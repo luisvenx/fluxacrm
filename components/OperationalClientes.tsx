@@ -5,8 +5,10 @@ import {
   Plus, 
   ChevronDown 
 } from 'lucide-react';
+import NewClientModal from './NewClientModal';
 
 const OperationalClientes: React.FC = () => {
+  const [isNewClientModalOpen, setIsNewClientModalOpen] = useState(false);
   const [filters, setFilters] = useState({
     status: 'Todos',
     statusNf: 'Todos',
@@ -28,7 +30,10 @@ const OperationalClientes: React.FC = () => {
           </div>
         </div>
 
-        <button className="flex items-center justify-center gap-2 px-6 py-2.5 bg-[#0047AB] text-white rounded-xl text-sm font-bold hover:bg-blue-800 transition-all shadow-lg shadow-blue-500/20">
+        <button 
+          onClick={() => setIsNewClientModalOpen(true)}
+          className="flex items-center justify-center gap-2 px-6 py-2.5 bg-[#0047AB] text-white rounded-xl text-sm font-bold hover:bg-blue-800 transition-all shadow-lg shadow-blue-500/20"
+        >
           <Plus size={20} />
           Novo Cliente
         </button>
@@ -100,6 +105,11 @@ const OperationalClientes: React.FC = () => {
           </p>
         </div>
       </div>
+
+      <NewClientModal 
+        isOpen={isNewClientModalOpen}
+        onClose={() => setIsNewClientModalOpen(false)}
+      />
 
     </div>
   );

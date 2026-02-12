@@ -6,9 +6,11 @@ import {
   ChevronDown,
   FileSearch
 } from 'lucide-react';
+import NewContractModal from './NewContractModal';
 
 const OperationalContratos: React.FC = () => {
   const [filter, setFilter] = useState('Todos');
+  const [isNewContractModalOpen, setIsNewContractModalOpen] = useState(false);
 
   return (
     <div className="min-h-full bg-[#f8fafc] p-6 lg:p-10 space-y-6 animate-in fade-in duration-500">
@@ -25,7 +27,10 @@ const OperationalContratos: React.FC = () => {
           </div>
         </div>
 
-        <button className="flex items-center justify-center gap-2 px-6 py-2.5 bg-[#0047AB] text-white rounded-xl text-sm font-bold hover:bg-blue-800 transition-all shadow-lg shadow-blue-500/20">
+        <button 
+          onClick={() => setIsNewContractModalOpen(true)}
+          className="flex items-center justify-center gap-2 px-6 py-2.5 bg-[#0047AB] text-white rounded-xl text-sm font-bold hover:bg-blue-800 transition-all shadow-lg shadow-blue-500/20"
+        >
           <Plus size={20} />
           Novo Contrato
         </button>
@@ -63,6 +68,11 @@ const OperationalContratos: React.FC = () => {
           </p>
         </div>
       </div>
+
+      <NewContractModal 
+        isOpen={isNewContractModalOpen}
+        onClose={() => setIsNewContractModalOpen(false)}
+      />
 
     </div>
   );

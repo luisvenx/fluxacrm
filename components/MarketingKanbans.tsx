@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Plus, 
   Search, 
@@ -9,8 +9,10 @@ import {
   Image as ImageIcon, 
   Video, 
   FileText,
-  User
+  User,
+  LayoutGrid
 } from 'lucide-react';
+import NewKanbanModal from './NewKanbanModal';
 
 interface MarketingTask {
   id: string;
@@ -22,6 +24,8 @@ interface MarketingTask {
 }
 
 const MarketingKanbans: React.FC = () => {
+  const [isNewKanbanModalOpen, setIsNewKanbanModalOpen] = useState(false);
+  
   const columns = [
     { id: 'idea', label: 'Ideação', count: 0 },
     { id: 'prod', label: 'Produção', count: 2 },
@@ -66,6 +70,15 @@ const MarketingKanbans: React.FC = () => {
           <button className="p-2.5 bg-white border border-gray-200 rounded-xl text-gray-400 hover:text-gray-900 transition-colors shadow-sm">
             <Filter size={18} />
           </button>
+          
+          <button 
+            onClick={() => setIsNewKanbanModalOpen(true)}
+            className="bg-white border border-gray-200 text-gray-700 px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-50 transition-all shadow-sm flex items-center gap-2"
+          >
+            <LayoutGrid size={18} className="text-blue-600" />
+            Novo Kanban
+          </button>
+
           <button className="bg-[#0047AB] text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-blue-800 transition-all shadow-lg flex items-center gap-2">
             <Plus size={20} />
             Nova Tarefa
@@ -128,6 +141,11 @@ const MarketingKanbans: React.FC = () => {
           ))}
         </div>
       </div>
+
+      <NewKanbanModal 
+        isOpen={isNewKanbanModalOpen} 
+        onClose={() => setIsNewKanbanModalOpen(false)} 
+      />
     </div>
   );
 };

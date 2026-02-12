@@ -6,9 +6,11 @@ import {
   Search, 
   ChevronDown 
 } from 'lucide-react';
+import NewSquadModal from './NewSquadModal';
 
 const Squads: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [isNewSquadModalOpen, setIsNewSquadModalOpen] = useState(false);
 
   return (
     <div className="min-h-full bg-[#f8fafc] p-6 lg:p-10 space-y-8 animate-in fade-in duration-500">
@@ -20,7 +22,10 @@ const Squads: React.FC = () => {
           <p className="text-sm text-gray-400 font-medium">0 squads cadastrados</p>
         </div>
 
-        <button className="flex items-center justify-center gap-2 px-6 py-2.5 bg-[#0047AB] text-white rounded-xl text-sm font-bold hover:bg-blue-800 transition-all shadow-lg shadow-blue-500/20">
+        <button 
+          onClick={() => setIsNewSquadModalOpen(true)}
+          className="flex items-center justify-center gap-2 px-6 py-2.5 bg-[#0047AB] text-white rounded-xl text-sm font-bold hover:bg-blue-800 transition-all shadow-lg shadow-blue-500/20"
+        >
           <Plus size={20} />
           Novo Squad
         </button>
@@ -48,10 +53,18 @@ const Squads: React.FC = () => {
           <h3 className="text-lg font-bold text-[#1e293b]">Nenhum squad encontrado</h3>
         </div>
 
-        <button className="px-6 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all shadow-sm">
+        <button 
+          onClick={() => setIsNewSquadModalOpen(true)}
+          className="px-6 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all shadow-sm"
+        >
           Criar primeiro squad
         </button>
       </div>
+
+      <NewSquadModal 
+        isOpen={isNewSquadModalOpen} 
+        onClose={() => setIsNewSquadModalOpen(false)} 
+      />
 
     </div>
   );
