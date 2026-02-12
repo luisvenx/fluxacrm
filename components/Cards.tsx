@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Plus, 
   ChevronDown, 
@@ -10,8 +10,11 @@ import {
   AlertCircle,
   Building2
 } from 'lucide-react';
+import NewCardModal from './NewCardModal';
 
 const Cards: React.FC = () => {
+  const [isNewCardModalOpen, setIsNewCardModalOpen] = useState(false);
+
   return (
     <div className="min-h-full bg-[#f8fafc] p-6 lg:p-10 space-y-8 animate-in fade-in duration-500">
       
@@ -22,7 +25,10 @@ const Cards: React.FC = () => {
           <p className="text-sm text-gray-500 font-medium">Gerencie cartões da empresa e pessoais</p>
         </div>
         
-        <button className="flex items-center gap-2 px-6 py-2.5 bg-[#0047AB] text-white rounded-xl text-sm font-bold hover:bg-blue-800 transition-all shadow-lg shadow-blue-500/20">
+        <button 
+          onClick={() => setIsNewCardModalOpen(true)}
+          className="flex items-center gap-2 px-6 py-2.5 bg-[#0047AB] text-white rounded-xl text-sm font-bold hover:bg-blue-800 transition-all shadow-lg shadow-blue-500/20"
+        >
           <Plus size={20} />
           Novo cartão
         </button>
@@ -134,6 +140,12 @@ const Cards: React.FC = () => {
       <div className="flex-1 bg-white border-2 border-dashed border-gray-200 rounded-3xl min-h-[400px] flex flex-col items-center justify-center p-12 text-center transition-all hover:border-gray-300">
         <p className="text-gray-400 font-medium text-lg tracking-tight">Nenhum cartão cadastrado</p>
       </div>
+
+      {/* New Card Modal */}
+      <NewCardModal 
+        isOpen={isNewCardModalOpen} 
+        onClose={() => setIsNewCardModalOpen(false)} 
+      />
 
     </div>
   );
