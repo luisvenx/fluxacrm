@@ -10,11 +10,13 @@ import {
   Building2,
   Tag
 } from 'lucide-react';
+import NewToolModal from './NewToolModal';
 
 const OperationalFerramentas: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState('Todas');
   const [costCenterFilter, setCostCenterFilter] = useState('Todos os centros');
   const [periodFilter, setPeriodFilter] = useState('Todas');
+  const [isNewToolModalOpen, setIsNewToolModalOpen] = useState(false);
 
   const metrics = [
     { label: 'Ferramentas Ativas', value: '0', icon: <Wrench size={18} />, color: 'text-blue-600', bgColor: 'bg-blue-50' },
@@ -33,7 +35,10 @@ const OperationalFerramentas: React.FC = () => {
           <p className="text-sm text-gray-400 font-medium">Gerencie seus custos recorrentes</p>
         </div>
 
-        <button className="flex items-center justify-center gap-2 px-6 py-2.5 bg-[#0047AB] text-white rounded-xl text-sm font-bold hover:bg-blue-800 transition-all shadow-lg shadow-blue-500/20">
+        <button 
+          onClick={() => setIsNewToolModalOpen(true)}
+          className="flex items-center justify-center gap-2 px-6 py-2.5 bg-[#0047AB] text-white rounded-xl text-sm font-bold hover:bg-blue-800 transition-all shadow-lg shadow-blue-500/20"
+        >
           <Plus size={20} />
           Nova ferramenta
         </button>
@@ -102,6 +107,11 @@ const OperationalFerramentas: React.FC = () => {
       <div className="bg-white border border-gray-100 rounded-3xl min-h-[500px] flex flex-col items-center justify-center p-12 text-center shadow-sm">
         <p className="text-sm font-medium text-gray-400 italic">Nenhuma ferramenta cadastrada</p>
       </div>
+
+      <NewToolModal 
+        isOpen={isNewToolModalOpen}
+        onClose={() => setIsNewToolModalOpen(false)}
+      />
 
     </div>
   );

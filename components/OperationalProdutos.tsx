@@ -6,11 +6,13 @@ import {
   Search, 
   ChevronDown 
 } from 'lucide-react';
+import NewProductModal from './NewProductModal';
 
 const OperationalProdutos: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState('Todos os tipos');
   const [statusFilter, setStatusFilter] = useState('Todos');
+  const [isNewProductModalOpen, setIsNewProductModalOpen] = useState(false);
 
   return (
     <div className="min-h-full bg-[#f8fafc] p-6 lg:p-10 space-y-6 animate-in fade-in duration-500">
@@ -27,7 +29,10 @@ const OperationalProdutos: React.FC = () => {
           </div>
         </div>
 
-        <button className="flex items-center justify-center gap-2 px-6 py-2.5 bg-[#0047AB] text-white rounded-xl text-sm font-bold hover:bg-blue-800 transition-all shadow-lg shadow-blue-500/20">
+        <button 
+          onClick={() => setIsNewProductModalOpen(true)}
+          className="flex items-center justify-center gap-2 px-6 py-2.5 bg-[#0047AB] text-white rounded-xl text-sm font-bold hover:bg-blue-800 transition-all shadow-lg shadow-blue-500/20"
+        >
           <Plus size={20} />
           Novo Produto
         </button>
@@ -88,6 +93,11 @@ const OperationalProdutos: React.FC = () => {
           </p>
         </div>
       </div>
+
+      <NewProductModal 
+        isOpen={isNewProductModalOpen}
+        onClose={() => setIsNewProductModalOpen(false)}
+      />
 
     </div>
   );

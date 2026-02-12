@@ -11,6 +11,7 @@ import {
   Building2,
   Wallet
 } from 'lucide-react';
+import NewMemberModal from './NewMemberModal';
 
 interface TeamMember {
   id: string;
@@ -27,6 +28,7 @@ const OperationalEquipe: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState('Ativos');
   const [paymentFilter, setPaymentFilter] = useState('Todos');
   const [costCenterFilter, setCostCenterFilter] = useState('Todos');
+  const [isNewMemberModalOpen, setIsNewMemberModalOpen] = useState(false);
 
   const members: TeamMember[] = [
     { id: '1', name: 'Gabriel Dantras', initials: 'GD', role: 'bdr', costCenter: '—', value: 'R$ 0,00', status: 'Sem pgto', totalPaid: '—' },
@@ -50,7 +52,10 @@ const OperationalEquipe: React.FC = () => {
           </div>
         </div>
 
-        <button className="flex items-center justify-center gap-2 px-6 py-2.5 bg-[#0047AB] text-white rounded-xl text-sm font-bold hover:bg-blue-800 transition-all shadow-lg shadow-blue-500/20">
+        <button 
+          onClick={() => setIsNewMemberModalOpen(true)}
+          className="flex items-center justify-center gap-2 px-6 py-2.5 bg-[#0047AB] text-white rounded-xl text-sm font-bold hover:bg-blue-800 transition-all shadow-lg shadow-blue-500/20"
+        >
           <Plus size={20} />
           Novo Membro
         </button>
@@ -206,6 +211,11 @@ const OperationalEquipe: React.FC = () => {
           </table>
         </div>
       </div>
+
+      <NewMemberModal 
+        isOpen={isNewMemberModalOpen}
+        onClose={() => setIsNewMemberModalOpen(false)}
+      />
 
     </div>
   );

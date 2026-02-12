@@ -12,10 +12,12 @@ import {
   Building2, 
   FileText 
 } from 'lucide-react';
+import NewNPSModal from './NewNPSModal';
 
 const OperationalNPS: React.FC = () => {
   const [activeSegment, setActiveSegment] = useState<'Clientes' | 'Equipe'>('Clientes');
   const [activeView, setActiveView] = useState<'Cohort' | 'Cliente' | 'Pesquisas'>('Cohort');
+  const [isNewNPSModalOpen, setIsNewNPSModalOpen] = useState(false);
 
   const metrics = [
     { label: 'NPS Geral', value: '0', sub: '0 promotores, 0 detratores', icon: <TrendingUp size={16} /> },
@@ -60,7 +62,10 @@ const OperationalNPS: React.FC = () => {
             <Settings size={18} className="text-gray-400" />
             Configurações
           </button>
-          <button className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-[#0047AB] text-white rounded-xl text-sm font-bold hover:bg-blue-800 transition-all shadow-lg shadow-blue-500/20">
+          <button 
+            onClick={() => setIsNewNPSModalOpen(true)}
+            className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-[#0047AB] text-white rounded-xl text-sm font-bold hover:bg-blue-800 transition-all shadow-lg shadow-blue-500/20"
+          >
             <Plus size={20} />
             Nova Pesquisa
           </button>
@@ -118,6 +123,11 @@ const OperationalNPS: React.FC = () => {
           <p className="text-sm font-medium text-gray-400 italic">Nenhum dado disponível</p>
         </div>
       </div>
+
+      <NewNPSModal 
+        isOpen={isNewNPSModalOpen}
+        onClose={() => setIsNewNPSModalOpen(false)}
+      />
 
     </div>
   );
