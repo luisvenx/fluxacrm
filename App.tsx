@@ -26,10 +26,8 @@ import OperationalNPS from './components/OperationalNPS';
 import OperationalOKR from './components/OperationalOKR';
 import OperationalEquipe from './components/OperationalEquipe';
 import OperationalFerramentas from './components/OperationalFerramentas';
-import Communication from './components/Communication';
 import UsersManagement from './components/UsersManagement';
 import SettingsView from './components/SettingsView';
-import GenericSection from './components/GenericSection';
 
 const App: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -68,7 +66,6 @@ const App: React.FC = () => {
       case 'Operacional-Equipe': return <OperationalEquipe />;
       case 'Operacional-Ferramentas': return <OperationalFerramentas />;
 
-      case 'Comunicação': return <Communication />;
       case 'Usuários': return <UsersManagement />;
       case 'Configurações': return <SettingsView />;
       default: return <Dashboard />;

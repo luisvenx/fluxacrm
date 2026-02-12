@@ -102,8 +102,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, onNavigate, ac
         { id: 'Operacional-Equipe', label: 'Equipe', icon: <Wallet size={16} /> },
         { id: 'Operacional-Ferramentas', label: 'Ferramentas', icon: <Wrench size={16} /> },
       ]
-    },
-    { id: 'Comunicação', label: 'Comunicação', icon: <MessageSquare size={18} /> },
+    }
   ];
 
   const handleNavClick = (id: string, hasSubItems: boolean) => {
