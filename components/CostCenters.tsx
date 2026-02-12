@@ -9,9 +9,11 @@ import {
   PieChart 
 } from 'lucide-react';
 import NewCostCenterModal from './NewCostCenterModal';
+import ExportPDFModal from './ExportPDFModal';
 
 const CostCenters: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   return (
     <div className="min-h-full bg-[#f8fafc] p-6 lg:p-10 space-y-6 animate-in fade-in duration-500">
@@ -29,7 +31,10 @@ const CostCenters: React.FC = () => {
         </div>
         
         <div className="flex items-center gap-3 w-full md:w-auto">
-          <button className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-2.5 border border-gray-200 bg-white rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-all">
+          <button 
+            onClick={() => setIsExportModalOpen(true)}
+            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-2.5 border border-gray-200 bg-white rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-all shadow-sm"
+          >
             <Download size={18} className="text-gray-400" />
             Exportar PDF
           </button>
@@ -89,10 +94,15 @@ const CostCenters: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal Integration */}
+      {/* Modals Integration */}
       <NewCostCenterModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
+      />
+
+      <ExportPDFModal 
+        isOpen={isExportModalOpen} 
+        onClose={() => setIsExportModalOpen(false)} 
       />
 
     </div>
