@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Menu, Tv, Bell } from 'lucide-react';
 
@@ -19,7 +18,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, title }) => {
         </button>
         <div>
           <h1 className="text-xl font-bold text-gray-900 tracking-tight">{title}</h1>
-          <p className="text-gray-400 text-[10px] font-bold uppercase tracking-widest">Strict Financial Management</p>
+          <p className="text-gray-400 text-[10px] font-bold uppercase tracking-widest">Fluxa Financial Management</p>
         </div>
       </div>
       

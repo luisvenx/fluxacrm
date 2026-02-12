@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { X, FileText, ChevronDown, Check, Loader2 } from 'lucide-react';
+import { X, FileText, ChevronDown, Check, Loader2, Download, FileSpreadsheet, File } from 'lucide-react';
 
 interface ExportPDFModalProps {
   isOpen: boolean;
@@ -9,6 +8,7 @@ interface ExportPDFModalProps {
 
 const ExportPDFModal: React.FC<ExportPDFModalProps> = ({ isOpen, onClose }) => {
   const [isExporting, setIsExporting] = useState(false);
+  const [format, setFormat] = useState<'pdf' | 'xlsx'>('pdf');
   const [options, setOptions] = useState({
     charts: true,
     details: true,
@@ -19,7 +19,6 @@ const ExportPDFModal: React.FC<ExportPDFModalProps> = ({ isOpen, onClose }) => {
 
   const handleExport = () => {
     setIsExporting(true);
-    // Simulação de geração de PDF
     setTimeout(() => {
       setIsExporting(false);
       onClose();
@@ -30,94 +29,130 @@ const ExportPDFModal: React.FC<ExportPDFModalProps> = ({ isOpen, onClose }) => {
     <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-black/30 backdrop-blur-[1px]" 
+        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" 
         onClick={onClose}
       />
       
       {/* Modal Content */}
-      <div className="relative bg-white w-full max-w-[480px] rounded-[32px] shadow-2xl animate-in zoom-in-95 duration-200 p-8">
+      <div className="relative bg-white w-full max-w-[550px] rounded-[2.5rem] shadow-2xl animate-in zoom-in-95 duration-300 overflow-hidden border border-slate-100">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center text-red-500">
-              <FileText size={20} />
+        <div className="p-8 pb-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center shadow-sm">
+              <Download size={24} />
             </div>
-            <h2 className="text-xl font-bold text-[#1e293b]">Exportar Relatório</h2>
+            <div>
+              <h2 className="text-xl font-bold text-slate-900 tracking-tight">Exportar Relatórios</h2>
+              <p className="text-xs text-slate-400 font-medium">Gere documentos analíticos e auditáveis</p>
+            </div>
           </div>
           <button 
             onClick={onClose} 
-            className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+            className="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-300 hover:text-slate-900"
           >
             <X size={20} />
           </button>
         </div>
 
-        {/* Options */}
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-sm font-bold text-gray-700">Período do Relatório</label>
-            <div className="relative">
-              <select className="w-full bg-[#f8fafc] border border-[#e2e8f0] rounded-2xl py-3.5 px-4 text-sm appearance-none focus:outline-none focus:border-blue-500 text-gray-700 font-medium cursor-pointer">
-                <option>Mês Atual (Fevereiro 2026)</option>
-                <option>Mês Anterior (Janeiro 2026)</option>
-                <option>Últimos 3 Meses</option>
-                <option>Ano Completo (2026)</option>
+        <div className="p-8 pt-4 space-y-8">
+          {/* Interval Selection */}
+          <div className="space-y-4">
+            <h3 className="text-[11px] font-bold uppercase text-slate-400 tracking-widest ml-1">Período de Consolidação</h3>
+            <div className="relative group">
+              <select className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-3.5 px-5 text-sm font-semibold text-slate-700 appearance-none focus:outline-none focus:ring-2 focus:ring-rose-100 focus:bg-white transition-all cursor-pointer">
+                <option>Relatório Mensal (Fev/2026)</option>
+                <option>Trimestre Consolidado (Q1)</option>
+                <option>Relatório Anual (FY 2026)</option>
                 <option>Personalizado...</option>
               </select>
-              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
+              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none group-hover:text-slate-600" size={18} />
             </div>
           </div>
 
-          <div className="space-y-3">
-            <label className="text-sm font-bold text-gray-700">Conteúdo do PDF</label>
+          {/* Module Selection */}
+          <div className="space-y-4">
+            <h3 className="text-[11px] font-bold uppercase text-slate-400 tracking-widest ml-1">Módulos Inclusos</h3>
             <div className="grid gap-3">
               {[
-                { id: 'charts', label: 'Incluir Gráficos de Distribuição' },
-                { id: 'details', label: 'Listagem Detalhada de Lançamentos' },
-                { id: 'summary', label: 'Resumo Consolidado por Centro' },
+                { id: 'charts', label: 'Matriz de Fluxo de Caixa (Gráficos)' },
+                { id: 'details', label: 'Journal de Lançamentos Analítico' },
+                { id: 'summary', label: 'EBITDA & DRE Consolidado' },
               ].map((item) => (
                 <button
                   key={item.id}
                   onClick={() => setOptions(prev => ({ ...prev, [item.id]: !prev[item.id as keyof typeof options] }))}
-                  className="flex items-center justify-between p-4 rounded-2xl border border-gray-100 bg-gray-50/30 hover:bg-gray-50 transition-all text-left group"
+                  className={`flex items-center justify-between p-4 rounded-2xl border transition-all text-left group ${
+                    options[item.id as keyof typeof options] 
+                      ? 'border-rose-100 bg-rose-50/30' 
+                      : 'border-slate-100 bg-white hover:bg-slate-50'
+                  }`}
                 >
-                  <span className="text-sm font-medium text-gray-600 group-hover:text-gray-900">{item.label}</span>
-                  <div className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all ${options[item.id as keyof typeof options] ? 'bg-blue-600 text-white' : 'bg-white border border-gray-200'}`}>
-                    {options[item.id as keyof typeof options] && <Check size={14} strokeWidth={3} />}
+                  <span className={`text-xs font-semibold ${options[item.id as keyof typeof options] ? 'text-rose-700' : 'text-slate-500'}`}>
+                    {item.label}
+                  </span>
+                  <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${
+                    options[item.id as keyof typeof options] ? 'bg-rose-500 border-rose-500 scale-110 shadow-sm' : 'bg-white border-slate-200'
+                  }`}>
+                    {options[item.id as keyof typeof options] && <Check size={10} className="text-white" strokeWidth={4} />}
                   </div>
                 </button>
               ))}
             </div>
           </div>
-        </div>
 
-        {/* Actions */}
-        <div className="flex items-center gap-3 mt-10">
-          <button 
-            type="button" 
-            onClick={onClose}
-            className="flex-1 py-4 bg-white border border-gray-100 rounded-2xl text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all"
-          >
-            Cancelar
-          </button>
-          <button 
-            type="button" 
-            onClick={handleExport}
-            disabled={isExporting}
-            className="flex-1 py-4 bg-[#0047AB] text-white rounded-2xl text-sm font-bold hover:bg-blue-800 transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 disabled:opacity-70"
-          >
-            {isExporting ? (
-              <>
-                <Loader2 size={18} className="animate-spin" />
-                Gerando...
-              </>
-            ) : (
-              <>
-                <FileText size={18} />
-                Gerar PDF
-              </>
-            )}
-          </button>
+          {/* Format Selection */}
+          <div className="space-y-4">
+            <h3 className="text-[11px] font-bold uppercase text-slate-400 tracking-widest ml-1">Formato do Arquivo</h3>
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setFormat('pdf')}
+                className={`flex-1 flex items-center justify-center gap-3 p-4 rounded-2xl border transition-all font-bold text-xs uppercase tracking-widest ${
+                  format === 'pdf' ? 'bg-slate-900 text-white border-slate-900 shadow-lg' : 'bg-white text-slate-400 border-slate-100 hover:bg-slate-50'
+                }`}
+              >
+                <File size={16} /> PDF Profissional
+              </button>
+              <button 
+                onClick={() => setFormat('xlsx')}
+                className={`flex-1 flex items-center justify-center gap-3 p-4 rounded-2xl border transition-all font-bold text-xs uppercase tracking-widest ${
+                  format === 'xlsx' ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg' : 'bg-white text-slate-400 border-slate-100 hover:bg-slate-50'
+                }`}
+              >
+                <FileSpreadsheet size={16} /> XLSX Auditoria
+              </button>
+            </div>
+          </div>
+
+          {/* Footer Buttons */}
+          <div className="flex items-center gap-3 pt-4">
+            <button 
+              type="button" 
+              onClick={onClose}
+              className="flex-1 py-4 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-500 hover:bg-slate-50 transition-all"
+            >
+              Cancelar
+            </button>
+            <button 
+              type="button" 
+              onClick={handleExport}
+              disabled={isExporting}
+              className={`flex-1 py-4 text-white rounded-full text-xs font-bold transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 disabled:opacity-70 ${
+                format === 'pdf' ? 'bg-rose-500 hover:bg-rose-600 shadow-rose-200' : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200'
+              }`}
+            >
+              {isExporting ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  Gernado Arquivo...
+                </>
+              ) : (
+                <>
+                  <FileText size={18} />
+                  Baixar Relatório
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>

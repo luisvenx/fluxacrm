@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Calendar, 
@@ -8,8 +7,6 @@ import {
   Settings, 
   Users, 
   LogOut, 
-  Sun, 
-  Moon, 
   ChevronDown, 
   ChevronRight,
   LayoutDashboard,
@@ -114,13 +111,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, onNavigate, ac
 
   return (
     <aside 
-      className={`fixed top-0 left-0 bottom-0 z-50 w-72 bg-white border-r border-gray-200 shadow-2xl transition-transform duration-300 ease-in-out transform flex flex-col ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
+      className={`fixed top-0 left-0 bottom-0 z-50 w-72 bg-white border-r border-gray-200 shadow-2xl transition-all duration-300 ease-in-out transform flex flex-col ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
     >
       {/* Header Fixo */}
       <div className="p-5 flex items-center justify-between border-b border-gray-100 bg-white shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center font-bold italic text-white shadow-lg shadow-blue-500/20">S</div>
-          <span className="font-bold text-lg tracking-tight text-gray-900">STRICT</span>
+          <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center font-bold italic text-white shadow-lg shadow-blue-500/20">F</div>
+          <span className="font-bold text-lg tracking-tight text-gray-900 uppercase">Fluxa</span>
         </div>
         <button 
           onClick={toggleSidebar} 
@@ -165,17 +162,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, onNavigate, ac
         ))}
       </div>
 
-      {/* Rodapé Fixo e "Flutuante" */}
+      {/* Rodapé Fixo */}
       <div className="p-4 border-t border-gray-100 bg-white shrink-0 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)]">
         {/* Card do Usuário */}
         <div className="bg-gray-50 p-3 rounded-2xl mb-4 flex items-center justify-between border border-gray-100">
           <div className="flex flex-col">
             <span className="text-[10px] text-gray-400 uppercase font-black tracking-widest">Admin</span>
             <span className="text-xs text-gray-700 font-bold truncate max-w-[140px]">kyroossx@gmail.com</span>
-          </div>
-          <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-gray-100 shadow-sm">
-            <button className="p-1.5 hover:text-blue-600 text-gray-400 transition-colors"><Moon size={12} /></button>
-            <button className="p-1.5 text-blue-600 bg-gray-50 rounded-lg transition-colors"><Sun size={12} /></button>
           </div>
         </div>
         

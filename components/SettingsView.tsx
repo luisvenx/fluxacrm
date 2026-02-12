@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Settings, 
@@ -43,7 +42,7 @@ const SettingsView: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                  <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Razão Social</label>
-                 <input type="text" defaultValue="Strict Management LTDA" className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:border-blue-500 transition-all" />
+                 <input type="text" defaultValue="Fluxa Management LTDA" className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:border-blue-500 transition-all" />
               </div>
               <div className="space-y-2">
                  <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest">CNPJ</label>
@@ -51,7 +50,7 @@ const SettingsView: React.FC = () => {
               </div>
               <div className="space-y-2">
                  <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest">E-mail Financeiro</label>
-                 <input type="email" defaultValue="financeiro@strict.com" className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:border-blue-500 transition-all" />
+                 <input type="email" defaultValue="financeiro@fluxa.com" className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:border-blue-500 transition-all" />
               </div>
               <div className="space-y-2">
                  <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Moeda Padrão</label>
@@ -262,7 +261,7 @@ const SettingsView: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-3xl font-black text-gray-900 tracking-tight">Configurações</h2>
-          <p className="text-sm font-medium text-gray-400">Personalize sua experiência no Strict</p>
+          <p className="text-sm font-medium text-gray-400">Personalize sua experiência no Fluxa</p>
         </div>
         {activeTab !== 'Integrações' && (
            <button className="bg-blue-600 text-white px-8 py-3 rounded-xl text-sm font-black uppercase tracking-widest hover:bg-blue-700 transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20 self-start md:self-center active:scale-95">
