@@ -187,7 +187,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             {/* Categoria/Divisor */}
             {!isCollapsed ? (
               <div className="px-3 flex items-center justify-between">
-                <span className="text-[10px] font-black text-slate-300 uppercase tracking-[0.25em]">{item.label}</span>
+                <span className="text-[10px] font-medium text-slate-300 uppercase tracking-[0.25em]">{item.label}</span>
                 {item.subItems && (
                   <button 
                     onClick={() => toggleMenu(item.id)}
@@ -211,7 +211,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   } ${activeView === item.id ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}
                 >
                   <span className={`${activeView === item.id ? 'text-blue-400' : 'text-slate-300 group-hover:text-slate-900'}`}>{item.icon}</span>
-                  {!isCollapsed && <span className="flex-1 text-left text-xs font-bold tracking-tight">{item.label}</span>}
+                  {!isCollapsed && <span className="flex-1 text-left text-xs font-medium tracking-tight">{item.label}</span>}
                 </button>
               ) : (
                 <div className="space-y-1">
@@ -225,7 +225,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                     <span className="text-slate-300 group-hover:text-slate-900">{item.icon}</span>
                     {!isCollapsed && (
                       <>
-                        <span className="flex-1 text-left text-xs font-bold tracking-tight">{item.label}</span>
+                        <span className="flex-1 text-left text-xs font-medium tracking-tight">{item.label}</span>
                         <ChevronDown size={12} className={`text-slate-300 transition-transform ${expandedMenus.includes(item.id) ? '' : '-rotate-90'}`} />
                       </>
                     )}
@@ -237,7 +237,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                         <button 
                           key={sub.id} 
                           onClick={() => onNavigate(sub.id)}
-                          className={`w-full flex items-center gap-4 p-3 rounded-xl text-[12px] font-bold transition-all group ${
+                          className={`w-full flex items-center gap-4 p-3 rounded-xl text-[12px] font-medium transition-all group ${
                             activeView === sub.id ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-900 hover:bg-slate-50'
                           }`}
                         >
@@ -260,10 +260,10 @@ const Sidebar: React.FC<SidebarProps> = ({
         {!isCollapsed ? (
           <>
             <div className="bg-slate-50 p-4 rounded-2xl mb-6 flex items-center gap-4 border border-slate-100 group cursor-pointer hover:bg-white hover:shadow-md transition-all">
-              <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white text-xs font-black shadow-sm italic">{userInitial}</div>
+              <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white text-xs font-medium shadow-sm italic">{userInitial}</div>
               <div className="flex flex-col min-w-0">
-                <span className="text-[9px] text-blue-600 font-black uppercase tracking-widest leading-none mb-1">Conta Ativa</span>
-                <span className="text-xs text-slate-900 font-bold truncate">{userEmail || 'Usuário'}</span>
+                <span className="text-[9px] text-blue-600 font-medium uppercase tracking-widest leading-none mb-1">Conta Ativa</span>
+                <span className="text-xs text-slate-900 font-medium truncate">{userEmail || 'Usuário'}</span>
               </div>
             </div>
             
@@ -273,7 +273,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 className={`flex flex-col items-center justify-center gap-2 p-3.5 rounded-2xl transition-all border ${activeView === 'Configurações' ? 'bg-blue-50 border-blue-100 text-blue-600' : 'bg-white border-slate-100 text-slate-400 hover:text-slate-900 shadow-sm'}`}
               >
                 <Settings size={18} />
-                <span className="text-[10px] font-black uppercase tracking-widest">Ajustes</span>
+                <span className="text-[10px] font-medium uppercase tracking-widest">Ajustes</span>
               </button>
               <button 
                 onClick={handleLogout}
@@ -281,7 +281,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 className="flex flex-col items-center justify-center gap-2 p-3.5 bg-white border border-slate-100 text-slate-400 hover:text-rose-600 hover:border-rose-100 hover:bg-rose-50 rounded-2xl transition-all shadow-sm group disabled:opacity-50"
               >
                 {isLoggingOut ? <Loader2 size={18} className="animate-spin" /> : <LogOut size={18} />}
-                <span className="text-[10px] font-black uppercase tracking-widest">Sair</span>
+                <span className="text-[10px] font-medium uppercase tracking-widest">Sair</span>
               </button>
             </div>
           </>
@@ -301,7 +301,7 @@ const Sidebar: React.FC<SidebarProps> = ({
              >
                 <LogOut size={20} />
              </button>
-             <div className="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white text-[10px] font-black shadow-sm mt-2 italic">{userInitial}</div>
+             <div className="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white text-[10px] font-medium shadow-sm mt-2 italic">{userInitial}</div>
           </div>
         )}
       </div>

@@ -104,10 +104,10 @@ const Dashboard: React.FC = () => {
       {/* Header Responsivo */}
       <div className="px-4 md:px-8 pt-6 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">Dashboard Financeiro</h1>
+          <h1 className="text-xl md:text-2xl font-medium text-slate-900 tracking-tight">Dashboard Financeiro</h1>
           <p className="text-xs text-slate-400 font-medium">Visão geral das suas finanças</p>
         </div>
-        <button className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-[11px] font-bold text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
+        <button className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-[11px] font-medium text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
           <Tv size={14} /> Modo TV
         </button>
       </div>
@@ -118,13 +118,13 @@ const Dashboard: React.FC = () => {
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
             <div className="flex items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-100/50 w-full sm:w-auto overflow-x-auto no-scrollbar">
                <Calendar size={14} className="text-slate-400 ml-2 shrink-0" />
-               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mx-2 shrink-0">Período:</span>
+               <span className="text-[10px] font-medium text-slate-400 uppercase tracking-widest mx-2 shrink-0">Período:</span>
                <div className="flex gap-1 shrink-0">
                  {['Hoje', 'Esta Semana', 'Este Mês', 'Este Ano'].map(p => (
                    <button 
                     key={p} 
                     onClick={() => setActivePeriod(p)}
-                    className={`px-4 py-1.5 rounded-lg text-[10px] font-bold transition-all whitespace-nowrap ${activePeriod === p ? 'bg-blue-600 text-white shadow-md' : 'text-slate-500 hover:text-slate-900'}`}
+                    className={`px-4 py-1.5 rounded-lg text-[10px] font-medium transition-all whitespace-nowrap ${activePeriod === p ? 'bg-blue-600 text-white shadow-md' : 'text-slate-500 hover:text-slate-900'}`}
                    >
                      {p}
                    </button>
@@ -134,14 +134,14 @@ const Dashboard: React.FC = () => {
             
             <div className="flex gap-2 w-full sm:w-auto">
               <div className="relative flex-1 sm:flex-none">
-                <select className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2 px-4 text-[10px] font-bold text-slate-600 appearance-none pr-10">
+                <select className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2 px-4 text-[10px] font-medium text-slate-600 appearance-none pr-10">
                   <option>Realizado</option>
                   <option>Previsto</option>
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300" size={12} />
               </div>
 
-              <button className="flex items-center justify-center gap-2 px-4 py-2 text-[10px] font-bold text-slate-500 hover:text-slate-900 bg-slate-50 sm:bg-transparent rounded-xl flex-1 sm:flex-none">
+              <button className="flex items-center justify-center gap-2 px-4 py-2 text-[10px] font-medium text-slate-500 hover:text-slate-900 bg-slate-50 sm:bg-transparent rounded-xl flex-1 sm:flex-none">
                  <Filter size={14} /> Avançado
               </button>
             </div>
@@ -149,7 +149,7 @@ const Dashboard: React.FC = () => {
 
           <div className="hidden lg:flex items-center gap-4 pr-4">
              <span className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">
-               <span className="text-slate-900 font-bold">{activePeriod}</span> | <span className="text-slate-900 font-bold">Realizado</span>
+               <span className="text-slate-900 font-medium">{activePeriod}</span> | <span className="text-slate-900 font-medium">Realizado</span>
              </span>
           </div>
         </div>
@@ -157,37 +157,37 @@ const Dashboard: React.FC = () => {
 
       {/* Main Content Area */}
       <div className="px-4 md:px-8 space-y-6">
-        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4 block px-1">Indicadores Principais</span>
+        <span className="text-[10px] font-medium text-slate-400 uppercase tracking-[0.2em] mb-4 block px-1">Indicadores Principais</span>
 
         {/* Row 1: Top KPIs - Responsivo */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Entradas */}
           <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm relative group hover:border-blue-100 transition-all">
             <div className="flex justify-between items-start mb-2">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Entradas</span>
+              <span className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">Entradas</span>
               <div className="p-1.5 bg-emerald-50 text-emerald-500 rounded-lg"><ArrowDownLeft size={14}/></div>
             </div>
-            <h3 className="text-2xl font-bold text-slate-900 tracking-tighter">{isLoading ? '...' : formatCurrency(metrics.entradas)}</h3>
+            <h3 className="text-2xl font-medium text-slate-900 tracking-tighter">{isLoading ? '...' : formatCurrency(metrics.entradas)}</h3>
             <p className="text-[10px] text-slate-400 font-medium mt-1">{metrics.countIn} transações</p>
           </div>
 
           {/* Saídas */}
           <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm relative group hover:border-blue-100 transition-all">
             <div className="flex justify-between items-start mb-2">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Saídas</span>
+              <span className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">Saídas</span>
               <div className="p-1.5 bg-rose-50 text-rose-500 rounded-lg"><ArrowUpRight size={14}/></div>
             </div>
-            <h3 className="text-2xl font-bold text-slate-900 tracking-tighter">{isLoading ? '...' : formatCurrency(metrics.saidas)}</h3>
+            <h3 className="text-2xl font-medium text-slate-900 tracking-tighter">{isLoading ? '...' : formatCurrency(metrics.saidas)}</h3>
             <p className="text-[10px] text-slate-400 font-medium mt-1">{metrics.countOut} transações</p>
           </div>
 
           {/* Lucro Líquido */}
           <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm relative group hover:border-blue-100 transition-all">
             <div className="flex justify-between items-start mb-2">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lucro Líquido</span>
+              <span className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">Lucro Líquido</span>
               <div className="p-1.5 bg-blue-50 text-blue-500 rounded-lg"><TrendingUp size={14}/></div>
             </div>
-            <h3 className="text-2xl font-bold text-slate-900 tracking-tighter">{isLoading ? '...' : formatCurrency(metrics.lucro)}</h3>
+            <h3 className="text-2xl font-medium text-slate-900 tracking-tighter">{isLoading ? '...' : formatCurrency(metrics.lucro)}</h3>
             <p className="text-[10px] text-slate-400 font-medium mt-1 flex items-center gap-1">
               Consolidado — <Info size={10} className="text-slate-300" />
             </p>
@@ -196,10 +196,10 @@ const Dashboard: React.FC = () => {
           {/* Ticket Médio */}
           <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm relative group hover:border-blue-100 transition-all">
             <div className="flex justify-between items-start mb-2">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ticket Médio</span>
+              <span className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">Ticket Médio</span>
               <div className="p-1.5 bg-slate-50 text-slate-400 rounded-lg"><Users size={14}/></div>
             </div>
-            <h3 className="text-2xl font-bold text-slate-900 tracking-tighter">{isLoading ? '...' : formatCurrency(metrics.ticketMedio)}</h3>
+            <h3 className="text-2xl font-medium text-slate-900 tracking-tighter">{isLoading ? '...' : formatCurrency(metrics.ticketMedio)}</h3>
             <p className="text-[10px] text-slate-400 font-medium mt-1">{metrics.activeClients} clientes ativos</p>
           </div>
         </div>
@@ -209,8 +209,8 @@ const Dashboard: React.FC = () => {
           {/* Meta Widget */}
           <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm flex flex-col items-center justify-center text-center">
             <CircleDashed size={32} strokeWidth={1.5} className="text-slate-200 mb-2 animate-[spin_15s_linear_infinite]" />
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter mb-3">Meta não definida</p>
-            <button className="flex items-center gap-2 px-4 py-1.5 bg-slate-900 text-white rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all">
+            <p className="text-[10px] text-slate-400 font-medium uppercase tracking-tighter mb-3">Meta não definida</p>
+            <button className="flex items-center gap-2 px-4 py-1.5 bg-slate-900 text-white rounded-lg text-[10px] font-medium uppercase tracking-widest hover:bg-slate-800 transition-all">
               <Target size={12} /> Definir
             </button>
           </div>
@@ -219,9 +219,9 @@ const Dashboard: React.FC = () => {
           <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
             <div className="flex items-center gap-2 mb-3">
               <Wallet size={14} className="text-amber-500" />
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">A Receber</span>
+              <span className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">A Receber</span>
             </div>
-            <h3 className="text-2xl font-bold text-slate-900 tracking-tighter">{formatCurrency(metrics.aReceber)}</h3>
+            <h3 className="text-2xl font-medium text-slate-900 tracking-tighter">{formatCurrency(metrics.aReceber)}</h3>
             <p className="text-[9px] text-slate-400 font-medium mb-4">Total em aberto</p>
             <div className="h-1.5 w-full bg-slate-50 rounded-full overflow-hidden flex">
                <div className="h-full bg-emerald-400 w-[70%]" />
@@ -233,9 +233,9 @@ const Dashboard: React.FC = () => {
           <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
             <div className="flex items-center gap-2 mb-3">
               <Receipt size={14} className="text-rose-500" />
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Contas a Pagar</span>
+              <span className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">Contas a Pagar</span>
             </div>
-            <h3 className="text-2xl font-bold text-slate-900 tracking-tighter">{formatCurrency(metrics.contasPagar)}</h3>
+            <h3 className="text-2xl font-medium text-slate-900 tracking-tighter">{formatCurrency(metrics.contasPagar)}</h3>
             <p className="text-[9px] text-slate-400 font-medium">{metrics.countPagar} contas pendentes</p>
           </div>
 
@@ -244,11 +244,11 @@ const Dashboard: React.FC = () => {
             <div className="flex justify-between items-center mb-3">
               <div className="flex items-center gap-2">
                 <RefreshCcw size={14} className="text-blue-500" />
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">MRR</span>
+                <span className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">MRR</span>
               </div>
-              <span className="text-[8px] font-black uppercase tracking-widest bg-blue-50 text-blue-600 px-2 py-0.5 rounded-md">{metrics.countContracts}</span>
+              <span className="text-[8px] font-medium uppercase tracking-widest bg-blue-50 text-blue-600 px-2 py-0.5 rounded-md">{metrics.countContracts}</span>
             </div>
-            <h3 className="text-2xl font-bold text-slate-900 tracking-tighter">{formatCurrency(metrics.mrr)}</h3>
+            <h3 className="text-2xl font-medium text-slate-900 tracking-tighter">{formatCurrency(metrics.mrr)}</h3>
             <p className="text-[9px] text-slate-400 font-medium">Recorrência Mensal</p>
           </div>
         </div>
@@ -256,19 +256,19 @@ const Dashboard: React.FC = () => {
         {/* Charts Row - Stacked no mobile */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="bg-white border border-slate-100 rounded-2xl p-6 md:p-8 h-[320px] md:h-[380px] shadow-sm flex flex-col">
-            <h3 className="text-sm font-bold text-slate-800 mb-6 md:mb-10">Entradas x Saídas</h3>
+            <h3 className="text-sm font-medium text-slate-800 mb-6 md:mb-10">Entradas x Saídas</h3>
             <div className="flex-1 flex items-center justify-center border-b border-l border-slate-50 relative">
                <div className="absolute inset-0 flex flex-col justify-between py-2 opacity-50">
                   {[1,2,3,4].map(i => <div key={i} className="w-full border-t border-slate-50 border-dashed" />)}
                </div>
-               <span className="text-[10px] font-black text-slate-200 uppercase tracking-[0.3em] text-center px-4">Aguardando dados históricos...</span>
+               <span className="text-[10px] font-medium text-slate-200 uppercase tracking-[0.3em] text-center px-4">Aguardando dados históricos...</span>
             </div>
           </div>
 
           <div className="bg-white border border-slate-100 rounded-2xl p-6 md:p-8 h-[320px] md:h-[380px] shadow-sm flex flex-col">
-            <h3 className="text-sm font-bold text-slate-800 mb-6 md:mb-10">Lucro Líquido por Período</h3>
+            <h3 className="text-sm font-medium text-slate-800 mb-6 md:mb-10">Lucro Líquido por Período</h3>
             <div className="flex-1 flex items-center justify-center border-b border-l border-slate-50 relative">
-               <span className="text-[10px] font-black text-slate-200 uppercase tracking-[0.3em] text-center px-4">Processando performance...</span>
+               <span className="text-[10px] font-medium text-slate-200 uppercase tracking-[0.3em] text-center px-4">Processando performance...</span>
             </div>
           </div>
         </div>
@@ -279,21 +279,21 @@ const Dashboard: React.FC = () => {
           <div className="bg-white border border-slate-100 rounded-2xl shadow-sm flex flex-col min-h-[300px] overflow-hidden">
             <div className="p-6 border-b border-slate-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
-                <h3 className="text-sm font-bold text-slate-800">Lançamentos Recentes</h3>
+                <h3 className="text-sm font-medium text-slate-800">Lançamentos Recentes</h3>
                 <p className="text-[10px] text-slate-400 font-medium">Últimas movimentações</p>
               </div>
               <div className="flex gap-1 bg-slate-50 p-1 rounded-lg w-full sm:w-auto overflow-x-auto">
                  {['Todos', 'Entradas', 'Saídas'].map(tab => (
-                   <button key={tab} className={`px-3 py-1 rounded text-[9px] font-black uppercase tracking-tighter whitespace-nowrap ${tab === 'Todos' ? 'bg-blue-600 text-white' : 'text-slate-400'}`}>
+                   <button key={tab} className={`px-3 py-1 rounded text-[9px] font-medium uppercase tracking-tighter whitespace-nowrap ${tab === 'Todos' ? 'bg-blue-600 text-white' : 'text-slate-400'}`}>
                      {tab}
                    </button>
                  ))}
               </div>
             </div>
             <div className="flex-1 flex flex-col items-center justify-center p-10 opacity-40">
-               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Nenhum lançamento</p>
+               <p className="text-xs font-medium text-slate-400 uppercase tracking-widest">Nenhum lançamento</p>
             </div>
-            <button className="p-4 text-center text-[10px] font-black text-blue-600 uppercase tracking-widest border-t border-slate-50 hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
+            <button className="p-4 text-center text-[10px] font-medium text-blue-600 uppercase tracking-widest border-t border-slate-50 hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
               Ver Tudo <ArrowRight size={12} />
             </button>
           </div>
@@ -301,7 +301,7 @@ const Dashboard: React.FC = () => {
           {/* Clientes Table */}
           <div className="bg-white border border-slate-100 rounded-2xl shadow-sm flex flex-col min-h-[300px] overflow-hidden">
              <div className="p-6 border-b border-slate-50">
-                <h3 className="text-sm font-bold text-slate-800">Clientes</h3>
+                <h3 className="text-sm font-medium text-slate-800">Clientes</h3>
                 <p className="text-[10px] text-slate-400 font-medium">Faturamento por conta</p>
              </div>
              <div className="overflow-x-auto no-scrollbar">
@@ -309,20 +309,20 @@ const Dashboard: React.FC = () => {
                  <thead className="bg-slate-50/50 border-b border-slate-100">
                     <tr>
                       {['CLIENTE', 'FATURADO', 'RECEBIDO', 'STATUS'].map(h => (
-                        <th key={h} className="px-6 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest">{h}</th>
+                        <th key={h} className="px-6 py-3 text-[9px] font-medium text-slate-400 uppercase tracking-widest">{h}</th>
                       ))}
                     </tr>
                  </thead>
                  <tbody>
                     <tr>
                       <td colSpan={4} className="py-20 text-center opacity-40">
-                         <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Sem clientes cadastrados</p>
+                         <p className="text-xs font-medium text-slate-400 uppercase tracking-widest">Sem clientes cadastrados</p>
                       </td>
                     </tr>
                  </tbody>
                </table>
              </div>
-             <button className="p-4 text-center text-[10px] font-black text-blue-600 uppercase tracking-widest border-t border-slate-50 hover:bg-slate-50 transition-colors flex items-center justify-center gap-2 mt-auto">
+             <button className="p-4 text-center text-[10px] font-medium text-blue-600 uppercase tracking-widest border-t border-slate-50 hover:bg-slate-50 transition-colors flex items-center justify-center gap-2 mt-auto">
               Ver Carteira <ArrowRight size={12} />
             </button>
           </div>
@@ -333,7 +333,7 @@ const Dashboard: React.FC = () => {
       {isLoading && (
         <div className="fixed bottom-20 md:bottom-8 right-4 md:right-8 bg-slate-900 text-white px-4 md:px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-bounce z-40">
           <Loader2 size={16} className="animate-spin text-blue-400" />
-          <span className="text-[10px] font-black uppercase tracking-widest">Sincronizando...</span>
+          <span className="text-[10px] font-medium uppercase tracking-widest">Sincronizando...</span>
         </div>
       )}
     </div>

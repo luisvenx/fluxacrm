@@ -7,8 +7,6 @@ import {
   AlertCircle, 
   CheckCircle2,
   ChevronRight,
-  Github,
-  Chrome,
   Zap,
   ShieldCheck,
   Globe
@@ -77,13 +75,13 @@ const LoginView: React.FC<LoginViewProps> = () => {
 
       <div className="w-full max-w-[1100px] grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-12 p-4 lg:p-8 z-10 animate-in fade-in slide-in-from-bottom-4 duration-1000">
         
-        {/* Left Side: Brand & Social Proof */}
+        {/* Left Side: Brand Info */}
         <div className="hidden lg:flex flex-col justify-center space-y-12">
           <div className="space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-[10px] font-black uppercase tracking-[0.2em]">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-[10px] font-medium uppercase tracking-[0.2em]">
               <Zap size={12} fill="currentColor" /> Fluxa Engine v2.6
             </div>
-            <h2 className="text-5xl font-black text-slate-950 tracking-tighter leading-[1.1]">
+            <h2 className="text-5xl font-medium text-slate-950 tracking-tighter leading-[1.1]">
               Inteligência financeira <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">em tempo real.</span>
             </h2>
@@ -95,22 +93,13 @@ const LoginView: React.FC<LoginViewProps> = () => {
           <div className="grid grid-cols-2 gap-6">
             <div className="p-5 rounded-3xl bg-white border border-slate-100 space-y-2 shadow-sm">
               <ShieldCheck className="text-emerald-500" size={20} />
-              <p className="text-slate-900 text-sm font-bold uppercase tracking-tight">SQL Encryption</p>
+              <p className="text-slate-900 text-sm font-medium uppercase tracking-tight">SQL Encryption</p>
               <p className="text-slate-400 text-xs font-medium">Dados protegidos por protocolos de nível bancário.</p>
             </div>
             <div className="p-5 rounded-3xl bg-white border border-slate-100 space-y-2 shadow-sm">
               <Globe className="text-blue-500" size={20} />
-              <p className="text-slate-900 text-sm font-bold uppercase tracking-tight">Cloud Sync</p>
+              <p className="text-slate-900 text-sm font-medium uppercase tracking-tight">Cloud Sync</p>
               <p className="text-slate-400 text-xs font-medium">Acesse sua operação de qualquer lugar do mundo.</p>
-            </div>
-          </div>
-
-          <div className="pt-8">
-            <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em] mb-4">Trusted by modern teams</p>
-            <div className="flex gap-8 opacity-20 grayscale transition-opacity hover:opacity-40">
-              <span className="text-xl font-black text-slate-900 italic">SIRIUS</span>
-              <span className="text-xl font-black text-slate-900">ORBIT</span>
-              <span className="text-xl font-black text-slate-900 tracking-widest">NEXUS</span>
             </div>
           </div>
         </div>
@@ -126,7 +115,7 @@ const LoginView: React.FC<LoginViewProps> = () => {
                 alt="Fluxa" 
                 className="h-8 mb-8"
               />
-              <h1 className="text-2xl font-bold text-slate-950 tracking-tight">
+              <h1 className="text-2xl font-medium text-slate-950 tracking-tight">
                 {isRegistering ? 'Crie sua conta' : 'Bem-vindo de volta'}
               </h1>
               <p className="text-slate-400 text-sm mt-1 font-medium">
@@ -135,14 +124,14 @@ const LoginView: React.FC<LoginViewProps> = () => {
             </div>
 
             {error && (
-              <div className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-center gap-3 text-rose-600 text-xs font-bold animate-in zoom-in-95">
+              <div className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-center gap-3 text-rose-600 text-xs font-medium animate-in zoom-in-95">
                 <AlertCircle size={16} />
                 <p>{error}</p>
               </div>
             )}
 
             {success && (
-              <div className="mb-6 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center gap-3 text-emerald-600 text-xs font-bold animate-in zoom-in-95">
+              <div className="mb-6 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center gap-3 text-emerald-600 text-xs font-medium animate-in zoom-in-95">
                 <CheckCircle2 size={16} />
                 <p>{success}</p>
               </div>
@@ -207,7 +196,7 @@ const LoginView: React.FC<LoginViewProps> = () => {
               <button 
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-xl text-sm font-black uppercase tracking-widest shadow-xl shadow-blue-500/20 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 group"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-xl text-sm font-medium uppercase tracking-widest shadow-xl shadow-blue-500/20 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 group"
               >
                 {isLoading ? (
                   <Loader2 size={18} className="animate-spin" />
@@ -220,35 +209,19 @@ const LoginView: React.FC<LoginViewProps> = () => {
               </button>
             </form>
 
-            <div className="relative my-8">
-              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-100"></div></div>
-              <div className="relative flex justify-center text-[10px] uppercase font-black tracking-widest text-slate-300"><span className="bg-white px-3">Ou continue com</span></div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <button className="flex items-center justify-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 py-3 rounded-xl transition-all shadow-sm">
-                <Chrome size={18} className="text-slate-400" />
-                <span className="text-xs font-bold">Google</span>
-              </button>
-              <button className="flex items-center justify-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 py-3 rounded-xl transition-all shadow-sm">
-                <Github size={18} className="text-slate-400" />
-                <span className="text-xs font-bold">GitHub</span>
-              </button>
-            </div>
-
             <button 
               onClick={() => {
                 setIsRegistering(!isRegistering);
                 setError(null);
                 setSuccess(null);
               }}
-              className="w-full mt-10 text-center text-xs font-bold text-slate-400 hover:text-blue-600 transition-colors"
+              className="w-full mt-10 text-center text-xs font-medium text-slate-400 hover:text-blue-600 transition-colors"
             >
               {isRegistering ? 'Já possui uma conta? Login' : "Não tem conta? Cadastre-se"}
             </button>
           </div>
 
-          <div className="mt-8 flex gap-6 text-[10px] font-black uppercase tracking-widest text-slate-300">
+          <div className="mt-8 flex gap-6 text-[10px] font-medium uppercase tracking-widest text-slate-300">
             <a href="#" className="hover:text-slate-500 transition-colors">Privacidade</a>
             <a href="#" className="hover:text-slate-500 transition-colors">Termos de Uso</a>
           </div>
