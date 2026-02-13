@@ -18,6 +18,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import NewOKRModal from './NewOKRModal';
 
 interface OperationalOKRProps {
   user: any;
@@ -27,6 +28,7 @@ const OperationalOKR: React.FC<OperationalOKRProps> = ({ user }) => {
   const [okrs, setOkrs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchOKRs = async () => {
     if (!user) return;
@@ -70,7 +72,7 @@ const OperationalOKR: React.FC<OperationalOKRProps> = ({ user }) => {
           <div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0"><CircleDot size={24} /></div>
           <div><div className="flex items-center gap-2 mb-0.5"><Database size={14} className="text-blue-500" /><span className="text-[10px] font-black uppercase tracking-widest text-slate-400">OKR Data Sync</span></div><h2 className="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">Seus OKRs</h2></div>
         </div>
-        <button className="w-full md:w-auto bg-blue-600 text-white px-6 py-3 rounded-xl md:rounded-full text-xs font-bold hover:bg-blue-700 transition-all flex items-center justify-center gap-2 active:scale-95"><Plus size={20} /> Novo Objetivo</button>
+        <button onClick={() => setIsModalOpen(true)} className="w-full md:w-auto bg-blue-600 text-white px-6 py-3 rounded-xl md:rounded-full text-xs font-bold hover:bg-blue-700 transition-all flex items-center justify-center gap-2 active:scale-95"><Plus size={20} /> Novo Objetivo</button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
@@ -85,7 +87,13 @@ const OperationalOKR: React.FC<OperationalOKRProps> = ({ user }) => {
       {isLoading ? (
         <div className="py-20 flex flex-col items-center justify-center min-h-[400px]"><Loader2 className="animate-spin text-blue-600 mb-4" size={40} /><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sincronizando Seus Resultados...</p></div>
       ) : filteredOKRs.length === 0 ? (
-        <div className="bg-white border border-slate-100 rounded-[2.5rem] shadow-sm min-h-[400px] flex flex-col items-center justify-center p-12 text-center group transition-all hover:border-blue-100 relative overflow-hidden"><Zap className="text-slate-50 w-48 h-48 mb-4" /><p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Nenhum OKR encontrado</p></div>
+        <div className="bg-white border border-slate-100 rounded-[2.5rem] shadow-sm min-h-[400px] flex flex-col items-center justify-center p-12 text-center group transition-all hover:border-blue-100 relative overflow-hidden">
+           <div className="w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-200 mb-4">
+             <Target size={40} strokeWidth={1.5} />
+           </div>
+           <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-6">Nenhum OKR encontrado</p>
+           <button onClick={() => setIsModalOpen(true)} className="px-8 py-3 bg-slate-900 text-white rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all">Definir primeiro objetivo</button>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
            {filteredOKRs.map(okr => {
@@ -99,6 +107,8 @@ const OperationalOKR: React.FC<OperationalOKRProps> = ({ user }) => {
            })}
         </div>
       )}
+
+      <NewOKRModal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); fetchOKRs(); }} user={user} />
     </div>
   );
 };
