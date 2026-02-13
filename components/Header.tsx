@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Menu, Tv, Bell, Search, Command } from 'lucide-react';
+import { Menu, Bell, Search, Command } from 'lucide-react';
 import NotificationCenter from './NotificationCenter';
 import GlobalSearchOverlay from './GlobalSearchOverlay';
 import { supabase } from '../lib/supabase';
@@ -33,9 +33,9 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onOpenTv, title }) => {
   useEffect(() => {
     fetchUnreadCount();
     
-    // Opcional: Escutar mudanças via Realtime para atualizar o contador instantaneamente
+    // Escutar mudanças via Realtime
     const channel = supabase
-      .channel('schema-db-changes')
+      .channel('header-notifications')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, () => {
         fetchUnreadCount();
       })
@@ -105,13 +105,10 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onOpenTv, title }) => {
           )}
         </div>
 
-        <button 
-          onClick={onOpenTv}
-          className="hidden sm:flex items-center gap-2.5 bg-slate-900 text-white text-[10px] font-medium uppercase tracking-[0.15em] px-6 py-2.5 rounded-full hover:bg-slate-800 transition-all shadow-xl shadow-slate-200 active:scale-95 group"
-        >
-          <Tv size={14} className="text-blue-400 group-hover:scale-110 transition-transform" />
-          <span>Dashboard TV</span>
-        </button>
+        {/* Removido o botão Modo TV conforme solicitado */}
+        <div className="hidden sm:flex w-10 h-10 rounded-full bg-slate-100 items-center justify-center text-slate-400 text-[10px] font-bold italic">
+          {title.substring(0,1).toUpperCase()}
+        </div>
       </div>
 
       <GlobalSearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />

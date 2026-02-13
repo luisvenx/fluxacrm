@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Info } from 'lucide-react';
 
 interface StatCardProps {
   title: string;
@@ -7,27 +8,35 @@ interface StatCardProps {
   subtitle: string;
   icon?: React.ReactNode;
   color: 'green' | 'red' | 'emerald' | 'blue';
+  showInfo?: boolean;
 }
 
-const StatCard: React.FC<StatCardProps> = ({ title, value, subtitle, icon, color }) => {
+const StatCard: React.FC<StatCardProps> = ({ title, value, subtitle, icon, color, showInfo }) => {
   const colorMap = {
-    green: 'bg-emerald-50 text-emerald-600',
-    red: 'bg-rose-50 text-rose-600',
-    emerald: 'bg-emerald-50 text-emerald-600',
-    blue: 'bg-blue-50 text-blue-600'
+    green: 'bg-emerald-50 text-emerald-500 border-emerald-100',
+    red: 'bg-rose-50 text-rose-400 border-rose-100',
+    emerald: 'bg-emerald-50 text-emerald-500 border-emerald-100',
+    blue: 'bg-blue-50 text-blue-500 border-blue-100'
   };
 
   return (
-    <div className="bg-white border border-slate-100 rounded-[1.75rem] p-6 hover:shadow-lg hover:shadow-slate-200/50 transition-all group shadow-sm">
+    <div className="bg-white border border-slate-100 rounded-xl p-5 hover:shadow-sm transition-all group shadow-sm relative overflow-hidden">
       <div className="flex items-center justify-between mb-4">
         <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{title}</span>
-        <div className={`p-2.5 rounded-2xl ${colorMap[color]} group-hover:scale-110 transition-transform`}>
-          {icon && React.cloneElement(icon as React.ReactElement, { size: 18 })}
+        <div className={`p-1.5 rounded-lg border transition-transform ${colorMap[color]}`}>
+          {icon && React.cloneElement(icon as React.ReactElement, { size: 14 })}
         </div>
       </div>
-      <div className="space-y-1">
-        <h3 className="text-2xl font-bold text-slate-900 tracking-tight">{value}</h3>
-        <p className="text-xs font-medium text-slate-400">{subtitle}</p>
+      <div className="space-y-0.5">
+        <h3 className="text-[22px] font-black text-slate-900 tracking-tight leading-tight">{value}</h3>
+        <div className="flex items-center gap-1">
+          <p className="text-[10px] font-medium text-slate-400">{subtitle}</p>
+          {showInfo && <Info size={10} className="text-slate-300" />}
+        </div>
+      </div>
+      {/* Background decoration */}
+      <div className={`absolute -right-2 -bottom-2 w-16 h-16 opacity-[0.03] group-hover:scale-110 transition-transform ${colorMap[color].split(' ')[1]}`}>
+        {icon && React.cloneElement(icon as React.ReactElement, { size: 64 })}
       </div>
     </div>
   );
