@@ -1,9 +1,10 @@
 
-const CACHE_NAME = 'fluxa-v1';
+const CACHE_NAME = 'fluxa-v2';
 const ASSETS = [
-  './',
-  './index.html',
-  './index.tsx',
+  '/',
+  '/index.html',
+  '/index.tsx',
+  '/manifest.json',
   'https://cdn.tailwindcss.com',
   'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap'
 ];
@@ -15,6 +16,7 @@ self.addEventListener('install', (event) => {
       return cache.addAll(ASSETS);
     })
   );
+  self.skipWaiting();
 });
 
 // Ativação: Limpa caches antigos
@@ -26,6 +28,7 @@ self.addEventListener('activate', (event) => {
       );
     })
   );
+  self.clients.claim();
 });
 
 // Interceptação de Requests
@@ -35,7 +38,15 @@ self.addEventListener('fetch', (event) => {
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      return cachedResponse || fetch(event.request);
+      // Retorna do cache se existir, senão busca na rede
+      if (cachedResponse) return cachedResponse;
+
+      return fetch(event.request).catch(() => {
+        // Fallback para o index.html em caso de falha de rede (navegação)
+        if (event.request.mode === 'navigate') {
+          return caches.match('/index.html');
+        }
+      });
     })
   );
 });
