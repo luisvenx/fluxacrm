@@ -49,8 +49,8 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onOpenTv, title }) => {
   const formattedTitle = title.includes('-') ? title.split('-').join(' / ') : title;
 
   return (
-    <header className="px-8 py-4 flex items-center justify-between bg-white/80 backdrop-blur-md border-b border-slate-100 sticky top-0 z-40 transition-all">
-      <div className="flex items-center gap-6">
+    <header className="px-4 md:px-8 py-4 flex items-center justify-between bg-white/80 backdrop-blur-md border-b border-slate-100 sticky top-0 z-40 transition-all">
+      <div className="flex items-center gap-4 md:gap-6">
         <button 
           onClick={onMenuClick}
           className="lg:hidden p-2.5 hover:bg-slate-50 rounded-xl transition-all text-slate-400 hover:text-slate-900 border border-slate-100"
@@ -60,31 +60,31 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onOpenTv, title }) => {
         
         <div className="flex flex-col">
           <div className="flex items-center gap-2.5">
-             <h1 className="text-[18px] font-bold text-slate-900 tracking-tight leading-none">
+             <h1 className="text-[16px] md:text-[18px] font-medium text-slate-900 tracking-tight leading-none">
                {formattedTitle}
              </h1>
              <div className="hidden md:block w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse mt-0.5"></div>
           </div>
-          <p className="text-slate-400 text-[9px] font-black uppercase tracking-[0.25em] mt-1.5">
+          <p className="text-slate-400 text-[8px] md:text-[9px] font-medium uppercase tracking-[0.25em] mt-1.5">
             Fluxa Financial Engine v2.6
           </p>
         </div>
       </div>
       
-      <div className="flex items-center gap-5">
+      <div className="flex items-center gap-2 md:gap-5">
         <div 
           onClick={() => setIsSearchOpen(true)}
           className="hidden md:flex items-center gap-3 bg-slate-50 border border-slate-100 px-4 py-2 rounded-full text-slate-400 hover:bg-slate-100 transition-all cursor-pointer group group-hover:border-slate-200"
         >
            <Search size={14} className="group-hover:text-slate-600 transition-colors" />
-           <span className="text-[10px] font-bold uppercase tracking-widest">Busca Inteligente...</span>
+           <span className="text-[10px] font-medium uppercase tracking-widest">Busca Inteligente...</span>
            <div className="flex items-center gap-0.5 bg-white px-1.5 py-0.5 rounded border border-slate-200 text-slate-300">
              <Command size={10} />
-             <span className="text-[9px] font-black">K</span>
+             <span className="text-[9px] font-medium">K</span>
            </div>
         </div>
 
-        <div className="h-6 w-px bg-slate-100 mx-1 hidden sm:block"></div>
+        <div className="hidden sm:block h-6 w-px bg-slate-100 mx-1"></div>
 
         <div className="relative">
           <button 
@@ -107,7 +107,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onOpenTv, title }) => {
 
         <button 
           onClick={onOpenTv}
-          className="hidden sm:flex items-center gap-2.5 bg-slate-900 text-white text-[10px] font-black uppercase tracking-[0.15em] px-6 py-2.5 rounded-full hover:bg-slate-800 transition-all shadow-xl shadow-slate-200 active:scale-95 group"
+          className="hidden sm:flex items-center gap-2.5 bg-slate-900 text-white text-[10px] font-medium uppercase tracking-[0.15em] px-6 py-2.5 rounded-full hover:bg-slate-800 transition-all shadow-xl shadow-slate-200 active:scale-95 group"
         >
           <Tv size={14} className="text-blue-400 group-hover:scale-110 transition-transform" />
           <span>Dashboard TV</span>
