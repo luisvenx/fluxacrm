@@ -27,7 +27,11 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
-const Crm: React.FC = () => {
+interface CrmProps {
+  user: any;
+}
+
+const Crm: React.FC<CrmProps> = ({ user }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [activePeriod, setActivePeriod] = useState('Este Mês');
   
@@ -53,9 +57,10 @@ const Crm: React.FC = () => {
   });
 
   const fetchData = async () => {
+    if (!user) return;
     setIsLoading(true);
     try {
-      const { data: leads, error } = await supabase.from('leads').select('*');
+      const { data: leads, error } = await supabase.from('leads').select('*').eq('user_id', user.id);
       if (error) throw error;
 
       if (leads) {
@@ -102,7 +107,7 @@ const Crm: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [user]);
 
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
@@ -124,7 +129,7 @@ const Crm: React.FC = () => {
       <div className="px-4 md:px-8 pt-6 md:pt-8 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
         <div>
           <h1 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">Dashboard Comercial</h1>
-          <p className="text-xs md:text-sm text-slate-400 font-medium">Acompanhe a performance do time em tempo real</p>
+          <p className="text-xs md:text-sm text-slate-400 font-medium">Performance isolada da sua conta</p>
         </div>
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
@@ -144,12 +149,6 @@ const Crm: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="relative flex-1 sm:flex-none">
-              <select className="w-full bg-white border border-slate-200 rounded-xl py-2 px-4 text-[11px] font-bold text-slate-600 appearance-none pr-10 shadow-sm">
-                <option>Todos os Squads</option>
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300" size={14} />
-            </div>
             <button onClick={fetchData} className="p-2 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-blue-600 shadow-sm transition-all">
               <RefreshCcw size={16} />
             </button>
@@ -276,7 +275,7 @@ const Crm: React.FC = () => {
           {/* Ranking Sidebar */}
           <div className="lg:col-span-3 space-y-6">
             <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
-               <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">Top Closers</h4>
+               <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">Top Closers (Global)</h4>
                <div className="space-y-4">
                   {data.ranking.slice(0, 4).map((rep, i) => (
                     <div key={i} className="flex items-center justify-between group">

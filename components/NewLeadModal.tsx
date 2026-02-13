@@ -6,9 +6,10 @@ import { supabase } from '../lib/supabase';
 interface NewLeadModalProps {
   isOpen: boolean;
   onClose: () => void;
+  user: any;
 }
 
-const NewLeadModal: React.FC<NewLeadModalProps> = ({ isOpen, onClose }) => {
+const NewLeadModal: React.FC<NewLeadModalProps> = ({ isOpen, onClose, user }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -22,11 +23,13 @@ const NewLeadModal: React.FC<NewLeadModalProps> = ({ isOpen, onClose }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) return;
     if (!formData.name) return alert('O nome do contato é obrigatório.');
 
     setIsSaving(true);
     try {
       const { error } = await supabase.from('leads').insert([{
+        user_id: user.id, // VINCULAR AO USUÁRIO
         name: formData.name,
         company: formData.company,
         email: formData.email,
@@ -61,7 +64,7 @@ const NewLeadModal: React.FC<NewLeadModalProps> = ({ isOpen, onClose }) => {
             </div>
             <div>
               <h2 className="text-xl font-bold text-slate-900 tracking-tight">Capturar Novo Lead</h2>
-              <p className="text-xs text-slate-400 font-medium">Inicie um novo ciclo no CRM</p>
+              <p className="text-xs text-slate-400 font-medium">Este lead será visível apenas para você e seu squad</p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-slate-50 rounded-full text-slate-300 hover:text-slate-900"><X size={20} /></button>
@@ -87,18 +90,6 @@ const NewLeadModal: React.FC<NewLeadModalProps> = ({ isOpen, onClose }) => {
             <div className="space-y-2">
               <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Valor Estimado (R$)</label>
               <input type="text" value={formData.value} onChange={e => setFormData({...formData, value: e.target.value})} placeholder="0,00" className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-3.5 px-5 text-sm font-bold outline-none focus:ring-2 focus:ring-blue-100" />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Atribuir Responsável</label>
-            <div className="relative">
-              <select value={formData.assigned_to} onChange={e => setFormData({...formData, assigned_to: e.target.value})} className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-3.5 px-5 text-sm font-semibold appearance-none outline-none">
-                <option>Gabriel Dantras (Alpha)</option>
-                <option>Luis Venx (Beta)</option>
-                <option>Kyros (Financial Ops)</option>
-              </select>
-              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
             </div>
           </div>
 

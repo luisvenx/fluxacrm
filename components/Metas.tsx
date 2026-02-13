@@ -20,16 +20,21 @@ import {
 import NewGoalModal from './NewGoalModal';
 import { supabase } from '../lib/supabase';
 
-const Metas: React.FC = () => {
+interface MetasProps {
+  user: any;
+}
+
+const Metas: React.FC<MetasProps> = ({ user }) => {
   const [activeTab, setActiveTab] = useState<'empresa' | 'individuais' | 'squads'>('empresa');
   const [isNewGoalModalOpen, setIsNewGoalModalOpen] = useState(false);
   const [goals, setGoals] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchGoals = async () => {
+    if (!user) return;
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.from('goals').select('*');
+      const { data, error } = await supabase.from('goals').select('*').eq('user_id', user.id);
       if (error) throw error;
       setGoals(data || []);
     } catch (err) {
@@ -41,7 +46,7 @@ const Metas: React.FC = () => {
 
   useEffect(() => {
     fetchGoals();
-  }, []);
+  }, [user]);
 
   const stats = useMemo(() => {
     const active = goals.length;
@@ -78,7 +83,7 @@ const Metas: React.FC = () => {
              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">OKR Data Engine</span>
           </div>
           <h2 className="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">Metas & Performance</h2>
-          <p className="text-slate-500 text-xs md:text-sm font-medium mt-1">Gestão estratégica de OKRs e objetivos.</p>
+          <p className="text-slate-500 text-xs md:text-sm font-medium mt-1">Gestão estratégica de OKRs para sua conta.</p>
         </div>
 
         <div className="flex items-center gap-2 md:gap-3 w-full md:w-auto">
@@ -94,7 +99,6 @@ const Metas: React.FC = () => {
         </div>
       </div>
 
-      {/* Stats Grid Responsivo */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {stats.map((stat, i) => (
           <div key={i} className="bg-white border border-slate-100 rounded-[1.5rem] md:rounded-[1.75rem] p-5 md:p-6 shadow-sm hover:shadow-md transition-all group">
@@ -110,7 +114,6 @@ const Metas: React.FC = () => {
         ))}
       </div>
 
-      {/* Tabs com Scroll Lateral no Mobile */}
       <div className="bg-white p-2 border border-slate-100 rounded-2xl md:rounded-3xl shadow-sm overflow-hidden">
         <div className="flex items-center gap-1 bg-slate-50 p-1 rounded-xl md:rounded-2xl w-full overflow-x-auto no-scrollbar">
           {tabs.map((tab) => (
@@ -141,11 +144,11 @@ const Metas: React.FC = () => {
           </div>
           <div className="relative z-10 flex flex-col items-center space-y-6">
             <div className="w-16 h-16 md:w-20 md:h-20 bg-slate-50 rounded-2xl md:rounded-[2.5rem] flex items-center justify-center text-slate-200 group-hover:bg-blue-50 group-hover:text-blue-500 transition-all duration-500 shadow-sm">
-              <Target size={32} md:size={40} />
+              <Target size={32} />
             </div>
             <div className="max-w-md">
               <h3 className="text-lg md:text-xl font-bold text-slate-900 tracking-tight mb-2 uppercase">Configure seus objetivos de {activeTab}</h3>
-              <p className="text-xs md:text-sm text-slate-400 font-medium leading-relaxed">Acompanhe leads, reuniões ou volume de vendas em tempo real conectando as metas ao SQL.</p>
+              <p className="text-xs md:text-sm text-slate-400 font-medium leading-relaxed">Defina metas isoladas para sua operação e acompanhe os resultados em tempo real.</p>
             </div>
             <button onClick={() => setIsNewGoalModalOpen(true)} className="px-8 py-3 bg-slate-900 text-white rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl">Criar primeira meta</button>
           </div>
@@ -187,7 +190,7 @@ const Metas: React.FC = () => {
         </div>
       )}
 
-      <NewGoalModal isOpen={isNewGoalModalOpen} onClose={() => { setIsNewGoalModalOpen(false); fetchGoals(); }} />
+      <NewGoalModal isOpen={isNewGoalModalOpen} onClose={() => { setIsNewGoalModalOpen(false); fetchGoals(); }} user={user} />
     </div>
   );
 };

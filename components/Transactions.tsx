@@ -15,7 +15,11 @@ import NewTransactionModal from './NewTransactionModal';
 import ImportModal from './ImportModal';
 import { supabase } from '../lib/supabase';
 
-const Transactions: React.FC = () => {
+interface TransactionsProps {
+  user: any;
+}
+
+const Transactions: React.FC<TransactionsProps> = ({ user }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState('Todos');
@@ -26,6 +30,7 @@ const Transactions: React.FC = () => {
   const tabs = ['Todos', 'Pagos', 'Pendentes', 'Atrasados'];
 
   const fetchTransactions = async () => {
+    if (!user) return;
     setIsLoading(true);
     try {
       const { data, error } = await supabase
@@ -35,6 +40,7 @@ const Transactions: React.FC = () => {
           bank_accounts (name),
           cost_centers (name)
         `)
+        .eq('user_id', user.id) // FILTRO CRÍTICO: Somente dados do usuário logado
         .order('competence_date', { ascending: false });
 
       if (error) throw error;
@@ -48,7 +54,7 @@ const Transactions: React.FC = () => {
 
   useEffect(() => {
     fetchTransactions();
-  }, []);
+  }, [user]);
 
   const filteredTransactions = useMemo(() => {
     let result = [...transactions];
@@ -81,7 +87,7 @@ const Transactions: React.FC = () => {
   return (
     <div className="bg-[#fcfcfd] min-h-screen space-y-6 md:space-y-8 animate-in fade-in duration-700 pb-24 md:pb-20 px-4 md:px-10 pt-6 md:pt-8">
       
-      {/* Header Responsivo */}
+      {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
           <div className="flex items-center gap-2 mb-1">
@@ -89,7 +95,7 @@ const Transactions: React.FC = () => {
              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Database Realtime</span>
           </div>
           <h2 className="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">Ledger Financeiro</h2>
-          <p className="text-slate-500 font-medium text-xs md:text-sm">Exibindo {filteredTransactions.length} registros.</p>
+          <p className="text-slate-500 font-medium text-xs md:text-sm">Exibindo {filteredTransactions.length} registros da sua conta.</p>
         </div>
         
         <div className="flex items-center gap-2 w-full md:w-auto">
@@ -109,7 +115,7 @@ const Transactions: React.FC = () => {
         </div>
       </div>
 
-      {/* Toolbar Adaptável */}
+      {/* Toolbar */}
       <div className="flex flex-col lg:flex-row gap-4 items-center justify-between bg-white p-2 border border-slate-100 rounded-2xl md:rounded-3xl shadow-sm">
         <div className="flex items-center gap-1 bg-slate-50 p-1 rounded-xl md:rounded-[1.25rem] w-full lg:w-auto overflow-x-auto no-scrollbar">
           {tabs.map(tab => (
@@ -134,13 +140,10 @@ const Transactions: React.FC = () => {
               className="w-full bg-slate-50 border-none rounded-xl md:rounded-2xl py-2.5 pl-11 pr-4 text-sm font-medium focus:ring-2 focus:ring-blue-100 text-slate-600"
             />
           </div>
-          <button className="p-2.5 bg-slate-50 text-slate-400 hover:text-slate-900 rounded-xl transition-colors shrink-0">
-            <Filter size={18} />
-          </button>
         </div>
       </div>
 
-      {/* Tabela de Dados com Scroll Horizontal Controlado */}
+      {/* Tabela */}
       <div className="bg-white border border-slate-100 rounded-2xl md:rounded-[2rem] shadow-sm overflow-hidden">
         <div className="overflow-x-auto no-scrollbar">
           <table className="w-full text-left border-collapse min-w-[700px]">
@@ -158,13 +161,13 @@ const Transactions: React.FC = () => {
                 <tr>
                   <td colSpan={5} className="py-24 text-center">
                     <Loader2 className="animate-spin mx-auto text-blue-500 mb-4" size={32} />
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Consultando Supabase...</p>
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Filtrando seus dados...</p>
                   </td>
                 </tr>
               ) : filteredTransactions.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="py-32 text-center">
-                    <p className="text-xs font-bold text-slate-300 uppercase tracking-[0.2em]">Sem registros</p>
+                    <p className="text-xs font-bold text-slate-300 uppercase tracking-[0.2em]">Sem registros na sua conta</p>
                   </td>
                 </tr>
               ) : (
@@ -208,8 +211,8 @@ const Transactions: React.FC = () => {
         </div>
       </div>
 
-      <NewTransactionModal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); fetchTransactions(); }} />
-      <ImportModal isOpen={isImportModalOpen} onClose={() => setIsImportModalOpen(false)} />
+      <NewTransactionModal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); fetchTransactions(); }} user={user} />
+      <ImportModal isOpen={isImportModalOpen} onClose={() => setIsImportModalOpen(false)} user={user} />
     </div>
   );
 };

@@ -21,19 +21,24 @@ import {
 import NewClientModal from './NewClientModal';
 import { supabase } from '../lib/supabase';
 
-const OperationalClientes: React.FC = () => {
+interface OperationalClientesProps {
+  user: any;
+}
+
+const OperationalClientes: React.FC<OperationalClientesProps> = ({ user }) => {
   const [isNewClientModalOpen, setIsNewClientModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [clients, setClients] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedSegment, setSelectedSegment] = useState('Todos os Segmentos');
 
   const fetchClients = async () => {
+    if (!user) return;
     setIsLoading(true);
     try {
       const { data, error } = await supabase
         .from('customers')
         .select('*')
+        .eq('user_id', user.id)
         .order('name', { ascending: true });
       
       if (error) throw error;
@@ -47,16 +52,14 @@ const OperationalClientes: React.FC = () => {
 
   useEffect(() => {
     fetchClients();
-  }, []);
+  }, [user]);
 
   const filteredClients = useMemo(() => {
-    return clients.filter(client => {
-      const matchesSearch = client.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                           client.segment?.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesSegment = selectedSegment === 'Todos os Segmentos' || client.segment === selectedSegment;
-      return matchesSearch && matchesSegment;
-    });
-  }, [clients, searchTerm, selectedSegment]);
+    return clients.filter(client => 
+      client.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      client.segment?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [clients, searchTerm]);
 
   const stats = useMemo(() => {
     const totalActive = clients.filter(c => c.status === 'Ativo').length;
@@ -79,7 +82,6 @@ const OperationalClientes: React.FC = () => {
   return (
     <div className="bg-[#fcfcfd] min-h-screen space-y-6 md:space-y-8 animate-in fade-in duration-700 pb-24 md:pb-20 px-4 md:px-10 pt-6 md:pt-8">
       
-      {/* Header Responsivo */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0">
@@ -88,9 +90,9 @@ const OperationalClientes: React.FC = () => {
           <div>
             <div className="flex items-center gap-2 mb-0.5">
                <Database size={14} className="text-blue-500" />
-               <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Base SQL Sincronizada</span>
+               <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Sua Base SQL</span>
             </div>
-            <h2 className="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">Portfólio de Clientes</h2>
+            <h2 className="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">Meus Clientes</h2>
           </div>
         </div>
 
@@ -102,7 +104,6 @@ const OperationalClientes: React.FC = () => {
         </button>
       </div>
 
-      {/* KPI Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <div className="bg-white border border-slate-100 rounded-[1.75rem] p-5 md:p-6 shadow-sm hover:shadow-md transition-all group">
           <div className="flex justify-between items-start mb-4">
@@ -112,7 +113,6 @@ const OperationalClientes: React.FC = () => {
             </div>
           </div>
           <h3 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">{isLoading ? '...' : `${stats.totalActive} Contas`}</h3>
-          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Status Ativo no Banco</p>
         </div>
 
         <div className="bg-white border border-slate-100 rounded-[1.75rem] p-5 md:p-6 shadow-sm hover:shadow-md transition-all group">
@@ -123,7 +123,6 @@ const OperationalClientes: React.FC = () => {
             </div>
           </div>
           <h3 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight truncate">{isLoading ? '...' : formatCurrency(stats.mrrTotal)}</h3>
-          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Recorrência Mensal</p>
         </div>
 
         <div className="bg-white border border-slate-100 rounded-[1.75rem] p-5 md:p-6 shadow-sm hover:shadow-md transition-all group">
@@ -134,73 +133,19 @@ const OperationalClientes: React.FC = () => {
             </div>
           </div>
           <h3 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">{isLoading ? '...' : `${stats.avgHealth}%`}</h3>
-          <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest mt-1">Health Score Médio</p>
         </div>
 
-        <div className="bg-[#002147] rounded-[1.75rem] p-5 md:p-6 shadow-xl text-white relative overflow-hidden group">
-          <div className="relative z-10">
-            <p className="text-[10px] md:text-[11px] font-bold text-white/50 uppercase tracking-widest mb-4">Base Total (SQL)</p>
-            <h3 className="text-xl md:text-2xl font-bold tracking-tight">{clients.length} Clientes</h3>
-            <p className="text-[10px] text-blue-400 font-bold mt-1 uppercase tracking-widest">Registros Auditados</p>
-          </div>
-          <Target className="absolute -right-4 -bottom-4 text-white/5 w-24 h-24 group-hover:scale-110 transition-transform" />
+        <div className="bg-[#002147] rounded-[1.75rem] p-5 md:p-6 shadow-xl text-white relative overflow-hidden">
+          <p className="text-[10px] md:text-[11px] font-bold text-white/50 uppercase tracking-widest mb-4">Sua Base Total</p>
+          <h3 className="text-xl md:text-2xl font-bold tracking-tight">{clients.length} Clientes</h3>
         </div>
       </div>
 
-      {/* Toolbar Adaptável */}
-      <div className="flex flex-col lg:flex-row gap-4 items-center justify-between bg-white p-2 border border-slate-100 rounded-2xl md:rounded-3xl shadow-sm">
-        <div className="relative flex-1 w-full lg:max-w-md ml-0 lg:ml-2">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
-          <input 
-            type="text" 
-            placeholder="Buscar por nome do cliente ou segmento..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-slate-50 border-none rounded-xl md:rounded-2xl py-2.5 pl-12 pr-4 text-sm font-medium focus:ring-2 focus:ring-blue-100 transition-all text-slate-600"
-          />
-        </div>
-
-        <div className="flex items-center gap-2 w-full lg:w-auto pr-0 lg:pr-2">
-           <div className="relative flex-1 lg:flex-none">
-              <select 
-                value={selectedSegment}
-                onChange={(e) => setSelectedSegment(e.target.value)}
-                className="w-full bg-slate-50 border-none rounded-xl py-2.5 pl-4 pr-10 text-[10px] font-black uppercase text-slate-500 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-100 cursor-pointer lg:min-w-[180px] tracking-widest"
-              >
-                <option>Todos os Segmentos</option>
-                <option>SaaS</option>
-                <option>Varejo</option>
-                <option>Serviços</option>
-                <option>Educação</option>
-                <option>Indústria</option>
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none" size={14} />
-           </div>
-           <button onClick={fetchClients} className="p-2.5 text-slate-400 hover:text-blue-600 bg-slate-50 rounded-xl transition-all shadow-sm">
-             <RefreshCcw size={18} className={isLoading ? 'animate-spin' : ''} />
-           </button>
-        </div>
-      </div>
-
-      {/* Data Table */}
       <div className="bg-white border border-slate-100 rounded-2xl md:rounded-[2.5rem] shadow-sm overflow-hidden flex flex-col min-h-[450px]">
         {isLoading ? (
           <div className="flex-1 flex flex-col items-center justify-center py-20">
             <Loader2 className="animate-spin text-blue-600 mb-4" size={40} />
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Acessando Engine de Dados...</p>
-          </div>
-        ) : filteredClients.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center p-12 text-center space-y-4">
-             <div className="w-20 h-20 bg-slate-50 rounded-[2rem] flex items-center justify-center text-slate-200">
-               <Users size={40} />
-             </div>
-             <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Nenhum cliente encontrado no banco</p>
-             <button 
-               onClick={() => setIsNewClientModalOpen(true)}
-               className="text-blue-600 text-[10px] font-black uppercase tracking-widest hover:underline"
-             >
-               Cadastrar primeiro cliente
-             </button>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Acessando Dados...</p>
           </div>
         ) : (
           <div className="overflow-x-auto no-scrollbar">
@@ -208,58 +153,37 @@ const OperationalClientes: React.FC = () => {
               <thead>
                 <tr className="bg-slate-50/30">
                   <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Cliente & Status</th>
-                  <th className="px-6 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Segmento</th>
                   <th className="px-6 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">MRR Atual</th>
                   <th className="px-6 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Health Score</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Ações</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
                 {filteredClients.map((client) => (
-                  <tr key={client.id} className="hover:bg-slate-50 transition-all group cursor-pointer">
+                  <tr key={client.id} className="hover:bg-slate-50 transition-all group">
                     <td className="px-8 py-6">
                       <div className="flex items-center gap-4">
-                        <div className="w-11 h-11 bg-slate-900 text-white rounded-xl flex items-center justify-center font-black text-xs shadow-md group-hover:scale-110 transition-transform italic">
+                        <div className="w-11 h-11 bg-slate-900 text-white rounded-xl flex items-center justify-center font-black text-xs shadow-md italic">
                           {client.name?.substring(0,1).toUpperCase()}
                         </div>
                         <div>
                           <p className="text-sm font-bold text-slate-900 tracking-tight uppercase truncate max-w-[200px]">{client.name}</p>
-                          <div className="flex items-center gap-1.5 mt-0.5">
-                             <div className={`w-1.5 h-1.5 rounded-full ${client.status === 'Ativo' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`}></div>
-                             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{client.status}</span>
-                          </div>
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{client.status}</span>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-6">
-                      <span className="text-[10px] font-bold px-3 py-1 bg-slate-100 text-slate-500 rounded-full uppercase tracking-widest">
-                        {client.segment || 'Geral'}
-                      </span>
-                    </td>
                     <td className="px-6 py-6 text-right">
                       <p className="text-sm font-black text-slate-900 tracking-tighter">{formatCurrency(client.mrr_value || 0)}</p>
-                      <p className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">faturamento mensal</p>
                     </td>
                     <td className="px-6 py-6 text-center">
-                      <div className="flex flex-col items-center gap-1.5">
-                        <span className={`text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-sm border ${
-                          (client.health_score || 0) >= 80 ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
-                          (client.health_score || 0) >= 50 ? 'bg-amber-50 text-amber-600 border-amber-100' : 
-                          'bg-rose-50 text-rose-600 border-rose-100'
+                        <span className={`text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest border ${
+                          (client.health_score || 0) >= 80 ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600'
                         }`}>
-                          {client.health_score}% - {(client.health_score || 0) >= 80 ? 'Saudável' : (client.health_score || 0) >= 50 ? 'Atenção' : 'Churn Risk'}
+                          {client.health_score}%
                         </span>
-                      </div>
                     </td>
                     <td className="px-8 py-6 text-right">
-                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all">
-                          <ExternalLink size={18} />
-                        </button>
-                        <button className="p-2 text-slate-300 hover:text-slate-900 transition-all">
-                          <MoreVertical size={18} />
-                        </button>
-                      </div>
+                       <button className="p-2 text-slate-200 hover:text-slate-900"><MoreVertical size={18} /></button>
                     </td>
                   </tr>
                 ))}
@@ -269,7 +193,7 @@ const OperationalClientes: React.FC = () => {
         )}
       </div>
 
-      <NewClientModal isOpen={isNewClientModalOpen} onClose={() => { setIsNewClientModalOpen(false); fetchClients(); }} />
+      <NewClientModal isOpen={isNewClientModalOpen} onClose={() => { setIsNewClientModalOpen(false); fetchClients(); }} user={user} />
     </div>
   );
 };

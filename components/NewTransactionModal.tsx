@@ -6,14 +6,14 @@ import { supabase } from '../lib/supabase';
 interface NewTransactionModalProps {
   isOpen: boolean;
   onClose: () => void;
+  user: any;
 }
 
-const NewTransactionModal: React.FC<NewTransactionModalProps> = ({ isOpen, onClose }) => {
+const NewTransactionModal: React.FC<NewTransactionModalProps> = ({ isOpen, onClose, user }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [bankAccounts, setBankAccounts] = useState<any[]>([]);
   const [costCenters, setCostCenters] = useState<any[]>([]);
   
-  // Form State
   const [formData, setFormData] = useState({
     amount: '',
     description: '',
@@ -25,26 +25,26 @@ const NewTransactionModal: React.FC<NewTransactionModalProps> = ({ isOpen, onClo
   });
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && user) {
       fetchAuxiliaryData();
     }
-  }, [isOpen]);
+  }, [isOpen, user]);
 
   async function fetchAuxiliaryData() {
     const [{ data: banks }, { data: centers }] = await Promise.all([
-      supabase.from('bank_accounts').select('id, name'),
-      supabase.from('cost_centers').select('id, name')
+      supabase.from('bank_accounts').select('id, name').eq('user_id', user.id),
+      supabase.from('cost_centers').select('id, name').eq('user_id', user.id)
     ]);
     if (banks) setBankAccounts(banks);
     if (centers) setCostCenters(centers);
     
-    // Auto-select first options if available
     if (banks?.[0]) setFormData(prev => ({ ...prev, bank_account_id: banks[0].id }));
     if (centers?.[0]) setFormData(prev => ({ ...prev, cost_center_id: centers[0].id }));
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) return;
     if (!formData.description || !formData.amount) {
       alert('Por favor, preencha a descrição e o valor.');
       return;
@@ -56,6 +56,7 @@ const NewTransactionModal: React.FC<NewTransactionModalProps> = ({ isOpen, onClo
       const { error } = await supabase
         .from('transactions')
         .insert([{
+          user_id: user.id, // VINCULAR AO USUÁRIO
           description: formData.description,
           amount: parseFloat(cleanAmount),
           type: formData.type,
@@ -66,8 +67,7 @@ const NewTransactionModal: React.FC<NewTransactionModalProps> = ({ isOpen, onClo
         }]);
 
       if (error) throw error;
-      
-      onClose(); // Transactions.tsx já chama fetchTransactions no onClose
+      onClose();
     } catch (err) {
       console.error('Erro ao salvar transação:', err);
       alert('Ocorreu um erro ao salvar o lançamento.');
@@ -83,7 +83,6 @@ const NewTransactionModal: React.FC<NewTransactionModalProps> = ({ isOpen, onClo
       <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" onClick={onClose} />
       
       <div className="relative bg-white w-full max-w-[650px] max-h-[90vh] rounded-[2.5rem] shadow-2xl animate-in zoom-in-95 duration-300 overflow-hidden border border-slate-100 flex flex-col">
-        {/* Header */}
         <div className="p-8 pb-4 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shadow-sm">
@@ -91,7 +90,7 @@ const NewTransactionModal: React.FC<NewTransactionModalProps> = ({ isOpen, onClo
             </div>
             <div>
               <h2 className="text-xl font-bold text-slate-900 tracking-tight">Novo Lançamento</h2>
-              <p className="text-xs text-slate-400 font-medium">Registre uma nova entrada ou saída no Supabase</p>
+              <p className="text-xs text-slate-400 font-medium">Os dados serão salvos de forma isolada na sua conta</p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-300 hover:text-slate-900">
@@ -101,7 +100,6 @@ const NewTransactionModal: React.FC<NewTransactionModalProps> = ({ isOpen, onClo
 
         <div className="flex-1 overflow-y-auto p-8 pt-4 no-scrollbar">
           <form id="new-tx-form" onSubmit={handleSubmit} className="space-y-8">
-            {/* Amount Section */}
             <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100 flex flex-col items-center">
               <label className="text-[10px] font-bold uppercase text-slate-400 tracking-[0.2em] mb-4">Valor da Transação</label>
               <div className="flex items-center text-4xl font-bold text-slate-900 tracking-tighter">
@@ -118,7 +116,6 @@ const NewTransactionModal: React.FC<NewTransactionModalProps> = ({ isOpen, onClo
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Tipo */}
               <div className="space-y-2">
                 <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Tipo de Fluxo</label>
                 <div className="flex bg-slate-50 p-1 rounded-2xl border border-slate-100">
@@ -139,9 +136,8 @@ const NewTransactionModal: React.FC<NewTransactionModalProps> = ({ isOpen, onClo
                 </div>
               </div>
 
-              {/* Status */}
               <div className="space-y-2">
-                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Status do Pagamento</label>
+                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Status</label>
                 <div className="flex bg-slate-50 p-1 rounded-2xl border border-slate-100">
                   <button 
                     type="button" 
@@ -161,9 +157,8 @@ const NewTransactionModal: React.FC<NewTransactionModalProps> = ({ isOpen, onClo
               </div>
             </div>
 
-            {/* Descrição */}
             <div className="space-y-2">
-              <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Descrição do Lançamento</label>
+              <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Descrição</label>
               <input 
                 type="text" 
                 value={formData.description}
@@ -174,7 +169,6 @@ const NewTransactionModal: React.FC<NewTransactionModalProps> = ({ isOpen, onClo
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Categoria / Centro de Custo */}
               <div className="space-y-2">
                 <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Centro de Custo</label>
                 <div className="relative">
@@ -190,9 +184,8 @@ const NewTransactionModal: React.FC<NewTransactionModalProps> = ({ isOpen, onClo
                 </div>
               </div>
 
-              {/* Data */}
               <div className="space-y-2">
-                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Data de Competência</label>
+                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Data</label>
                 <div className="relative">
                   <input 
                     type="date"
@@ -204,34 +197,9 @@ const NewTransactionModal: React.FC<NewTransactionModalProps> = ({ isOpen, onClo
                 </div>
               </div>
             </div>
-
-            {/* Banco/Meio de Pagamento */}
-            <div className="space-y-2">
-              <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Vincular a Banco / Conta</label>
-              <div className="relative">
-                <select 
-                  value={formData.bank_account_id}
-                  onChange={(e) => setFormData({...formData, bank_account_id: e.target.value})}
-                  className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-3.5 px-5 text-sm font-semibold text-slate-700 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all cursor-pointer"
-                >
-                  <option value="">Selecione uma conta</option>
-                  {bankAccounts.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-                </select>
-                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none" size={18} />
-              </div>
-            </div>
-
-            {/* Attachments Placeholder */}
-            <div className="p-6 border-2 border-dashed border-slate-100 rounded-[2rem] flex flex-col items-center justify-center text-center gap-3 hover:bg-slate-50 transition-all cursor-pointer group">
-              <div className="w-10 h-10 bg-white border border-slate-100 rounded-xl flex items-center justify-center text-slate-300 group-hover:text-blue-500 transition-colors">
-                <Paperclip size={20} />
-              </div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Anexar Comprovante / Nota Fiscal</p>
-            </div>
           </form>
         </div>
 
-        {/* Footer */}
         <div className="p-8 pt-4 flex items-center gap-3 shrink-0">
           <button 
             type="button" 
@@ -246,14 +214,7 @@ const NewTransactionModal: React.FC<NewTransactionModalProps> = ({ isOpen, onClo
             disabled={isSaving}
             className="flex-1 py-4 bg-blue-600 text-white rounded-full text-xs font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95 flex items-center justify-center gap-2 disabled:opacity-70"
           >
-            {isSaving ? (
-              <>
-                <Loader2 size={18} className="animate-spin" />
-                Salvando...
-              </>
-            ) : (
-              'Confirmar Lançamento'
-            )}
+            {isSaving ? <Loader2 size={18} className="animate-spin" /> : 'Confirmar Lançamento'}
           </button>
         </div>
       </div>

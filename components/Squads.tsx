@@ -15,16 +15,21 @@ import {
 import NewSquadModal from './NewSquadModal';
 import { supabase } from '../lib/supabase';
 
-const Squads: React.FC = () => {
+interface SquadsProps {
+  user: any;
+}
+
+const Squads: React.FC<SquadsProps> = ({ user }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isNewSquadModalOpen, setIsNewSquadModalOpen] = useState(false);
   const [squads, setSquads] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchSquads = async () => {
+    if (!user) return;
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.from('squads').select('*');
+      const { data, error } = await supabase.from('squads').select('*').eq('user_id', user.id);
       if (error) throw error;
       setSquads(data || []);
     } catch (err) {
@@ -36,7 +41,7 @@ const Squads: React.FC = () => {
 
   useEffect(() => {
     fetchSquads();
-  }, []);
+  }, [user]);
 
   const filteredSquads = useMemo(() => {
     return squads.filter(s => 
@@ -55,12 +60,12 @@ const Squads: React.FC = () => {
              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Database Org Sincronizado</span>
           </div>
           <h2 className="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">Células Operacionais</h2>
-          <p className="text-slate-500 text-xs md:text-sm font-medium mt-1">Gestão de estrutura organizacional do time.</p>
+          <p className="text-slate-500 text-xs md:text-sm font-medium mt-1">Gestão isolada da sua estrutura de time.</p>
         </div>
 
         <button 
           onClick={() => setIsNewSquadModalOpen(true)}
-          className="w-full md:w-auto bg-blue-600 text-white px-6 py-3 md:py-2.5 rounded-xl md:rounded-full text-xs md:text-sm font-semibold hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all flex items-center justify-center gap-2 active:scale-95"
+          className="w-full md:w-auto bg-blue-600 text-white px-6 py-3 rounded-xl md:rounded-full text-sm font-semibold hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all flex items-center justify-center gap-2 active:scale-95"
         >
           <Plus size={20} /> <span className="md:hidden">Novo Squad</span> <span className="hidden md:inline">Criar Novo Squad</span>
         </button>
@@ -78,13 +83,6 @@ const Squads: React.FC = () => {
             className="w-full bg-slate-50 border-none rounded-xl md:rounded-2xl py-2.5 pl-12 pr-4 text-sm font-medium focus:ring-2 focus:ring-blue-100 transition-all text-slate-600 placeholder:text-slate-300"
           />
         </div>
-
-        <div className="flex items-center gap-2 w-full lg:w-auto pr-0 lg:pr-2">
-           <div className="flex-1 lg:flex-none bg-slate-50 p-1 rounded-xl flex items-center justify-center gap-1">
-             <button className="flex-1 lg:flex-none p-2 bg-white text-slate-900 rounded-lg shadow-sm border border-slate-100 px-4"><LayoutGrid size={18}/></button>
-             <button className="flex-1 lg:flex-none p-2 text-slate-400 hover:text-slate-600 px-4"><Filter size={18}/></button>
-           </div>
-        </div>
       </div>
 
       {isLoading ? (
@@ -100,13 +98,13 @@ const Squads: React.FC = () => {
 
           <div className="relative z-10 flex flex-col items-center space-y-6">
             <div className="w-20 h-20 md:w-24 md:h-24 bg-slate-50 rounded-[1.5rem] md:rounded-[2.5rem] flex items-center justify-center text-slate-200 group-hover:bg-blue-50 group-hover:text-blue-500 transition-all duration-500 shadow-sm border border-slate-100">
-              <Users size={40} md:size={48} strokeWidth={1.5} />
+              <Users size={40} strokeWidth={1.5} />
             </div>
             
             <div className="max-w-sm">
-              <h3 className="text-lg md:text-xl font-bold text-slate-900 tracking-tight mb-2">Nenhum squad encontrado</h3>
+              <h3 className="text-lg md:text-xl font-bold text-slate-900 tracking-tight mb-2">Nenhum squad na sua conta</h3>
               <p className="text-xs md:text-sm text-slate-400 font-medium leading-relaxed">
-                Você ainda não configurou células operacionais. Crie squads para organizar metas e responsabilidades.
+                Crie squads isolados para organizar suas metas e responsabilidades.
               </p>
             </div>
 
@@ -133,7 +131,7 @@ const Squads: React.FC = () => {
                  <div className="space-y-4">
                     <div className="min-w-0">
                       <h4 className="text-lg md:text-xl font-bold text-slate-900 tracking-tight uppercase truncate">{squad.name}</h4>
-                      <p className="text-[10px] md:text-xs text-slate-400 font-medium mt-1 line-clamp-2">{squad.description || 'Nenhum mantra definido para este squad.'}</p>
+                      <p className="text-[10px] md:text-xs text-slate-400 font-medium mt-1 line-clamp-2">{squad.description || 'Nenhum mantra definido.'}</p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-50">
@@ -159,11 +157,6 @@ const Squads: React.FC = () => {
                           {member.substring(0, 1).toUpperCase()}
                         </div>
                       ))}
-                      {(squad.members || []).length > 3 && (
-                        <div className="w-7 h-7 md:w-8 md:h-8 rounded-full border-2 border-white bg-blue-50 flex items-center justify-center text-[8px] md:text-[9px] font-black text-blue-600 shadow-sm">
-                          +{(squad.members || []).length - 3}
-                        </div>
-                      )}
                    </div>
                </div>
             </div>
@@ -174,6 +167,7 @@ const Squads: React.FC = () => {
       <NewSquadModal 
         isOpen={isNewSquadModalOpen} 
         onClose={() => { setIsNewSquadModalOpen(false); fetchSquads(); }} 
+        user={user}
       />
     </div>
   );

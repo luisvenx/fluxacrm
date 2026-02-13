@@ -19,15 +19,24 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
-const OperationalOKR: React.FC = () => {
+interface OperationalOKRProps {
+  user: any;
+}
+
+const OperationalOKR: React.FC<OperationalOKRProps> = ({ user }) => {
   const [okrs, setOkrs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
   const fetchOKRs = async () => {
+    if (!user) return;
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.from('okrs').select('*').order('title');
+      const { data, error } = await supabase
+        .from('okrs')
+        .select('*')
+        .eq('user_id', user.id) // ISOLAÇÃO
+        .order('title');
       if (error) throw error;
       setOkrs(data || []);
     } catch (err) {
@@ -39,7 +48,7 @@ const OperationalOKR: React.FC = () => {
 
   useEffect(() => {
     fetchOKRs();
-  }, []);
+  }, [user]);
 
   const filteredOKRs = useMemo(() => {
     return okrs.filter(o => o.title?.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -48,131 +57,43 @@ const OperationalOKR: React.FC = () => {
   const stats = useMemo(() => {
     const total = okrs.length;
     const avgProgress = total > 0 ? Math.round(okrs.reduce((acc, o) => acc + (Math.min(o.current / o.target, 1) * 100), 0) / total) : 0;
-    const atRisk = okrs.filter(o => o.status === 'Risco' || o.status === 'Atenção').length;
-
     return [
-      { label: 'Objetivos Ativos', value: total.toString(), trend: 'Em execução', icon: <Target size={18}/>, color: 'text-blue-600' },
-      { label: 'Key Results', value: (total * 3).toString(), trend: 'Média estimada', icon: <KeyRound size={18}/>, color: 'text-indigo-500' },
-      { label: 'Atingimento Médio', value: `${avgProgress}%`, trend: 'Base SQL Realtime', icon: <TrendingUp size={18}/>, color: 'text-emerald-500' },
-      { label: 'Objetivos em Risco', value: atRisk.toString(), trend: 'Ação estratégica', icon: <AlertTriangle size={18}/>, color: 'text-rose-500' },
+      { label: 'Seus Objetivos', value: total.toString(), trend: 'Em execução', icon: <Target size={18}/>, color: 'text-blue-600' },
+      { label: 'Atingimento Médio', value: `${avgProgress}%`, trend: 'Base SQL Individual', icon: <TrendingUp size={18}/>, color: 'text-emerald-500' },
     ];
   }, [okrs]);
 
   return (
     <div className="bg-[#fcfcfd] min-h-screen space-y-6 md:space-y-8 animate-in fade-in duration-700 pb-24 md:pb-20 px-4 md:px-10 pt-6 md:pt-8">
-      
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0">
-            <CircleDot size={24} />
-          </div>
-          <div>
-            <div className="flex items-center gap-2 mb-0.5">
-               <Database size={14} className="text-blue-500" />
-               <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">OKR Strategic Engine</span>
-            </div>
-            <h2 className="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">Objectives & Key Results</h2>
-          </div>
+          <div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0"><CircleDot size={24} /></div>
+          <div><div className="flex items-center gap-2 mb-0.5"><Database size={14} className="text-blue-500" /><span className="text-[10px] font-black uppercase tracking-widest text-slate-400">OKR Data Sync</span></div><h2 className="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">Seus OKRs</h2></div>
         </div>
-
-        <button className="w-full md:w-auto bg-blue-600 text-white px-6 py-3 rounded-xl md:rounded-full text-xs font-bold hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all flex items-center justify-center gap-2 active:scale-95">
-          <Plus size={20} /> Novo Objetivo
-        </button>
+        <button className="w-full md:w-auto bg-blue-600 text-white px-6 py-3 rounded-xl md:rounded-full text-xs font-bold hover:bg-blue-700 transition-all flex items-center justify-center gap-2 active:scale-95"><Plus size={20} /> Novo Objetivo</button>
       </div>
 
-      {/* KPI Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {stats.map((stat, i) => (
           <div key={i} className="bg-white border border-slate-100 rounded-[1.75rem] p-5 md:p-6 shadow-sm hover:shadow-md transition-all group">
-            <div className="flex justify-between items-start mb-4">
-              <p className="text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest">{stat.label}</p>
-              <div className={`p-2 bg-slate-50 ${stat.color} rounded-xl group-hover:scale-110 transition-transform`}>
-                {stat.icon}
-              </div>
-            </div>
+            <div className="flex justify-between items-start mb-4"><p className="text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest">{stat.label}</p><div className={`p-2 bg-slate-50 ${stat.color} rounded-xl group-hover:scale-110 transition-transform`}>{stat.icon}</div></div>
             <h3 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">{isLoading ? '...' : stat.value}</h3>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">{stat.trend}</p>
           </div>
         ))}
       </div>
 
-      {/* Search Toolbar */}
-      <div className="flex flex-col lg:flex-row gap-4 items-center justify-between bg-white p-2 border border-slate-100 rounded-2xl md:rounded-3xl shadow-sm">
-        <div className="relative flex-1 w-full lg:max-w-md ml-0 lg:ml-2">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
-          <input 
-            type="text" 
-            placeholder="Buscar objetivo estratégico..." 
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className="w-full bg-slate-50 border-none rounded-xl md:rounded-2xl py-2.5 pl-12 pr-4 text-sm font-medium focus:ring-2 focus:ring-blue-100 text-slate-600"
-          />
-        </div>
-        <button onClick={fetchOKRs} className="hidden lg:flex p-2.5 text-slate-400 hover:text-slate-900 mr-2 transition-all">
-          <RefreshCcw size={18} className={isLoading ? 'animate-spin' : ''} />
-        </button>
-      </div>
-
       {isLoading ? (
-        <div className="py-20 flex flex-col items-center justify-center min-h-[400px]">
-           <Loader2 className="animate-spin text-blue-600 mb-4" size={40} />
-           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sincronizando Metas Globais...</p>
-        </div>
+        <div className="py-20 flex flex-col items-center justify-center min-h-[400px]"><Loader2 className="animate-spin text-blue-600 mb-4" size={40} /><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sincronizando Seus Resultados...</p></div>
       ) : filteredOKRs.length === 0 ? (
-        <div className="bg-white border border-slate-100 rounded-[2.5rem] shadow-sm min-h-[400px] flex flex-col items-center justify-center p-12 text-center relative overflow-hidden transition-all hover:border-blue-100 group">
-           <Zap className="text-slate-50 w-48 h-48 mb-4 group-hover:scale-110 transition-transform duration-700" />
-           <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Nenhum objetivo definido para este ciclo</p>
-        </div>
+        <div className="bg-white border border-slate-100 rounded-[2.5rem] shadow-sm min-h-[400px] flex flex-col items-center justify-center p-12 text-center group transition-all hover:border-blue-100 relative overflow-hidden"><Zap className="text-slate-50 w-48 h-48 mb-4" /><p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Nenhum OKR encontrado</p></div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
            {filteredOKRs.map(okr => {
              const perc = Math.min((okr.current / okr.target) * 100, 100);
              return (
-               <div key={okr.id} className="bg-white border border-slate-100 rounded-[2rem] p-6 md:p-8 shadow-sm hover:shadow-xl transition-all group relative overflow-hidden flex flex-col justify-between min-h-[300px]">
-                 {okr.status === 'Risco' && <div className="absolute top-0 right-0 w-1.5 h-full bg-rose-500"></div>}
-                 
-                 <div>
-                    <div className="flex justify-between items-start mb-8">
-                        <div className="space-y-2">
-                           <span className="text-[9px] font-black uppercase tracking-widest bg-blue-50 text-blue-600 px-2.5 py-1 rounded-md border border-blue-100">
-                             {okr.period || 'Ciclo Q1 - 2026'}
-                           </span>
-                           <h4 className="text-lg md:text-xl font-bold text-slate-900 tracking-tight mt-2 uppercase">{okr.title}</h4>
-                        </div>
-                        <button className="p-2 text-slate-200 hover:text-slate-900 transition-colors"><MoreVertical size={20}/></button>
-                    </div>
-
-                    <div className="flex items-center gap-3 mb-8">
-                        <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-[10px] font-black text-slate-400">
-                           {(okr.owner || 'U').substring(0,1).toUpperCase()}
-                        </div>
-                        <div className="flex flex-col">
-                           <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Responsável</span>
-                           <span className="text-xs font-bold text-slate-600">{okr.owner || 'Diretoria Executiva'}</span>
-                        </div>
-                    </div>
-                 </div>
-
-                 <div className="space-y-4 pt-6 border-t border-slate-50">
-                    <div className="flex justify-between items-end">
-                       <div className="flex flex-col">
-                          <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Progresso Consolidado</span>
-                          <span className="text-xl md:text-2xl font-black text-slate-900 tracking-tighter">
-                            {okr.current} <span className="text-slate-200">/</span> <span className="text-slate-300">{okr.target}</span>
-                          </span>
-                       </div>
-                       <div className="flex flex-col items-end">
-                          <span className={`text-xs md:text-sm font-black ${perc >= 100 ? 'text-emerald-500' : 'text-blue-600'}`}>{perc.toFixed(1)}%</span>
-                          {perc >= 100 && <CheckCircle2 size={16} className="text-emerald-500" />}
-                       </div>
-                    </div>
-                    <div className="h-2.5 w-full bg-slate-50 rounded-full overflow-hidden">
-                       <div 
-                         className={`h-full transition-all duration-1000 shadow-sm ${perc >= 100 ? 'bg-emerald-500' : okr.status === 'Risco' ? 'bg-rose-500' : 'bg-blue-600'}`} 
-                         style={{ width: `${perc}%` }}
-                       ></div>
-                    </div>
-                 </div>
+               <div key={okr.id} className="bg-white border border-slate-100 rounded-[2rem] p-6 md:p-8 shadow-sm hover:shadow-xl transition-all group flex flex-col justify-between min-h-[280px]">
+                 <div><div className="flex justify-between items-start mb-6"><div className="space-y-2"><span className="text-[9px] font-black uppercase tracking-widest bg-blue-50 text-blue-600 px-2.5 py-1 rounded-md border border-blue-100">{okr.period || 'Ciclo 2026'}</span><h4 className="text-lg md:text-xl font-bold text-slate-900 tracking-tight mt-2 uppercase">{okr.title}</h4></div><button className="p-2 text-slate-200 hover:text-slate-900 transition-colors"><MoreVertical size={20}/></button></div></div>
+                 <div className="space-y-4 pt-6 border-t border-slate-50"><div className="flex justify-between items-end"><div className="flex flex-col"><span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Progresso</span><span className="text-xl md:text-2xl font-black text-slate-900 tracking-tighter">{okr.current} / {okr.target}</span></div><span className={`text-xs md:text-sm font-black ${perc >= 100 ? 'text-emerald-500' : 'text-blue-600'}`}>{perc.toFixed(1)}%</span></div><div className="h-2.5 w-full bg-slate-50 rounded-full overflow-hidden"><div className={`h-full transition-all duration-1000 shadow-sm ${perc >= 100 ? 'bg-emerald-500' : 'bg-blue-600'}`} style={{ width: `${perc}%` }}></div></div></div>
                </div>
              );
            })}

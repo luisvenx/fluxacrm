@@ -14,6 +14,10 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
+interface RankingProps {
+  user: any;
+}
+
 interface RankItem {
   name: string;
   initial: string;
@@ -22,15 +26,16 @@ interface RankItem {
   isWinner?: boolean;
 }
 
-const Ranking: React.FC = () => {
+const Ranking: React.FC<RankingProps> = ({ user }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [leads, setLeads] = useState<any[]>([]);
   const [timeRange, setTimeRange] = useState('Geral');
 
   const fetchData = async () => {
+    if (!user) return;
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.from('leads').select('*');
+      const { data, error } = await supabase.from('leads').select('*').eq('user_id', user.id);
       if (error) throw error;
       setLeads(data || []);
     } catch (err) {
@@ -42,7 +47,7 @@ const Ranking: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [user]);
 
   const rankings = useMemo(() => {
     const grouped: Record<string, { prospects: number, meetings: number, sales: number, value: number }> = {};
@@ -76,9 +81,9 @@ const Ranking: React.FC = () => {
       prospeccoes: createRank('prospects'),
       reunioes: createRank('meetings'),
       vendas: createRank('sales'),
-      myStats: grouped['Kyros (Financial Ops)'] || grouped['Kyrooss'] || { prospects: 0, meetings: 0, sales: 0, value: 0 }
+      myStats: grouped[user?.user_metadata?.full_name] || { prospects: 0, meetings: 0, sales: 0, value: 0 }
     };
-  }, [leads]);
+  }, [leads, user]);
 
   const RenderMetricCard = ({ title, icon, items }: { title: string, icon: React.ReactNode, items: RankItem[] }) => (
     <div className="bg-white border border-slate-100 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 shadow-sm flex flex-col space-y-6 hover:shadow-md transition-all group min-h-[380px] md:min-h-[420px]">
@@ -96,7 +101,7 @@ const Ranking: React.FC = () => {
         {items.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center opacity-20 text-center space-y-4">
             <Database size={32} />
-            <p className="text-[10px] font-black uppercase tracking-widest max-w-[150px]">Sem dados no banco</p>
+            <p className="text-[10px] font-black uppercase tracking-widest max-w-[150px]">Sem dados isolados</p>
           </div>
         ) : items.slice(0, 5).map((item, idx) => (
           <div 
@@ -160,7 +165,7 @@ const Ranking: React.FC = () => {
              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Dados Auditados SQL</span>
           </div>
           <h2 className="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">Leaderboard Realtime</h2>
-          <p className="text-slate-500 text-xs md:text-sm font-medium mt-1">Ranking extraído diretamente da base de leads.</p>
+          <p className="text-slate-500 text-xs md:text-sm font-medium mt-1">Ranking extraído da sua base de leads.</p>
         </div>
 
         <div className="flex items-center gap-3 w-full md:w-auto">
@@ -185,7 +190,7 @@ const Ranking: React.FC = () => {
       </div>
 
       <div className="space-y-4 md:space-y-6">
-        <h3 className="text-[10px] md:text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] px-2">Análise de Atleta (Você)</h3>
+        <h3 className="text-[10px] md:text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] px-2">Sua Performance</h3>
 
         <div className="bg-white border border-slate-100 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 shadow-sm relative group overflow-hidden hover:border-blue-100 transition-all">
           <div className="absolute top-0 right-0 p-10 opacity-[0.03] group-hover:scale-110 transition-transform pointer-events-none">
@@ -195,7 +200,7 @@ const Ranking: React.FC = () => {
           <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12 relative z-10">
             <div className="relative shrink-0">
               <div className="w-24 h-24 md:w-32 md:h-32 bg-slate-900 text-white rounded-[2rem] md:rounded-[2.5rem] flex items-center justify-center text-4xl md:text-5xl font-black shadow-2xl group-hover:scale-105 transition-transform duration-500 italic">
-                K
+                {(user?.user_metadata?.full_name || 'U').substring(0,1).toUpperCase()}
               </div>
               <div className="absolute -bottom-2 -right-2 w-8 h-8 md:w-10 md:h-10 bg-blue-600 border-4 border-white rounded-xl md:rounded-2xl flex items-center justify-center text-white text-xs md:text-sm font-black shadow-lg">
                 {Math.floor(rankings.myStats.sales / 5) + 1}
@@ -204,10 +209,10 @@ const Ranking: React.FC = () => {
 
             <div className="flex-1 w-full space-y-6 md:space-y-8">
               <div className="text-center md:text-left space-y-1">
-                <h4 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">Kyros (Financial Ops)</h4>
+                <h4 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">{user?.user_metadata?.full_name}</h4>
                 <div className="flex items-center justify-center md:justify-start gap-2 text-blue-600">
                   <Star size={14} className="fill-blue-600" />
-                  <span className="text-[9px] md:text-[10px] uppercase tracking-widest font-black">Performance Auditada</span>
+                  <span className="text-[9px] md:text-[10px] uppercase tracking-widest font-black">Performance Auditada SQL</span>
                 </div>
               </div>
 
@@ -234,7 +239,6 @@ const Ranking: React.FC = () => {
                  </div>
                  <div className="flex flex-col md:items-center">
                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover/ai:text-blue-600 transition-colors">Performance AI</span>
-                    <span className="md:hidden text-[8px] font-bold text-slate-300 uppercase">Consultar Insights</span>
                  </div>
                </button>
             </div>

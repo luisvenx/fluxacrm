@@ -22,7 +22,11 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
-const Dashboard: React.FC = () => {
+interface DashboardProps {
+  user: any;
+}
+
+const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [activePeriod, setActivePeriod] = useState('Este Mês');
   
@@ -43,15 +47,15 @@ const Dashboard: React.FC = () => {
   });
 
   useEffect(() => {
-    fetchDashboardData();
-  }, []);
+    if (user) fetchDashboardData();
+  }, [user]);
 
   async function fetchDashboardData() {
     setIsLoading(true);
     try {
-      const { data: txs } = await supabase.from('transactions').select('*');
-      const { data: contracts } = await supabase.from('contracts').select('amount').eq('status', 'ACTIVE');
-      const { count: clientCount } = await supabase.from('customers').select('*', { count: 'exact', head: true });
+      const { data: txs } = await supabase.from('transactions').select('*').eq('user_id', user.id);
+      const { data: contracts } = await supabase.from('contracts').select('amount').eq('status', 'ACTIVE').eq('user_id', user.id);
+      const { count: clientCount } = await supabase.from('customers').select('*', { count: 'exact', head: true }).eq('user_id', user.id);
 
       if (txs) {
         const stats = txs.reduce((acc, curr) => {
@@ -112,7 +116,7 @@ const Dashboard: React.FC = () => {
         </button>
       </div>
 
-      {/* Filter Bar com Scroll Lateral no Mobile */}
+      {/* Filter Bar */}
       <div className="px-4 md:px-8 mb-6">
         <div className="bg-white border border-slate-100 rounded-2xl p-2 flex flex-col md:flex-row md:items-center justify-between shadow-sm gap-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
@@ -159,9 +163,8 @@ const Dashboard: React.FC = () => {
       <div className="px-4 md:px-8 space-y-6">
         <span className="text-[10px] font-medium text-slate-400 uppercase tracking-[0.2em] mb-4 block px-1">Indicadores Principais</span>
 
-        {/* Row 1: Top KPIs - Responsivo */}
+        {/* KPIs Row */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Entradas */}
           <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm relative group hover:border-blue-100 transition-all">
             <div className="flex justify-between items-start mb-2">
               <span className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">Entradas</span>
@@ -171,7 +174,6 @@ const Dashboard: React.FC = () => {
             <p className="text-[10px] text-slate-400 font-medium mt-1">{metrics.countIn} transações</p>
           </div>
 
-          {/* Saídas */}
           <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm relative group hover:border-blue-100 transition-all">
             <div className="flex justify-between items-start mb-2">
               <span className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">Saídas</span>
@@ -181,19 +183,15 @@ const Dashboard: React.FC = () => {
             <p className="text-[10px] text-slate-400 font-medium mt-1">{metrics.countOut} transações</p>
           </div>
 
-          {/* Lucro Líquido */}
           <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm relative group hover:border-blue-100 transition-all">
             <div className="flex justify-between items-start mb-2">
               <span className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">Lucro Líquido</span>
               <div className="p-1.5 bg-blue-50 text-blue-500 rounded-lg"><TrendingUp size={14}/></div>
             </div>
             <h3 className="text-2xl font-medium text-slate-900 tracking-tighter">{isLoading ? '...' : formatCurrency(metrics.lucro)}</h3>
-            <p className="text-[10px] text-slate-400 font-medium mt-1 flex items-center gap-1">
-              Consolidado — <Info size={10} className="text-slate-300" />
-            </p>
+            <p className="text-[10px] text-slate-400 font-medium mt-1">Consolidado</p>
           </div>
 
-          {/* Ticket Médio */}
           <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm relative group hover:border-blue-100 transition-all">
             <div className="flex justify-between items-start mb-2">
               <span className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">Ticket Médio</span>
@@ -204,9 +202,8 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Row 2: Secondary KPIs - Responsivo */}
+        {/* Row 2: Secondary KPIs */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Meta Widget */}
           <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm flex flex-col items-center justify-center text-center">
             <CircleDashed size={32} strokeWidth={1.5} className="text-slate-200 mb-2 animate-[spin_15s_linear_infinite]" />
             <p className="text-[10px] text-slate-400 font-medium uppercase tracking-tighter mb-3">Meta não definida</p>
@@ -215,7 +212,6 @@ const Dashboard: React.FC = () => {
             </button>
           </div>
 
-          {/* A Receber */}
           <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
             <div className="flex items-center gap-2 mb-3">
               <Wallet size={14} className="text-amber-500" />
@@ -229,7 +225,6 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Contas a Pagar */}
           <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
             <div className="flex items-center gap-2 mb-3">
               <Receipt size={14} className="text-rose-500" />
@@ -239,7 +234,6 @@ const Dashboard: React.FC = () => {
             <p className="text-[9px] text-slate-400 font-medium">{metrics.countPagar} contas pendentes</p>
           </div>
 
-          {/* MRR */}
           <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
             <div className="flex justify-between items-center mb-3">
               <div className="flex items-center gap-2">
@@ -253,74 +247,30 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Charts Row - Stacked no mobile */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white border border-slate-100 rounded-2xl p-6 md:p-8 h-[320px] md:h-[380px] shadow-sm flex flex-col">
-            <h3 className="text-sm font-medium text-slate-800 mb-6 md:mb-10">Entradas x Saídas</h3>
-            <div className="flex-1 flex items-center justify-center border-b border-l border-slate-50 relative">
-               <div className="absolute inset-0 flex flex-col justify-between py-2 opacity-50">
-                  {[1,2,3,4].map(i => <div key={i} className="w-full border-t border-slate-50 border-dashed" />)}
-               </div>
-               <span className="text-[10px] font-medium text-slate-200 uppercase tracking-[0.3em] text-center px-4">Aguardando dados históricos...</span>
-            </div>
-          </div>
-
-          <div className="bg-white border border-slate-100 rounded-2xl p-6 md:p-8 h-[320px] md:h-[380px] shadow-sm flex flex-col">
-            <h3 className="text-sm font-medium text-slate-800 mb-6 md:mb-10">Lucro Líquido por Período</h3>
-            <div className="flex-1 flex items-center justify-center border-b border-l border-slate-50 relative">
-               <span className="text-[10px] font-medium text-slate-200 uppercase tracking-[0.3em] text-center px-4">Processando performance...</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom Data Sections - Tabelas com Scroll Horizontal */}
+        {/* Tables */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-20">
-          {/* Lançamentos Recentes */}
           <div className="bg-white border border-slate-100 rounded-2xl shadow-sm flex flex-col min-h-[300px] overflow-hidden">
             <div className="p-6 border-b border-slate-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
                 <h3 className="text-sm font-medium text-slate-800">Lançamentos Recentes</h3>
-                <p className="text-[10px] text-slate-400 font-medium">Últimas movimentações</p>
-              </div>
-              <div className="flex gap-1 bg-slate-50 p-1 rounded-lg w-full sm:w-auto overflow-x-auto">
-                 {['Todos', 'Entradas', 'Saídas'].map(tab => (
-                   <button key={tab} className={`px-3 py-1 rounded text-[9px] font-medium uppercase tracking-tighter whitespace-nowrap ${tab === 'Todos' ? 'bg-blue-600 text-white' : 'text-slate-400'}`}>
-                     {tab}
-                   </button>
-                 ))}
+                <p className="text-[10px] text-slate-400 font-medium">Suas movimentações</p>
               </div>
             </div>
             <div className="flex-1 flex flex-col items-center justify-center p-10 opacity-40">
-               <p className="text-xs font-medium text-slate-400 uppercase tracking-widest">Nenhum lançamento</p>
+               <p className="text-xs font-medium text-slate-400 uppercase tracking-widest">Filtrado por sua conta</p>
             </div>
             <button className="p-4 text-center text-[10px] font-medium text-blue-600 uppercase tracking-widest border-t border-slate-50 hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
               Ver Tudo <ArrowRight size={12} />
             </button>
           </div>
 
-          {/* Clientes Table */}
           <div className="bg-white border border-slate-100 rounded-2xl shadow-sm flex flex-col min-h-[300px] overflow-hidden">
              <div className="p-6 border-b border-slate-50">
                 <h3 className="text-sm font-medium text-slate-800">Clientes</h3>
-                <p className="text-[10px] text-slate-400 font-medium">Faturamento por conta</p>
+                <p className="text-[10px] text-slate-400 font-medium">Sua carteira ativa</p>
              </div>
-             <div className="overflow-x-auto no-scrollbar">
-               <table className="w-full text-left min-w-[500px]">
-                 <thead className="bg-slate-50/50 border-b border-slate-100">
-                    <tr>
-                      {['CLIENTE', 'FATURADO', 'RECEBIDO', 'STATUS'].map(h => (
-                        <th key={h} className="px-6 py-3 text-[9px] font-medium text-slate-400 uppercase tracking-widest">{h}</th>
-                      ))}
-                    </tr>
-                 </thead>
-                 <tbody>
-                    <tr>
-                      <td colSpan={4} className="py-20 text-center opacity-40">
-                         <p className="text-xs font-medium text-slate-400 uppercase tracking-widest">Sem clientes cadastrados</p>
-                      </td>
-                    </tr>
-                 </tbody>
-               </table>
+             <div className="flex-1 flex flex-col items-center justify-center p-10 opacity-40">
+                <p className="text-xs font-medium text-slate-400 uppercase tracking-widest">Base isolada por usuário</p>
              </div>
              <button className="p-4 text-center text-[10px] font-medium text-blue-600 uppercase tracking-widest border-t border-slate-50 hover:bg-slate-50 transition-colors flex items-center justify-center gap-2 mt-auto">
               Ver Carteira <ArrowRight size={12} />
@@ -333,7 +283,7 @@ const Dashboard: React.FC = () => {
       {isLoading && (
         <div className="fixed bottom-20 md:bottom-8 right-4 md:right-8 bg-slate-900 text-white px-4 md:px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-bounce z-40">
           <Loader2 size={16} className="animate-spin text-blue-400" />
-          <span className="text-[10px] font-medium uppercase tracking-widest">Sincronizando...</span>
+          <span className="text-[10px] font-medium uppercase tracking-widest">Isolando Sessão...</span>
         </div>
       )}
     </div>

@@ -39,13 +39,11 @@ const App: React.FC = () => {
   const [activeView, setActiveView] = useState('Dashboard');
 
   useEffect(() => {
-    // Verificar sessão inicial
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setIsLoading(false);
     });
 
-    // Escutar mudanças no estado de auth (login/logout)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
@@ -54,44 +52,43 @@ const App: React.FC = () => {
   }, []);
 
   const renderView = () => {
-    switch (activeView) {
-      case 'Dashboard': return <Dashboard />;
-      case 'Lançamentos': return <Transactions />;
-      case 'Agenda': return <Agenda />;
-      case 'Centros': return <CostCenters />;
-      case 'Cartões': return <Cards />;
-      case 'Impostos': return <Taxes />;
-      case 'Contábil': return <Accounting />;
-      
-      // Comercial routes
-      case 'Comercial-Dashboard': return <Crm />; 
-      case 'Pipeline': return <Pipeline />; 
-      case 'Leads': return <Leads />; 
-      case 'Metas': return <Metas />; 
-      case 'Ranking': return <Ranking />; 
-      case 'Squads': return <Squads />; 
-      
-      // Marketing routes
-      case 'Marketing-Dashboard': return <Marketing />;
-      case 'Marketing-Kanbans': return <MarketingKanbans />;
-      
-      // Operacional routes
-      case 'Operacional-Clientes': return <OperationalClientes />;
-      case 'Operacional-Contratos': return <OperationalContratos />;
-      case 'Operacional-Produtos': return <OperationalProdutos />;
-      case 'Operacional-Onboarding': return <OperationalOnboarding />;
-      case 'Operacional-NPS': return <OperationalNPS />;
-      case 'Operacional-OKR': return <OperationalOKR />;
-      case 'Operacional-Equipe': return <OperationalEquipe />;
-      case 'Operacional-Ferramentas': return <OperationalFerramentas />;
+    const user = session?.user;
+    if (!user) return null;
 
-      case 'Usuários': return <UsersManagement />;
-      case 'Configurações': return <SettingsView />;
+    switch (activeView) {
+      case 'Dashboard': return <Dashboard user={user} />;
+      case 'Lançamentos': return <Transactions user={user} />;
+      case 'Agenda': return <Agenda user={user} />;
+      case 'Centros': return <CostCenters user={user} />;
+      case 'Cartões': return <Cards user={user} />;
+      case 'Impostos': return <Taxes user={user} />;
+      case 'Contábil': return <Accounting user={user} />;
       
-      // Fullscreen views
-      case 'Dashboard-TV': return <DashboardTv onBack={() => setActiveView('Dashboard')} />;
+      case 'Comercial-Dashboard': return <Crm user={user} />; 
+      case 'Pipeline': return <Pipeline user={user} />; 
+      case 'Leads': return <Leads user={user} />; 
+      case 'Metas': return <Metas user={user} />; 
+      case 'Ranking': return <Ranking user={user} />; 
+      case 'Squads': return <Squads user={user} />; 
       
-      default: return <Dashboard />;
+      case 'Marketing-Dashboard': return <Marketing user={user} />;
+      case 'Marketing-Kanbans': return <MarketingKanbans user={user} />;
+      
+      case 'Operacional-Clientes': return <OperationalClientes user={user} />;
+      case 'Operacional-Contratos': return <OperationalContratos user={user} />;
+      case 'Operacional-Produtos': return <OperationalProdutos user={user} />;
+      case 'Operacional-Onboarding': return <OperationalOnboarding user={user} />;
+      case 'Operacional-NPS': return <OperationalNPS user={user} />;
+      case 'Operacional-OKR': return <OperationalOKR user={user} />;
+      case 'Operacional-Equipe': return <OperationalEquipe user={user} />;
+      case 'Operacional-Ferramentas': return <OperationalFerramentas user={user} />;
+
+      case 'Usuários': return <UsersManagement user={user} />;
+      case 'Configurações': return <SettingsView user={user} />;
+      
+      case 'Dashboard-TV': return <DashboardTv onBack={() => setActiveView('Dashboard')} user={user} />;
+      
+      default: return <Dashboard user={user} />;
     }
   };
 
@@ -106,14 +103,12 @@ const App: React.FC = () => {
     );
   }
 
-  // Se não estiver autenticado, mostra a tela de login real
   if (!session) {
-    return <LoginView onLogin={() => {}} />; // O onAuthStateChange cuidará do estado
+    return <LoginView onLogin={() => {}} />;
   }
 
-  // Se estiver na visão de TV, não renderizamos Sidebar nem Header padrão
   if (activeView === 'Dashboard-TV') {
-    return <DashboardTv onBack={() => setActiveView('Dashboard')} />;
+    return <DashboardTv onBack={() => setActiveView('Dashboard')} user={session.user} />;
   }
 
   return (

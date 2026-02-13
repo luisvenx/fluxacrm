@@ -19,7 +19,11 @@ import {
 import NewTaxModal from './NewTaxModal';
 import { supabase } from '../lib/supabase';
 
-const Taxes: React.FC = () => {
+interface TaxesProps {
+  user: any;
+}
+
+const Taxes: React.FC<TaxesProps> = ({ user }) => {
   const [activeTab, setActiveTab] = useState('Tributos');
   const [isNewTaxModalOpen, setIsNewTaxModalOpen] = useState(false);
   const [taxes, setTaxes] = useState<any[]>([]);
@@ -27,14 +31,16 @@ const Taxes: React.FC = () => {
   const [provisionedTotal, setProvisionedTotal] = useState(0);
 
   const fetchData = async () => {
+    if (!user) return;
     setIsLoading(true);
     try {
-      const { data: taxesData } = await supabase.from('taxes').select('*');
+      const { data: taxesData } = await supabase.from('taxes').select('*').eq('user_id', user.id);
       setTaxes(taxesData || []);
 
       const { data: txs } = await supabase
         .from('transactions')
         .select('amount')
+        .eq('user_id', user.id)
         .eq('type', 'IN')
         .eq('status', 'PAID');
 
@@ -51,7 +57,7 @@ const Taxes: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [user]);
 
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
@@ -67,7 +73,7 @@ const Taxes: React.FC = () => {
              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Fiscal Engine Sincronizado</span>
           </div>
           <h2 className="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">Impostos & Taxas</h2>
-          <p className="text-slate-500 text-xs md:text-sm font-medium">Controle de obrigações baseado no faturamento real.</p>
+          <p className="text-slate-500 text-xs md:text-sm font-medium">Controle de obrigações baseado no faturamento real da conta.</p>
         </div>
         
         <div className="flex items-center gap-2 md:gap-3 w-full md:w-auto">
@@ -177,7 +183,7 @@ const Taxes: React.FC = () => {
         )}
       </div>
 
-      <NewTaxModal isOpen={isNewTaxModalOpen} onClose={() => { setIsNewTaxModalOpen(false); fetchData(); }} />
+      <NewTaxModal isOpen={isNewTaxModalOpen} onClose={() => { setIsNewTaxModalOpen(false); fetchData(); }} user={user} />
     </div>
   );
 };

@@ -6,9 +6,10 @@ import { supabase } from '../lib/supabase';
 interface NewTaxModalProps {
   isOpen: boolean;
   onClose: () => void;
+  user: any;
 }
 
-const NewTaxModal: React.FC<NewTaxModalProps> = ({ isOpen, onClose }) => {
+const NewTaxModal: React.FC<NewTaxModalProps> = ({ isOpen, onClose, user }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -20,11 +21,13 @@ const NewTaxModal: React.FC<NewTaxModalProps> = ({ isOpen, onClose }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) return;
     if (!formData.name || !formData.rate) return alert('Preencha os campos obrigatórios.');
 
     setIsSaving(true);
     try {
       const { error } = await supabase.from('taxes').insert([{
+        user_id: user.id, // ISOLAÇÃO
         name: formData.name,
         sphere: formData.sphere,
         calculation_base: formData.calculation_base,
@@ -56,7 +59,7 @@ const NewTaxModal: React.FC<NewTaxModalProps> = ({ isOpen, onClose }) => {
             </div>
             <div>
               <h2 className="text-xl font-bold text-slate-900 tracking-tight">Novo Tributo</h2>
-              <p className="text-xs text-slate-400 font-medium">Configure uma regra de cálculo fiscal</p>
+              <p className="text-xs text-slate-400 font-medium">Configuração isolada para sua conta</p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-slate-50 rounded-full text-slate-300 hover:text-slate-900"><X size={20} /></button>
@@ -64,58 +67,21 @@ const NewTaxModal: React.FC<NewTaxModalProps> = ({ isOpen, onClose }) => {
 
         <form onSubmit={handleSubmit} className="p-8 pt-4 space-y-6">
           <div className="space-y-2">
-            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Identificação do Tributo *</label>
-            <input 
-              type="text" 
-              value={formData.name}
-              onChange={e => setFormData({...formData, name: e.target.value})}
-              placeholder="Ex: Simples Nacional"
-              className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-3.5 px-5 text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-100"
-            />
+            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Identificação *</label>
+            <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="Ex: Simples Nacional" className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-3.5 px-5 text-sm font-semibold outline-none focus:ring-2" />
           </div>
-
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Esfera</label>
-              <select 
-                value={formData.sphere}
-                onChange={e => setFormData({...formData, sphere: e.target.value})}
-                className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-3.5 px-5 text-sm font-semibold outline-none"
-              >
-                <option>Federal</option>
-                <option>Estadual</option>
-                <option>Municipal</option>
+              <select value={formData.sphere} onChange={e => setFormData({...formData, sphere: e.target.value})} className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-3.5 px-5 text-sm">
+                <option>Federal</option><option>Estadual</option><option>Municipal</option>
               </select>
             </div>
             <div className="space-y-2">
               <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Alíquota (%) *</label>
-              <input 
-                type="text" 
-                value={formData.rate}
-                onChange={e => setFormData({...formData, rate: e.target.value})}
-                placeholder="6.00"
-                className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-3.5 px-5 text-sm font-bold"
-              />
+              <input type="text" value={formData.rate} onChange={e => setFormData({...formData, rate: e.target.value})} placeholder="6.00" className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-3.5 px-5 text-sm font-bold" />
             </div>
           </div>
-
-          <div className="space-y-2">
-            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Dia de Vencimento</label>
-            <input 
-              type="number" 
-              value={formData.due_day}
-              onChange={e => setFormData({...formData, due_day: e.target.value})}
-              className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-3.5 px-5 text-sm"
-            />
-          </div>
-
-          <div className="bg-blue-50/50 p-5 rounded-2xl border border-blue-100 flex gap-3">
-            <Info size={16} className="text-blue-600 mt-0.5" />
-            <p className="text-[11px] text-blue-700 font-semibold leading-relaxed">
-              O Fluxa usará esta regra para calcular as provisões fiscais no seu Dashboard de Inteligência Contábil.
-            </p>
-          </div>
-
           <div className="flex items-center gap-3 pt-4 pb-4">
             <button type="button" onClick={onClose} className="flex-1 py-4 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-500">Cancelar</button>
             <button type="submit" disabled={isSaving} className="flex-1 py-4 bg-blue-600 text-white rounded-full text-xs font-bold shadow-lg flex items-center justify-center gap-2">

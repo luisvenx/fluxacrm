@@ -21,16 +21,20 @@ import {
 import NewLeadModal from './NewLeadModal';
 import { supabase } from '../lib/supabase';
 
-const Pipeline: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('Pipeline');
+interface PipelineProps {
+  user: any;
+}
+
+const Pipeline: React.FC<PipelineProps> = ({ user }) => {
   const [isNewLeadModalOpen, setIsNewLeadModalOpen] = useState(false);
   const [leads, setLeads] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchLeads = async () => {
+    if (!user) return;
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.from('leads').select('*');
+      const { data, error } = await supabase.from('leads').select('*').eq('user_id', user.id);
       if (error) throw error;
       setLeads(data || []);
     } catch (err) {
@@ -42,7 +46,7 @@ const Pipeline: React.FC = () => {
 
   useEffect(() => {
     fetchLeads();
-  }, []);
+  }, [user]);
 
   const columns = [
     { id: 'lead', label: 'Novo Lead', color: 'bg-indigo-500' },
@@ -64,7 +68,7 @@ const Pipeline: React.FC = () => {
         <div>
           <h2 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">Pipeline de Vendas</h2>
           <div className="flex items-center gap-2 mt-1">
-             <span className="text-slate-400 text-[11px] font-bold uppercase tracking-widest">{leads.length} registros no SQL</span>
+             <span className="text-slate-400 text-[11px] font-bold uppercase tracking-widest">{leads.length} registros no seu SQL</span>
           </div>
         </div>
 
@@ -79,7 +83,7 @@ const Pipeline: React.FC = () => {
       {isLoading ? (
         <div className="flex-1 flex flex-col items-center justify-center">
            <Loader2 className="animate-spin text-blue-600 mb-4" size={40} />
-           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Acessando Banco...</p>
+           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Acessando Seu Banco...</p>
         </div>
       ) : (
         <div className="flex-1 overflow-x-auto px-4 md:px-8 pb-10 no-scrollbar">
@@ -139,7 +143,7 @@ const Pipeline: React.FC = () => {
         </div>
       )}
 
-      <NewLeadModal isOpen={isNewLeadModalOpen} onClose={() => { setIsNewLeadModalOpen(false); fetchLeads(); }} />
+      <NewLeadModal isOpen={isNewLeadModalOpen} onClose={() => { setIsNewLeadModalOpen(false); fetchLeads(); }} user={user} />
     </div>
   );
 };

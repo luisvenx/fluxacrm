@@ -19,7 +19,11 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
-const Accounting: React.FC = () => {
+interface AccountingProps {
+  user: any;
+}
+
+const Accounting: React.FC<AccountingProps> = ({ user }) => {
   const [activeTab, setActiveTab] = useState('DRE');
   const [isLoading, setIsLoading] = useState(true);
   const [dreLines, setDreLines] = useState<any[]>([]);
@@ -27,10 +31,11 @@ const Accounting: React.FC = () => {
   const [totalEbitda, setTotalEbitda] = useState(0);
 
   const calculateDRE = async () => {
+    if (!user) return;
     setIsLoading(true);
     try {
-      const { data: txs } = await supabase.from('transactions').select('*');
-      const { data: taxesData } = await supabase.from('taxes').select('rate');
+      const { data: txs } = await supabase.from('transactions').select('*').eq('user_id', user.id);
+      const { data: taxesData } = await supabase.from('taxes').select('rate').eq('user_id', user.id);
       const avgTaxRate = (taxesData?.reduce((acc, t) => acc + Number(t.rate), 0) || 0) / 100;
 
       const revenue = txs?.filter(t => t.type === 'IN' && t.status === 'PAID').reduce((acc, t) => acc + Number(t.amount), 0) || 0;
@@ -66,7 +71,7 @@ const Accounting: React.FC = () => {
 
   useEffect(() => {
     calculateDRE();
-  }, []);
+  }, [user]);
 
   return (
     <div className="bg-[#fcfcfd] min-h-screen space-y-6 md:space-y-8 animate-in fade-in duration-700 pb-24 md:pb-20 px-4 md:px-10 pt-6 md:pt-8">
@@ -79,7 +84,7 @@ const Accounting: React.FC = () => {
              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Processamento Analítico</span>
           </div>
           <h2 className="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">Inteligência Contábil</h2>
-          <p className="text-slate-500 text-xs md:text-sm font-medium mt-1">Demonstrativo gerado automaticamente.</p>
+          <p className="text-slate-500 text-xs md:text-sm font-medium mt-1">Demonstrativo isolado por conta.</p>
         </div>
         
         <div className="flex items-center gap-2 md:gap-3 w-full md:w-auto">
