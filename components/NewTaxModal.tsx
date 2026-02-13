@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
-import { X, ChevronDown, Receipt, Info, Plus } from 'lucide-react';
+import { X, ChevronDown, Receipt, Info, Plus, Loader2 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 interface NewTaxModalProps {
   isOpen: boolean;
@@ -8,127 +9,120 @@ interface NewTaxModalProps {
 }
 
 const NewTaxModal: React.FC<NewTaxModalProps> = ({ isOpen, onClose }) => {
-  const [isActive, setIsActive] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    sphere: 'Federal',
+    calculation_base: 'Faturamento',
+    rate: '',
+    due_day: '15'
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.name || !formData.rate) return alert('Preencha os campos obrigatórios.');
+
+    setIsSaving(true);
+    try {
+      const { error } = await supabase.from('taxes').insert([{
+        name: formData.name,
+        sphere: formData.sphere,
+        calculation_base: formData.calculation_base,
+        rate: parseFloat(formData.rate.replace(',', '.')),
+        due_day: parseInt(formData.due_day),
+        status: 'Active'
+      }]);
+
+      if (error) throw error;
+      onClose();
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao salvar tributo.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" 
-        onClick={onClose}
-      />
-      
-      {/* Modal Content */}
+      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" onClick={onClose} />
       <div className="relative bg-white w-full max-w-[500px] rounded-[2.5rem] shadow-2xl animate-in zoom-in-95 duration-300 overflow-hidden border border-slate-100">
-        {/* Header */}
         <div className="p-8 pb-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center shadow-sm">
+            <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shadow-sm">
               <Receipt size={24} />
             </div>
             <div>
               <h2 className="text-xl font-bold text-slate-900 tracking-tight">Novo Tributo</h2>
-              <p className="text-xs text-slate-400 font-medium">Registre uma nova obrigação fiscal</p>
+              <p className="text-xs text-slate-400 font-medium">Configure uma regra de cálculo fiscal</p>
             </div>
           </div>
-          <button 
-            onClick={onClose} 
-            className="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-300 hover:text-slate-900"
-          >
-            <X size={20} />
-          </button>
+          <button onClick={onClose} className="p-2 hover:bg-slate-50 rounded-full text-slate-300 hover:text-slate-900"><X size={20} /></button>
         </div>
 
-        {/* Form Body */}
-        <div className="p-8 pt-4 space-y-6">
-          {/* Nome */}
+        <form onSubmit={handleSubmit} className="p-8 pt-4 space-y-6">
           <div className="space-y-2">
-            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Identificação do Tributo</label>
+            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Identificação do Tributo *</label>
             <input 
               type="text" 
-              placeholder="Ex: ISS, PIS/COFINS, Simples Nacional..."
-              className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-3.5 px-5 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-rose-100 focus:bg-white transition-all"
-              autoFocus
+              value={formData.name}
+              onChange={e => setFormData({...formData, name: e.target.value})}
+              placeholder="Ex: Simples Nacional"
+              className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-3.5 px-5 text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-100"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            {/* Tipo */}
             <div className="space-y-2">
               <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Esfera</label>
-              <div className="relative">
-                <select className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-3.5 px-5 text-sm font-semibold text-slate-700 appearance-none focus:outline-none focus:ring-2 focus:ring-rose-100 transition-all cursor-pointer">
-                  <option>Federal</option>
-                  <option>Estadual</option>
-                  <option>Municipal</option>
-                </select>
-                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none" size={18} />
-              </div>
+              <select 
+                value={formData.sphere}
+                onChange={e => setFormData({...formData, sphere: e.target.value})}
+                className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-3.5 px-5 text-sm font-semibold outline-none"
+              >
+                <option>Federal</option>
+                <option>Estadual</option>
+                <option>Municipal</option>
+              </select>
             </div>
-
-            {/* Base */}
             <div className="space-y-2">
-              <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Base de Cálculo</label>
-              <div className="relative">
-                <select className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-3.5 px-5 text-sm font-semibold text-slate-700 appearance-none focus:outline-none focus:ring-2 focus:ring-rose-100 transition-all cursor-pointer">
-                  <option>Faturamento</option>
-                  <option>Lucro Bruto</option>
-                  <option>Valor Fixo</option>
-                </select>
-                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none" size={18} />
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            {/* Taxa */}
-            <div className="space-y-2">
-              <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Alíquota (%)</label>
+              <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Alíquota (%) *</label>
               <input 
                 type="text" 
-                placeholder="0.00"
-                className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-3.5 px-5 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-rose-100 focus:bg-white transition-all font-bold"
-              />
-            </div>
-            
-            {/* Dia */}
-            <div className="space-y-2">
-              <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Dia de Vencimento</label>
-              <input 
-                type="text" 
-                placeholder="15"
-                className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-3.5 px-5 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-rose-100 focus:bg-white transition-all"
+                value={formData.rate}
+                onChange={e => setFormData({...formData, rate: e.target.value})}
+                placeholder="6.00"
+                className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-3.5 px-5 text-sm font-bold"
               />
             </div>
           </div>
 
-          <div className="bg-rose-50/50 border border-rose-100 rounded-2xl p-5 flex gap-4">
-            <Info size={18} className="text-rose-600 mt-0.5 shrink-0" />
-            <p className="text-[11px] text-rose-700 font-semibold leading-relaxed">
-              O sistema gera automaticamente o lançamento no fluxo de caixa baseado nas regras fiscais cadastradas.
+          <div className="space-y-2">
+            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Dia de Vencimento</label>
+            <input 
+              type="number" 
+              value={formData.due_day}
+              onChange={e => setFormData({...formData, due_day: e.target.value})}
+              className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-3.5 px-5 text-sm"
+            />
+          </div>
+
+          <div className="bg-blue-50/50 p-5 rounded-2xl border border-blue-100 flex gap-3">
+            <Info size={16} className="text-blue-600 mt-0.5" />
+            <p className="text-[11px] text-blue-700 font-semibold leading-relaxed">
+              O Fluxa usará esta regra para calcular as provisões fiscais no seu Dashboard de Inteligência Contábil.
             </p>
           </div>
 
-          {/* Footer Buttons */}
-          <div className="flex items-center gap-3 pt-4">
-            <button 
-              type="button" 
-              onClick={onClose}
-              className="flex-1 py-4 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-500 hover:bg-slate-50 transition-all"
-            >
-              Cancelar
-            </button>
-            <button 
-              type="button" 
-              className="flex-1 py-4 bg-rose-500 text-white rounded-full text-xs font-bold hover:bg-rose-600 transition-all shadow-lg shadow-rose-200 active:scale-95 flex items-center justify-center gap-2"
-            >
-              <Plus size={18} />
-              Criar Tributo
+          <div className="flex items-center gap-3 pt-4 pb-4">
+            <button type="button" onClick={onClose} className="flex-1 py-4 bg-white border border-slate-100 rounded-full text-xs font-bold text-slate-500">Cancelar</button>
+            <button type="submit" disabled={isSaving} className="flex-1 py-4 bg-blue-600 text-white rounded-full text-xs font-bold shadow-lg flex items-center justify-center gap-2">
+              {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />} Salvar Regra
             </button>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );
