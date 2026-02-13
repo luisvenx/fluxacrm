@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
@@ -28,11 +28,31 @@ import OperationalEquipe from './components/OperationalEquipe';
 import OperationalFerramentas from './components/OperationalFerramentas';
 import UsersManagement from './components/UsersManagement';
 import SettingsView from './components/SettingsView';
+import DashboardTv from './components/DashboardTv';
+import LoginView from './components/LoginView';
+import { supabase } from './lib/supabase';
 
 const App: React.FC = () => {
+  const [session, setSession] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [activeView, setActiveView] = useState('Dashboard');
+
+  useEffect(() => {
+    // Verificar sessão inicial
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setIsLoading(false);
+    });
+
+    // Escutar mudanças no estado de auth (login/logout)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const renderView = () => {
     switch (activeView) {
@@ -69,9 +89,34 @@ const App: React.FC = () => {
 
       case 'Usuários': return <UsersManagement />;
       case 'Configurações': return <SettingsView />;
+      
+      // Fullscreen views
+      case 'Dashboard-TV': return <DashboardTv onBack={() => setActiveView('Dashboard')} />;
+      
       default: return <Dashboard />;
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Fluxa Financial Engine</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Se não estiver autenticado, mostra a tela de login real
+  if (!session) {
+    return <LoginView onLogin={() => {}} />; // O onAuthStateChange cuidará do estado
+  }
+
+  // Se estiver na visão de TV, não renderizamos Sidebar nem Header padrão
+  if (activeView === 'Dashboard-TV') {
+    return <DashboardTv onBack={() => setActiveView('Dashboard')} />;
+  }
 
   return (
     <div className="min-h-screen bg-[#fcfcfd] text-[#111827] relative">
@@ -94,9 +139,12 @@ const App: React.FC = () => {
         />
       )}
 
-      {/* Main Content Area - Padding dinâmico baseado no estado do menu lateral */}
       <div className={`flex flex-col min-h-screen transition-all duration-500 ease-in-out ${isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-72'}`}>
-        <Header onMenuClick={() => setIsSidebarOpen(true)} title={activeView} />
+        <Header 
+          onMenuClick={() => setIsSidebarOpen(true)} 
+          title={activeView} 
+          onOpenTv={() => setActiveView('Dashboard-TV')}
+        />
         <main className="flex-1 overflow-x-hidden">
           {renderView()}
         </main>

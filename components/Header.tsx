@@ -6,10 +6,11 @@ import GlobalSearchOverlay from './GlobalSearchOverlay';
 
 interface HeaderProps {
   onMenuClick: () => void;
+  onOpenTv?: () => void;
   title: string;
 }
 
-const Header: React.FC<HeaderProps> = ({ onMenuClick, title }) => {
+const Header: React.FC<HeaderProps> = ({ onMenuClick, onOpenTv, title }) => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(3);
@@ -76,7 +77,10 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, title }) => {
           )}
         </div>
 
-        <button className="hidden sm:flex items-center gap-2.5 bg-slate-900 text-white text-[10px] font-black uppercase tracking-[0.15em] px-6 py-2.5 rounded-full hover:bg-slate-800 transition-all shadow-xl shadow-slate-200 active:scale-95 group">
+        <button 
+          onClick={onOpenTv}
+          className="hidden sm:flex items-center gap-2.5 bg-slate-900 text-white text-[10px] font-black uppercase tracking-[0.15em] px-6 py-2.5 rounded-full hover:bg-slate-800 transition-all shadow-xl shadow-slate-200 active:scale-95 group"
+        >
           <Tv size={14} className="text-blue-400 group-hover:scale-110 transition-transform" />
           <span>Dashboard TV</span>
         </button>
