@@ -42,13 +42,37 @@ const LoginView: React.FC<LoginViewProps> = () => {
         if (formData.password !== formData.confirmPassword) {
           throw new Error('As senhas não coincidem.');
         }
-        const { error } = await supabase.auth.signUp({
+        
+        // 1. Criar usuário no Supabase Auth
+        const { data, error: signUpError } = await supabase.auth.signUp({
           email: formData.email,
           password: formData.password,
-          options: { data: { full_name: formData.name } }
+          options: { 
+            data: { full_name: formData.name } 
+          }
         });
-        if (error) throw error;
-        setSuccess('Verifique sua caixa de entrada para validar o acesso.');
+
+        if (signUpError) throw signUpError;
+
+        // 2. Criar perfil na tabela 'users'
+        if (data.user) {
+          const { error: profileError } = await supabase.from('users').insert([
+            { 
+              id: data.user.id, 
+              full_name: formData.name, 
+              email: formData.email,
+              role: 'Visualizador'
+            }
+          ]);
+          
+          if (profileError) {
+            console.warn('Nota: Perfil será sincronizado após a confirmação do e-mail ou via trigger.', profileError.message);
+          }
+        }
+
+        setSuccess('Conta criada! Enviamos um link de confirmação para o seu e-mail. Por favor, valide seu acesso para entrar na plataforma.');
+        // Limpar campos de senha após sucesso
+        setFormData(prev => ({ ...prev, password: '', confirmPassword: '' }));
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email: formData.email,
@@ -57,7 +81,7 @@ const LoginView: React.FC<LoginViewProps> = () => {
         if (error) throw error;
       }
     } catch (err: any) {
-      setError(err.message || 'Falha na autenticação.');
+      setError(err.message || 'Falha na operação.');
     } finally {
       setIsLoading(false);
     }
@@ -125,14 +149,14 @@ const LoginView: React.FC<LoginViewProps> = () => {
 
             {error && (
               <div className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-center gap-3 text-rose-600 text-xs font-medium animate-in zoom-in-95">
-                <AlertCircle size={16} />
+                <AlertCircle size={16} className="shrink-0" />
                 <p>{error}</p>
               </div>
             )}
 
             {success && (
-              <div className="mb-6 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center gap-3 text-emerald-600 text-xs font-medium animate-in zoom-in-95">
-                <CheckCircle2 size={16} />
+              <div className="mb-6 p-5 bg-emerald-50 border border-emerald-100 rounded-[2rem] flex items-start gap-4 text-emerald-700 text-xs font-medium animate-in zoom-in-95 leading-relaxed">
+                <CheckCircle2 size={20} className="shrink-0 text-emerald-500" />
                 <p>{success}</p>
               </div>
             )}
