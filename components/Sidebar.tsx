@@ -154,13 +154,13 @@ const Sidebar: React.FC<SidebarProps> = ({
       {/* Header Fixo do Sidebar */}
       <div className={`p-6 flex items-center justify-between bg-white shrink-0 ${isCollapsed ? 'flex-col gap-6' : 'pb-8'}`}>
         <div 
-          className="flex items-center group cursor-pointer overflow-hidden"
+          className="flex items-center group cursor-pointer overflow-hidden max-w-full"
           onClick={() => isCollapsed ? toggleCollapse() : onNavigate('Dashboard')}
         >
           <img 
-            src="https://drive.google.com/uc?export=view&id=1TIYyVwcuCt7uOdJocoOY6B8GyYXmSPyh" 
+            src="https://lh3.googleusercontent.com/d/1TIYyVwcuCt7uOdJocoOY6B8GyYXmSPyh" 
             alt="Fluxa Logo" 
-            className={`transition-all duration-500 ${isCollapsed ? 'h-8 min-w-[32px] object-contain' : 'h-10 object-contain'}`}
+            className={`transition-all duration-500 object-contain ${isCollapsed ? 'h-7 w-7' : 'h-8'}`}
           />
         </div>
         

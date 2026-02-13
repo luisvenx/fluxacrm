@@ -91,9 +91,13 @@ const LoginView: React.FC<LoginViewProps> = () => {
           {/* Logo Oficial */}
           <div className="group cursor-default">
             <img 
-              src="https://drive.google.com/uc?export=view&id=1TIYyVwcuCt7uOdJocoOY6B8GyYXmSPyh" 
+              src="https://lh3.googleusercontent.com/d/1TIYyVwcuCt7uOdJocoOY6B8GyYXmSPyh" 
               alt="Fluxa Logo" 
               className="h-12 w-auto object-contain group-hover:scale-105 transition-transform duration-500"
+              onError={(e) => {
+                // Fallback caso o Google bloqueie temporariamente
+                (e.target as HTMLImageElement).src = "https://drive.google.com/uc?export=view&id=1TIYyVwcuCt7uOdJocoOY6B8GyYXmSPyh";
+              }}
             />
           </div>
 
