@@ -17,7 +17,6 @@ import Ranking from './components/Ranking';
 import Squads from './components/Squads';
 import Marketing from './components/Marketing';
 import MarketingKanbans from './components/MarketingKanbans';
-import Operational from './components/Operational';
 import OperationalClientes from './components/OperationalClientes';
 import OperationalContratos from './components/OperationalContratos';
 import OperationalProdutos from './components/OperationalProdutos';
@@ -77,7 +76,6 @@ const App: React.FC = () => {
       case 'Marketing-Kanbans': return <MarketingKanbans />;
       
       // Operacional routes
-      case 'Operacional': return <Operational />;
       case 'Operacional-Clientes': return <OperationalClientes />;
       case 'Operacional-Contratos': return <OperationalContratos />;
       case 'Operacional-Produtos': return <OperationalProdutos />;

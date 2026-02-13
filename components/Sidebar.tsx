@@ -103,7 +103,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, isCollapsed, toggleSidebar, t
       label: 'Operacional', 
       icon: <Building2 size={18} />,
       subItems: [
-        { id: 'Operacional', label: 'Overview', icon: <LayoutDashboard size={16} /> },
         { id: 'Operacional-Clientes', label: 'Clientes', icon: <Users size={16} /> },
         { id: 'Operacional-Contratos', label: 'Contratos', icon: <FileSignature size={16} /> },
         { id: 'Operacional-Produtos', label: 'Produtos', icon: <Package size={16} /> },
