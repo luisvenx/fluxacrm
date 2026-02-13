@@ -66,7 +66,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onOpenTv, title }) => {
              <div className="hidden md:block w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse mt-0.5"></div>
           </div>
           <p className="text-slate-400 text-[8px] md:text-[9px] font-medium uppercase tracking-[0.25em] mt-1.5">
-            Fluxa Financial Engine v2.6
+            Fluxa Imob Engine v2.6
           </p>
         </div>
       </div>

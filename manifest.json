@@ -1,8 +1,8 @@
 
 {
-  "name": "Fluxa Dashboard",
-  "short_name": "Fluxa",
-  "description": "Plataforma de inteligência financeira e gestão empresarial.",
+  "name": "Fluxa Imob",
+  "short_name": "Fluxa Imob",
+  "description": "Plataforma de inteligência financeira e gestão imobiliária.",
   "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#fcfcfd",

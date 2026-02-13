@@ -103,14 +103,14 @@ const LoginView: React.FC<LoginViewProps> = () => {
         <div className="hidden lg:flex flex-col justify-center space-y-12">
           <div className="space-y-6">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50/80 border border-blue-100 text-blue-600 text-[10px] font-medium uppercase tracking-[0.2em] backdrop-blur-sm">
-              <Zap size={12} fill="currentColor" /> Fluxa Engine v2.6
+              <Zap size={12} fill="currentColor" /> Fluxa Imob v2.6
             </div>
             <h2 className="text-5xl font-medium text-slate-950 tracking-tighter leading-[1.1]">
-              Inteligência financeira <br />
+              Inteligência imobiliária <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">em tempo real.</span>
             </h2>
             <p className="text-slate-600 text-lg font-medium leading-relaxed max-w-md">
-              A stack definitiva para gestão de fluxos, OKRs e auditoria bancária automatizada.
+              A stack definitiva para gestão de fluxos, OKRs e auditoria bancária automatizada para o mercado imobiliário.
             </p>
           </div>
 
@@ -136,14 +136,14 @@ const LoginView: React.FC<LoginViewProps> = () => {
             <div className="mb-10">
               <img 
                 src="https://lh3.googleusercontent.com/d/1TIYyVwcuCt7uOdJocoOY6B8GyYXmSPyh" 
-                alt="Fluxa" 
+                alt="Fluxa Imob" 
                 className="h-8 mb-8"
               />
               <h1 className="text-2xl font-medium text-slate-950 tracking-tight">
                 {isRegistering ? 'Crie sua conta' : 'Bem-vindo de volta'}
               </h1>
               <p className="text-slate-400 text-sm mt-1 font-medium">
-                {isRegistering ? 'Junte-se à nova geração de gestores.' : 'Acesse seu dashboard operacional.'}
+                {isRegistering ? 'Junte-se à nova geração de gestores imobiliários.' : 'Acesse seu dashboard operacional.'}
               </p>
             </div>
 
