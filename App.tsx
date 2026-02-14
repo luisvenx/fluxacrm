@@ -96,10 +96,10 @@ const App: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-4 border-slate-900 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">Fluxa Engine</p>
+          <div className="w-10 h-10 border-4 border-[#203267] border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-[#203267]">Fluxa Imob Engine</p>
         </div>
       </div>
     );
@@ -109,8 +109,12 @@ const App: React.FC = () => {
     return <LoginView onLogin={() => {}} />;
   }
 
+  if (activeView === 'Dashboard-TV') {
+    return <DashboardTv onBack={() => setActiveView('Dashboard')} user={session.user} />;
+  }
+
   return (
-    <div className="min-h-screen bg-white text-[#111827] relative font-['Inter']">
+    <div className="min-h-screen bg-[#fcfcfd] text-[#111827] relative">
       <Sidebar 
         isOpen={isSidebarOpen} 
         isCollapsed={isSidebarCollapsed}
@@ -120,15 +124,14 @@ const App: React.FC = () => {
         toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         onNavigate={(view) => {
           setActiveView(view);
-          setIsSidebarOpen(false); // Fecha ao navegar no mobile
+          setIsSidebarOpen(false);
         }}
         activeView={activeView}
       />
       
-      {/* Mobile Backdrop */}
       {isSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-slate-900/10 backdrop-blur-md z-40 transition-opacity lg:hidden"
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 transition-opacity"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
@@ -140,15 +143,9 @@ const App: React.FC = () => {
           onOpenTv={() => setActiveView('Dashboard-TV')}
           onNavigate={(view) => setActiveView(view)}
           activeView={activeView}
-          user={session.user}
         />
-        <main className="flex-1 overflow-x-hidden relative">
-          <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.02]" 
-               style={{ backgroundImage: 'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)', backgroundSize: '60px 60px' }}>
-          </div>
-          <div className="relative z-10">
-            {renderView()}
-          </div>
+        <main className="flex-1 overflow-x-hidden">
+          {renderView()}
         </main>
       </div>
     </div>
