@@ -61,30 +61,24 @@ const App: React.FC = () => {
 
     switch (activeView) {
       case 'Dashboard': return <Dashboard user={user} />;
-      
-      // Imobiliária
       case 'Imóveis': return <Properties user={user} />;
       case 'Visitas': return <Visits user={user} />;
       case 'Vistorias': return <Inspections user={user} />;
       case 'Repasses': return <Disbursements user={user} />;
-
       case 'Lançamentos': return <Transactions user={user} />;
       case 'Agenda': return <Agenda user={user} />;
       case 'Centros': return <CostCenters user={user} />;
       case 'Cartões': return <Cards user={user} />;
       case 'Impostos': return <Taxes user={user} />;
       case 'Contábil': return <Accounting user={user} />;
-      
       case 'Comercial-Dashboard': return <Crm user={user} />; 
       case 'Pipeline': return <Pipeline user={user} />; 
       case 'Leads': return <Leads user={user} />; 
       case 'Metas': return <Metas user={user} />; 
       case 'Ranking': return <Ranking user={user} />; 
       case 'Squads': return <Squads user={user} />; 
-      
       case 'Marketing-Dashboard': return <Marketing user={user} />;
       case 'Marketing-Kanbans': return <MarketingKanbans user={user} />;
-      
       case 'Operacional-Clientes': return <OperationalClientes user={user} />;
       case 'Operacional-Contratos': return <OperationalContratos user={user} />;
       case 'Operacional-Produtos': return <OperationalProdutos user={user} />;
@@ -93,12 +87,9 @@ const App: React.FC = () => {
       case 'Operacional-OKR': return <OperationalOKR user={user} />;
       case 'Operacional-Equipe': return <OperationalEquipe user={user} />;
       case 'Operacional-Ferramentas': return <OperationalFerramentas user={user} />;
-
       case 'Usuários': return <UsersManagement user={user} />;
       case 'Configurações': return <SettingsView user={user} />;
-      
       case 'Dashboard-TV': return <DashboardTv onBack={() => setActiveView('Dashboard')} user={user} />;
-      
       default: return <Dashboard user={user} />;
     }
   };
@@ -107,8 +98,8 @@ const App: React.FC = () => {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-slate-400">Fluxa Imob Engine</p>
+          <div className="w-10 h-10 border-4 border-[#203267] border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-[#203267]">Fluxa Imob Engine</p>
         </div>
       </div>
     );
@@ -150,6 +141,8 @@ const App: React.FC = () => {
           onMenuClick={() => setIsSidebarOpen(true)} 
           title={activeView} 
           onOpenTv={() => setActiveView('Dashboard-TV')}
+          onNavigate={(view) => setActiveView(view)}
+          activeView={activeView}
         />
         <main className="flex-1 overflow-x-hidden">
           {renderView()}

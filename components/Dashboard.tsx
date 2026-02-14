@@ -114,7 +114,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
           <p className="text-[12px] text-slate-400 font-medium">Visão geral das suas finanças</p>
         </div>
         <div className="flex items-center gap-3">
-          <button onClick={fetchDashboardData} className="p-2 border-2 border-slate-200 rounded-lg text-slate-400 hover:text-blue-600 hover:border-blue-500 transition-all shadow-sm">
+          <button onClick={fetchDashboardData} className="p-2 border-2 border-slate-200 rounded-lg text-slate-400 hover:text-[#203267] hover:border-[#203267] transition-all shadow-sm">
             <RefreshCcw size={16} className={isLoading ? 'animate-spin' : ''} />
           </button>
         </div>
@@ -132,7 +132,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
               <button 
                 key={p} 
                 onClick={() => setActivePeriod(p)}
-                className={`px-3.5 py-1.5 rounded-lg text-[11px] font-bold transition-all whitespace-nowrap border-2 ${activePeriod === p ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-white border-slate-100 text-slate-500 hover:bg-slate-50 hover:border-slate-200'}`}
+                className={`px-3.5 py-1.5 rounded-lg text-[11px] font-bold transition-all whitespace-nowrap border-2 ${activePeriod === p ? 'bg-[#203267] text-white border-[#203267] shadow-sm' : 'bg-white border-slate-100 text-slate-500 hover:bg-slate-50 hover:border-slate-200'}`}
               >
                 {p}
               </button>
@@ -202,7 +202,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         {/* Row 2: Secondary Stats Row */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-5">
           {/* Card Meta */}
-          <div className="bg-white border-2 border-blue-100 rounded-xl p-6 shadow-sm flex flex-col items-center justify-center text-center group hover:border-blue-500 transition-all relative overflow-hidden">
+          <div className="bg-white border-2 border-indigo-100 rounded-xl p-6 shadow-sm flex flex-col items-center justify-center text-center group hover:border-[#203267] transition-all relative overflow-hidden">
             <div className="absolute top-4 left-4">
               <button className="flex items-center gap-1.5 px-2 py-1 bg-slate-50 border border-slate-100 rounded-md text-[9px] font-bold text-slate-400">
                 Mensal <ChevronDown size={10} />
@@ -214,11 +214,11 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             </div>
 
             <div className="relative mb-4 mt-4">
-              <CircleDashed size={60} strokeWidth={1} className="text-blue-50 animate-[spin_20s_linear_infinite]" />
-              <Target size={24} className="absolute inset-0 m-auto text-blue-200 group-hover:text-blue-500 transition-colors" />
+              <CircleDashed size={60} strokeWidth={1} className="text-indigo-50 animate-[spin_20s_linear_infinite]" />
+              <Target size={24} className="absolute inset-0 m-auto text-indigo-200 group-hover:text-[#203267] transition-colors" />
             </div>
             <h4 className="text-[12px] font-semibold text-slate-400 mb-4 uppercase tracking-widest">Meta de Fluxo</h4>
-            <button className="flex items-center gap-2 px-4 py-1.5 border border-blue-200 text-blue-600 rounded-lg text-[10px] font-bold hover:bg-blue-50 transition-all shadow-sm">
+            <button className="flex items-center gap-2 px-4 py-1.5 border border-indigo-200 text-[#203267] rounded-lg text-[10px] font-bold hover:bg-indigo-50 transition-all shadow-sm">
               <Target size={12} /> Definir Meta
             </button>
           </div>
@@ -266,20 +266,20 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
           </div>
 
           {/* Card MRR */}
-          <div className="bg-white border-2 border-blue-100 rounded-xl p-6 shadow-sm group hover:border-blue-500 transition-all flex flex-col justify-between overflow-hidden">
+          <div className="bg-white border-2 border-indigo-100 rounded-xl p-6 shadow-sm group hover:border-[#203267] transition-all flex flex-col justify-between overflow-hidden">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <div className="p-2 bg-blue-50 rounded-lg border border-blue-200"><RefreshCcw size={16} className="text-blue-500" /></div>
+                <div className="p-2 bg-indigo-50 rounded-lg border border-indigo-200"><RefreshCcw size={16} className="text-[#203267]" /></div>
                 <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">MRR Contratual</h4>
               </div>
-              <span className="text-[9px] font-black bg-blue-600 text-white px-2 py-0.5 rounded-lg border border-blue-700 shadow-sm">{metrics.countContracts} Ativos</span>
+              <span className="text-[9px] font-black bg-[#203267] text-white px-2 py-0.5 rounded-lg border border-indigo-900 shadow-sm">{metrics.countContracts} Ativos</span>
             </div>
             <div>
               <h3 className="text-[22px] font-black text-slate-900 tracking-tight">{formatCurrency(metrics.mrr)}</h3>
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Recorrência Bruta</p>
             </div>
             <div className="flex-1 flex flex-col items-center justify-center py-6 opacity-30 group-hover:opacity-100 transition-all">
-               <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] group-hover:text-blue-400">Matriz de Dados SQL</p>
+               <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] group-hover:text-indigo-400">Matriz de Dados SQL</p>
             </div>
           </div>
         </div>
@@ -291,7 +291,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
               title="Entradas x Saídas (Auditado)" 
               xAxisLabels={['01/02', '02/02', '04/02', '06/02', '08/02', '10/02', '12/02', '14/02', '16/02', '18/02', '20/02', '22/02', '24/02', '26/02', '28/02']}
               legend={[
-                { label: 'Entradas', color: '#2563eb' },
+                { label: 'Entradas', color: '#203267' },
                 { label: 'Saídas', color: '#f43f5e' }
               ]}
             />
@@ -318,7 +318,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
       {isLoading && (
         <div className="fixed bottom-24 md:bottom-12 right-4 md:right-12 bg-slate-900 text-white px-10 py-5 rounded-[2.5rem] shadow-2xl flex items-center gap-5 z-50 border border-white/10 animate-bounce">
-          <Loader2 size={24} className="animate-spin text-blue-400" />
+          <Loader2 size={24} className="animate-spin text-indigo-400" />
           <div className="flex flex-col">
             <span className="text-[10px] font-black uppercase tracking-[0.3em] leading-none mb-1 text-white">Engine Sincronizada</span>
             <span className="text-xs font-bold text-slate-400 tracking-tight">Conciliando matriz de dados...</span>

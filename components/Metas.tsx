@@ -79,7 +79,7 @@ const Metas: React.FC<MetasProps> = ({ user }) => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
           <div className="flex items-center gap-2 mb-1">
-             <Database size={16} className="text-blue-500 shrink-0" />
+             <Database size={16} className="text-[#203267] shrink-0" />
              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">OKR Data Engine</span>
           </div>
           <h2 className="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">Metas & Performance</h2>
@@ -88,11 +88,11 @@ const Metas: React.FC<MetasProps> = ({ user }) => {
 
         <div className="flex items-center gap-2 md:gap-3 w-full md:w-auto">
           <button className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl md:rounded-full text-xs md:text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
-            <Sparkles size={16} className="text-blue-500" /> <span className="hidden sm:inline">AI Gen</span> <span className="sm:hidden">AI</span>
+            <Sparkles size={16} className="text-[#203267]" /> <span className="hidden sm:inline">AI Gen</span> <span className="sm:hidden">AI</span>
           </button>
           <button 
             onClick={() => setIsNewGoalModalOpen(true)}
-            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 md:px-6 py-2.5 bg-blue-600 text-white rounded-xl md:rounded-full text-xs md:text-sm font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20"
+            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 md:px-6 py-2.5 bg-[#203267] text-white rounded-xl md:rounded-full text-xs md:text-sm font-bold hover:bg-[#1a2954] transition-all shadow-lg shadow-indigo-900/20"
           >
             <Plus size={18} /> <span className="hidden sm:inline">Nova Meta</span> <span className="sm:hidden">Novo</span>
           </button>
@@ -134,16 +134,16 @@ const Metas: React.FC<MetasProps> = ({ user }) => {
 
       {isLoading ? (
         <div className="py-20 flex flex-col items-center justify-center">
-           <Loader2 className="animate-spin text-blue-600 mb-4" size={40} />
+           <Loader2 className="animate-spin text-[#203267] mb-4" size={40} />
            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sincronizando OKRs...</p>
         </div>
       ) : filteredGoals.length === 0 ? (
-        <div className="bg-white border border-slate-100 rounded-[2rem] md:rounded-[2.5rem] shadow-sm min-h-[350px] md:min-h-[400px] flex flex-col items-center justify-center p-8 md:p-12 text-center group relative overflow-hidden transition-all hover:border-blue-100">
+        <div className="bg-white border border-slate-100 rounded-[2rem] md:rounded-[2.5rem] shadow-sm min-h-[350px] md:min-h-[400px] flex flex-col items-center justify-center p-8 md:p-12 text-center group relative overflow-hidden transition-all hover:border-[#203267]">
           <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-110 transition-transform pointer-events-none">
             <Trophy size={250} />
           </div>
           <div className="relative z-10 flex flex-col items-center space-y-6">
-            <div className="w-16 h-16 md:w-20 md:h-20 bg-slate-50 rounded-2xl md:rounded-[2.5rem] flex items-center justify-center text-slate-200 group-hover:bg-blue-50 group-hover:text-blue-500 transition-all duration-500 shadow-sm">
+            <div className="w-16 h-16 md:w-20 md:h-20 bg-slate-50 rounded-2xl md:rounded-[2.5rem] flex items-center justify-center text-slate-200 group-hover:bg-indigo-50 group-hover:text-[#203267] transition-all duration-500 shadow-sm border border-slate-100">
               <Target size={32} />
             </div>
             <div className="max-w-md">
@@ -161,7 +161,7 @@ const Metas: React.FC<MetasProps> = ({ user }) => {
               <div key={goal.id} className="bg-white border border-slate-100 rounded-[1.75rem] md:rounded-[2rem] p-6 md:p-8 shadow-sm hover:shadow-lg transition-all group">
                 <div className="flex justify-between items-start mb-6 md:mb-8">
                   <div className="space-y-1 min-w-0 pr-4">
-                    <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest bg-blue-50 text-blue-600 px-2 py-0.5 rounded-md border border-blue-100">{goal.metric}</span>
+                    <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest bg-indigo-50 text-[#203267] px-2 py-0.5 rounded-md border border-indigo-100">{goal.metric}</span>
                     <h4 className="text-base md:text-lg font-bold text-slate-900 tracking-tight mt-2 uppercase truncate">{goal.title}</h4>
                     <p className="text-[10px] md:text-xs text-slate-400 font-medium italic">{goal.period}</p>
                   </div>
@@ -178,10 +178,10 @@ const Metas: React.FC<MetasProps> = ({ user }) => {
                          {goal.current_value} <span className="text-slate-200">/</span> <span className="text-slate-300">{goal.target_value}</span>
                        </span>
                     </div>
-                    <span className="text-xs md:text-sm font-black text-blue-600">{perc.toFixed(1)}%</span>
+                    <span className="text-xs md:text-sm font-black text-[#203267]">{perc.toFixed(1)}%</span>
                   </div>
                   <div className="h-2 w-full bg-slate-50 rounded-full overflow-hidden">
-                    <div className={`h-full transition-all duration-1000 shadow-sm ${perc >= 100 ? 'bg-emerald-500' : 'bg-blue-600'}`} style={{ width: `${perc}%` }}></div>
+                    <div className={`h-full transition-all duration-1000 shadow-sm ${perc >= 100 ? 'bg-emerald-500' : 'bg-[#203267]'}`} style={{ width: `${perc}%` }}></div>
                   </div>
                 </div>
               </div>

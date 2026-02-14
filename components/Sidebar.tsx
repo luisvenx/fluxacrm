@@ -167,7 +167,6 @@ const Sidebar: React.FC<SidebarProps> = ({
         isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       } ${isCollapsed ? 'w-[280px] lg:w-20' : 'w-[280px] lg:w-72'}`}
     >
-      {/* Header Fixo do Sidebar */}
       <div className={`p-6 flex items-center justify-between bg-white shrink-0 ${isCollapsed ? 'lg:flex-col lg:gap-6' : 'pb-8'}`}>
         <div 
           className="flex items-center group cursor-pointer overflow-hidden max-w-full"
@@ -182,7 +181,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         
         <button 
           onClick={toggleCollapse} 
-          className="hidden lg:flex p-2 hover:bg-slate-50 rounded-xl transition-all text-slate-300 hover:text-slate-900"
+          className="hidden lg:flex p-2 hover:bg-slate-50 rounded-xl transition-all text-slate-300 hover:text-[#203267]"
           title={isCollapsed ? "Expandir" : "Recolher"}
         >
           {isCollapsed ? <PanelLeft size={20} /> : <PanelLeftClose size={20} />}
@@ -190,23 +189,21 @@ const Sidebar: React.FC<SidebarProps> = ({
 
         <button 
           onClick={toggleSidebar} 
-          className="lg:hidden p-2 hover:bg-slate-50 rounded-xl transition-all text-slate-300 hover:text-slate-900"
+          className="lg:hidden p-2 hover:bg-slate-50 rounded-xl transition-all text-slate-300 hover:text-[#203267]"
         >
           <X size={20} />
         </button>
       </div>
 
-      {/* Menu Rolável */}
       <div className={`flex-1 overflow-y-auto no-scrollbar pb-10 ${isCollapsed ? 'px-6 lg:px-2 space-y-8 lg:space-y-6' : 'px-6 space-y-8'}`}>
         {navItems.map((item) => (
           <div key={item.id} className="space-y-3">
-            {/* Categoria/Divisor */}
             <div className={`px-3 flex items-center justify-between ${isCollapsed ? 'lg:hidden' : ''}`}>
               <span className="text-[10px] font-medium text-slate-300 uppercase tracking-[0.25em]">{item.label}</span>
               {item.subItems && (
                 <button 
                   onClick={() => toggleMenu(item.id)}
-                  className="text-slate-300 hover:text-slate-900 transition-colors"
+                  className="text-slate-300 hover:text-[#203267] transition-colors"
                 >
                   {expandedMenus.includes(item.id) ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
                 </button>
@@ -222,9 +219,9 @@ const Sidebar: React.FC<SidebarProps> = ({
                   title={item.label}
                   className={`w-full flex items-center rounded-2xl transition-all duration-300 group ${
                     isCollapsed ? 'justify-center lg:justify-center p-3.5' : 'gap-3.5 p-3.5'
-                  } ${activeView === item.id ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}
+                  } ${activeView === item.id ? 'bg-[#203267] text-white shadow-lg' : 'text-slate-500 hover:text-[#203267] hover:bg-slate-50'}`}
                 >
-                  <span className={`${activeView === item.id ? 'text-blue-400' : 'text-slate-300 group-hover:text-slate-900'}`}>{item.icon}</span>
+                  <span className={`${activeView === item.id ? 'text-indigo-300' : 'text-slate-300 group-hover:text-[#203267]'}`}>{item.icon}</span>
                   <span className={`flex-1 text-left text-xs font-medium tracking-tight ${isCollapsed ? 'lg:hidden' : ''}`}>{item.label}</span>
                 </button>
               ) : (
@@ -234,9 +231,9 @@ const Sidebar: React.FC<SidebarProps> = ({
                     title={item.label}
                     className={`w-full flex items-center rounded-2xl transition-all group ${
                       isCollapsed ? 'justify-center lg:justify-center p-3.5' : 'gap-3.5 p-3.5'
-                    } ${expandedMenus.includes(item.id) ? 'bg-slate-50/50' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}
+                    } ${expandedMenus.includes(item.id) ? 'bg-slate-50/50' : 'text-slate-500 hover:text-[#203267] hover:bg-slate-50'}`}
                   >
-                    <span className="text-slate-300 group-hover:text-slate-900">{item.icon}</span>
+                    <span className="text-slate-300 group-hover:text-[#203267]">{item.icon}</span>
                     <span className={`flex-1 text-left text-xs font-medium tracking-tight ${isCollapsed ? 'lg:hidden' : ''}`}>{item.label}</span>
                     <ChevronDown size={12} className={`text-slate-300 transition-transform ${isCollapsed ? 'lg:hidden' : ''} ${expandedMenus.includes(item.id) ? '' : '-rotate-90'}`} />
                   </button>
@@ -248,10 +245,10 @@ const Sidebar: React.FC<SidebarProps> = ({
                           key={sub.id} 
                           onClick={() => onNavigate(sub.id)}
                           className={`w-full flex items-center gap-4 p-3 rounded-xl text-[12px] font-medium transition-all group ${
-                            activeView === sub.id ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-900 hover:bg-slate-50'
+                            activeView === sub.id ? 'bg-[#203267] text-white shadow-md' : 'text-slate-400 hover:text-[#203267] hover:bg-slate-50'
                           }`}
                         >
-                          <span className={`transition-colors ${activeView === sub.id ? 'text-white' : 'text-slate-300 group-hover:text-slate-900'}`}>{sub.icon}</span>
+                          <span className={`transition-colors ${activeView === sub.id ? 'text-white' : 'text-slate-300 group-hover:text-[#203267]'}`}>{sub.icon}</span>
                           <span className="tracking-tight">{sub.label}</span>
                           {activeView === sub.id && <div className="ml-auto w-1 h-1 bg-white rounded-full"></div>}
                         </button>
@@ -265,12 +262,11 @@ const Sidebar: React.FC<SidebarProps> = ({
         ))}
       </div>
 
-      {/* Rodapé do Sidebar */}
       <div className={`p-6 border-t border-slate-50 bg-white shrink-0 ${isCollapsed ? 'lg:flex lg:flex-col lg:items-center lg:gap-6' : ''}`}>
         <div className={`bg-slate-50 p-4 rounded-2xl mb-6 flex items-center gap-4 border border-slate-100 group cursor-pointer hover:bg-white hover:shadow-md transition-all ${isCollapsed ? 'lg:hidden' : ''}`}>
-          <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white text-xs font-medium shadow-sm italic">{userInitial}</div>
+          <div className="w-10 h-10 rounded-xl bg-[#203267] flex items-center justify-center text-white text-xs font-medium shadow-sm italic">{userInitial}</div>
           <div className="flex flex-col min-w-0">
-            <span className="text-[9px] text-blue-600 font-medium uppercase tracking-widest leading-none mb-1">Conta Ativa</span>
+            <span className="text-[9px] text-[#203267] font-medium uppercase tracking-widest leading-none mb-1">Conta Ativa</span>
             <span className="text-xs text-slate-900 font-medium truncate">{userEmail || 'Usuário'}</span>
           </div>
         </div>
@@ -278,7 +274,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         <div className={`grid grid-cols-2 gap-2 ${isCollapsed ? 'lg:hidden' : ''}`}>
           <button 
             onClick={() => onNavigate('Configurações')} 
-            className={`flex flex-col items-center justify-center gap-2 p-3.5 rounded-2xl transition-all border ${activeView === 'Configurações' ? 'bg-blue-50 border-blue-100 text-blue-600' : 'bg-white border-slate-100 text-slate-400 hover:text-slate-900 shadow-sm'}`}
+            className={`flex flex-col items-center justify-center gap-2 p-3.5 rounded-2xl transition-all border ${activeView === 'Configurações' ? 'bg-indigo-50 border-indigo-100 text-[#203267]' : 'bg-white border-slate-100 text-slate-400 hover:text-[#203267] shadow-sm'}`}
           >
             <Settings size={18} />
             <span className="text-[10px] font-medium uppercase tracking-widest">Ajustes</span>
@@ -289,16 +285,15 @@ const Sidebar: React.FC<SidebarProps> = ({
             className="flex flex-col items-center justify-center gap-2 p-3.5 bg-white border border-slate-100 text-slate-400 hover:text-rose-600 hover:border-rose-100 hover:bg-rose-50 rounded-2xl transition-all shadow-sm group disabled:opacity-50"
           >
             {isLoggingOut ? <Loader2 size={18} className="animate-spin" /> : <LogOut size={18} />}
-            <span className="text-[10px) font-medium uppercase tracking-widest">Sair</span>
+            <span className="text-[10px] font-medium uppercase tracking-widest">Sair</span>
           </button>
         </div>
 
-        {/* Mini rodapé visível apenas quando colapsado no desktop */}
         <div className={`hidden ${isCollapsed ? 'lg:flex lg:flex-col lg:items-center lg:gap-5' : ''}`}>
             <button 
               onClick={() => onNavigate('Configurações')}
               title="Configurações"
-              className={`p-3 rounded-2xl transition-all ${activeView === 'Configurações' ? 'bg-blue-50 text-blue-600 shadow-sm' : 'text-slate-300 hover:text-slate-900 hover:bg-slate-50'}`}
+              className={`p-3 rounded-2xl transition-all ${activeView === 'Configurações' ? 'bg-indigo-50 text-[#203267] shadow-sm' : 'text-slate-300 hover:text-[#203267] hover:bg-slate-50'}`}
             >
               <Settings size={20} />
             </button>
@@ -309,7 +304,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             >
               <LogOut size={20} />
             </button>
-            <div className="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white text-[10px] font-medium shadow-sm mt-2 italic">{userInitial}</div>
+            <div className="w-9 h-9 rounded-xl bg-[#203267] flex items-center justify-center text-white text-[10px] font-medium shadow-sm mt-2 italic">{userInitial}</div>
         </div>
       </div>
     </aside>

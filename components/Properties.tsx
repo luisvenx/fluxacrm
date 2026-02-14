@@ -16,10 +16,12 @@ import {
   Sparkles,
   Zap,
   Tag,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Eye
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import NewPropertyModal from './NewPropertyModal';
+import PropertyDetailModal from './PropertyDetailModal';
 
 interface PropertiesProps {
   user: any;
@@ -27,6 +29,7 @@ interface PropertiesProps {
 
 const Properties: React.FC<PropertiesProps> = ({ user }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedProperty, setSelectedProperty] = useState<any>(null);
   const [properties, setProperties] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -93,7 +96,7 @@ const Properties: React.FC<PropertiesProps> = ({ user }) => {
         </button>
       </div>
 
-      {/* Toolbar Aprimorada */}
+      {/* Toolbar */}
       <div className="flex flex-col lg:flex-row gap-4 items-center justify-between bg-white p-3 border-2 border-slate-100 rounded-[2rem] shadow-sm">
         <div className="relative flex-1 w-full lg:max-w-md ml-0 lg:ml-2">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
@@ -124,7 +127,7 @@ const Properties: React.FC<PropertiesProps> = ({ user }) => {
         </div>
       </div>
 
-      {/* Grid de Cards Aprimorado */}
+      {/* Grid de Cards */}
       {isLoading ? (
         <div className="py-40 text-center">
           <Loader2 className="animate-spin mx-auto text-blue-500 mb-4" size={40} />
@@ -138,9 +141,12 @@ const Properties: React.FC<PropertiesProps> = ({ user }) => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
           {filteredProperties.map((p) => (
-            <div key={p.id} className="bg-white border-2 border-slate-100 rounded-[2.5rem] overflow-hidden group hover:border-blue-500 hover:shadow-2xl transition-all duration-500 flex flex-col relative">
+            <div 
+              key={p.id} 
+              onClick={() => setSelectedProperty(p)}
+              className="bg-white border-2 border-slate-100 rounded-[2.5rem] overflow-hidden group hover:border-blue-500 hover:shadow-2xl transition-all duration-500 flex flex-col relative cursor-pointer"
+            >
               
-              {/* Badges de Status e Destaque */}
               <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
                 <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border-2 shadow-sm backdrop-blur-md ${
                   p.status === 'Disponível' ? 'bg-emerald-50/90 text-emerald-600 border-emerald-500' : 
@@ -161,7 +167,6 @@ const Properties: React.FC<PropertiesProps> = ({ user }) => {
                 )}
               </div>
 
-              {/* Imagem Real ou Placeholder */}
               <div className="h-56 bg-slate-50 relative overflow-hidden flex items-center justify-center border-b border-slate-50 group-hover:bg-blue-50/20 transition-colors">
                 {p.image_url ? (
                   <img src={p.image_url} alt={p.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
@@ -178,7 +183,6 @@ const Properties: React.FC<PropertiesProps> = ({ user }) => {
                 </div>
               </div>
 
-              {/* Detalhes Aprimorados */}
               <div className="p-7 flex-1 flex flex-col">
                 <div className="flex justify-between items-start mb-3">
                   <h3 className="text-base font-black text-slate-900 uppercase tracking-tight line-clamp-1 group-hover:text-blue-600 transition-colors">{p.title}</h3>
@@ -205,7 +209,6 @@ const Properties: React.FC<PropertiesProps> = ({ user }) => {
                    </div>
                 </div>
 
-                {/* Preços e Taxas */}
                 <div className="mt-auto space-y-4">
                   <div className="flex items-center justify-between">
                      <div className="flex flex-col">
@@ -220,7 +223,6 @@ const Properties: React.FC<PropertiesProps> = ({ user }) => {
                      )}
                   </div>
                   
-                  {/* Taxas Secundárias */}
                   <div className="flex items-center justify-between pt-3 border-t border-slate-50/50">
                      <div className="flex items-center gap-2">
                         <span className="text-[9px] font-bold text-slate-400 uppercase">Cond. {formatCurrency(p.condo_fee || 0)}</span>
@@ -235,6 +237,12 @@ const Properties: React.FC<PropertiesProps> = ({ user }) => {
       )}
 
       <NewPropertyModal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); fetchProperties(); }} user={user} />
+      {selectedProperty && (
+        <PropertyDetailModal 
+          property={selectedProperty} 
+          onClose={() => setSelectedProperty(null)} 
+        />
+      )}
     </div>
   );
 };

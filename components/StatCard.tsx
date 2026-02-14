@@ -16,14 +16,14 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, subtitle, icon, color
     green: 'bg-emerald-50 text-emerald-500 border-emerald-200 hover:border-emerald-500',
     red: 'bg-rose-50 text-rose-400 border-rose-200 hover:border-rose-500',
     emerald: 'bg-emerald-50 text-emerald-500 border-emerald-200 hover:border-emerald-500',
-    blue: 'bg-blue-50 text-blue-500 border-blue-200 hover:border-blue-500'
+    blue: 'bg-indigo-50 text-[#203267] border-indigo-200 hover:border-[#203267]'
   };
 
   const containerBorderMap = {
     green: 'border-emerald-100 hover:border-emerald-400 shadow-emerald-100/20',
     red: 'border-rose-100 hover:border-rose-400 shadow-rose-100/20',
     emerald: 'border-emerald-100 hover:border-emerald-400 shadow-emerald-100/20',
-    blue: 'border-blue-100 hover:border-blue-400 shadow-blue-100/20'
+    blue: 'border-indigo-100 hover:border-[#203267] shadow-indigo-100/20'
   };
 
   return (

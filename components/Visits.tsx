@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import NewVisitModal from './NewVisitModal';
+import VisitDetailModal from './VisitDetailModal';
 
 interface VisitsProps {
   user: any;
@@ -28,6 +29,7 @@ interface VisitsProps {
 
 const Visits: React.FC<VisitsProps> = ({ user }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedVisit, setSelectedVisit] = useState<any>(null);
   const [visits, setVisits] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -41,7 +43,7 @@ const Visits: React.FC<VisitsProps> = ({ user }) => {
         .from('visits')
         .select(`
           *,
-          properties (title, address, rent_price, sale_price)
+          properties (title, address, rent_price, sale_price, type, bedrooms, bathrooms, area, status, image_url)
         `)
         .eq('user_id', user.id)
         .order('date', { ascending: false });
@@ -127,7 +129,7 @@ const Visits: React.FC<VisitsProps> = ({ user }) => {
         </div>
       </div>
 
-      {/* Tabela de Visitas Aprimorada */}
+      {/* Tabela de Visitas */}
       <div className="bg-white border-2 border-slate-100 rounded-[2.5rem] shadow-xl overflow-hidden min-h-[500px] flex flex-col">
         <div className="overflow-x-auto no-scrollbar flex-1">
           <table className="w-full text-left border-collapse min-w-[1100px]">
@@ -158,7 +160,11 @@ const Visits: React.FC<VisitsProps> = ({ user }) => {
                 </tr>
               ) : (
                 filteredVisits.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-50/50 transition-all group">
+                  <tr 
+                    key={item.id} 
+                    onClick={() => setSelectedVisit(item)}
+                    className="hover:bg-slate-50/50 transition-all group cursor-pointer"
+                  >
                     <td className="px-8 py-6">
                       <div className="flex flex-col">
                         <span className="text-sm font-black text-slate-900 tracking-tight">{new Date(item.date).toLocaleDateString('pt-BR')}</span>
@@ -176,7 +182,7 @@ const Visits: React.FC<VisitsProps> = ({ user }) => {
                           <Home size={18} strokeWidth={2.5} />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-sm font-black text-slate-900 tracking-tight uppercase truncate max-w-[200px]">{item.properties?.title}</p>
+                          <p className="text-sm font-black text-slate-900 tracking-tight uppercase truncate max-w-[200px] group-hover:text-blue-600 transition-colors">{item.properties?.title}</p>
                           <p className="text-[9px] font-bold text-slate-400 uppercase truncate max-w-[200px]">{item.properties?.address}</p>
                         </div>
                       </div>
@@ -223,6 +229,12 @@ const Visits: React.FC<VisitsProps> = ({ user }) => {
       </div>
 
       <NewVisitModal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); fetchVisits(); }} user={user} />
+      {selectedVisit && (
+        <VisitDetailModal 
+          visit={selectedVisit} 
+          onClose={() => setSelectedVisit(null)} 
+        />
+      )}
     </div>
   );
 };

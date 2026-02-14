@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import NewInspectionModal from './NewInspectionModal';
+import InspectionDetailModal from './InspectionDetailModal';
 
 interface InspectionsProps {
   user: any;
@@ -25,6 +26,7 @@ interface InspectionsProps {
 
 const Inspections: React.FC<InspectionsProps> = ({ user }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedInspection, setSelectedInspection] = useState<any>(null);
   const [inspections, setInspections] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -37,7 +39,7 @@ const Inspections: React.FC<InspectionsProps> = ({ user }) => {
         .from('inspections')
         .select(`
           *,
-          properties (title, address)
+          properties (title, address, type, status, image_url)
         `)
         .eq('user_id', user.id)
         .order('date', { ascending: false });
@@ -126,10 +128,14 @@ const Inspections: React.FC<InspectionsProps> = ({ user }) => {
               </thead>
               <tbody className="divide-y-2 divide-slate-50">
                 {filteredInspections.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-50/50 transition-all group">
+                  <tr 
+                    key={item.id} 
+                    onClick={() => setSelectedInspection(item)}
+                    className="hover:bg-slate-50/50 transition-all group cursor-pointer"
+                  >
                     <td className="px-8 py-6">
                       <div className="flex flex-col">
-                        <span className="text-sm font-black text-slate-900 tracking-tight">{new Date(item.date).toLocaleDateString('pt-BR')}</span>
+                        <span className="text-sm font-black text-slate-900 tracking-tight group-hover:text-blue-600 transition-colors">{new Date(item.date).toLocaleDateString('pt-BR')}</span>
                         <span className={`text-[9px] font-black uppercase mt-1 ${item.type === 'Saída' ? 'text-rose-500' : 'text-blue-500'}`}>
                            • Vistoria de {item.type}
                         </span>
@@ -139,7 +145,7 @@ const Inspections: React.FC<InspectionsProps> = ({ user }) => {
                       <div className="flex items-center gap-3">
                          <div className="p-2 bg-slate-50 rounded-xl text-slate-400"><Home size={14} /></div>
                          <div className="min-w-0">
-                            <p className="text-sm font-bold text-slate-900 truncate max-w-[200px] uppercase">{item.properties?.title}</p>
+                            <p className="text-sm font-bold text-slate-900 truncate max-w-[200px] uppercase group-hover:text-blue-600 transition-colors">{item.properties?.title}</p>
                             <p className="text-[10px] text-slate-400 truncate max-w-[200px] font-medium">{item.properties?.address}</p>
                          </div>
                       </div>
@@ -179,6 +185,12 @@ const Inspections: React.FC<InspectionsProps> = ({ user }) => {
       </div>
 
       <NewInspectionModal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); fetchInspections(); }} user={user} />
+      {selectedInspection && (
+        <InspectionDetailModal 
+          inspection={selectedInspection} 
+          onClose={() => setSelectedInspection(null)} 
+        />
+      )}
     </div>
   );
 };
