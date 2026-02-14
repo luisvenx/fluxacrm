@@ -158,7 +158,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           onClick={() => isCollapsed ? toggleCollapse() : onNavigate('Dashboard')}
         >
           <img 
-            src="https://lh3.googleusercontent.com/d/1TIYyVwcuCt7uOdJocoOY6B8GyYXmSPyh" 
+            src="https://lh3.googleusercontent.com/d/1iJOyi_ZfiSUGOMfDpAyXA2U_W6kcMxkF" 
             alt="Fluxa Logo" 
             className={`transition-all duration-500 object-contain ${isCollapsed ? 'h-7 lg:h-7 lg:w-7' : 'h-8'}`}
           />

@@ -121,7 +121,7 @@ const LoginView: React.FC<LoginViewProps> = () => {
             {/* Header */}
             <div className="mb-10">
               <img 
-                src="https://lh3.googleusercontent.com/d/1TIYyVwcuCt7uOdJocoOY6B8GyYXmSPyh" 
+                src="https://lh3.googleusercontent.com/d/1iJOyi_ZfiSUGOMfDpAyXA2U_W6kcMxkF" 
                 alt="Fluxa Imob" 
                 className="h-8 mb-8"
               />
