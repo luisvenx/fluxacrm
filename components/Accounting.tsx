@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Scale, 
@@ -23,8 +24,12 @@ import {
   Equal,
   ChevronRight,
   ShieldAlert,
-  // Fix: Added missing 'Plus' import from lucide-react
-  Plus
+  Plus,
+  List,
+  Link as LinkIcon,
+  Search,
+  RefreshCw,
+  MoreHorizontal
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -34,6 +39,7 @@ interface AccountingProps {
 
 const Accounting: React.FC<AccountingProps> = ({ user }) => {
   const [activeTab, setActiveTab] = useState('Balanço');
+  const [activeSettingsSubTab, setActiveSettingsSubTab] = useState('Plano de Contas');
   const [isLoading, setIsLoading] = useState(true);
   const [dreLines, setDreLines] = useState<any[]>([]);
   const [dfcMetrics, setDfcMetrics] = useState({
@@ -101,6 +107,196 @@ const Accounting: React.FC<AccountingProps> = ({ user }) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
   };
 
+  const getNaturezaStyle = (natureza: string) => {
+    switch (natureza) {
+      case 'Ativo': return 'bg-blue-50 text-blue-600';
+      case 'Passivo': return 'bg-orange-50 text-orange-700';
+      case 'Patrimônio Líquido': return 'bg-purple-50 text-purple-600';
+      case 'Receita': return 'bg-emerald-50 text-emerald-600';
+      case 'Despesa': return 'bg-rose-50 text-rose-600';
+      default: return 'bg-slate-50 text-slate-600';
+    }
+  };
+
+  const renderSettingsView = () => {
+    const subTabs = [
+      { id: 'Plano de Contas', icon: <List size={16} /> },
+      { id: 'Mapeamentos', icon: <LinkIcon size={16} /> },
+      { id: 'Saldos Iniciais', icon: <Wallet size={16} /> },
+      { id: 'Configurações', icon: <Settings size={16} /> },
+    ];
+
+    const chartOfAccounts = [
+      { code: '1.1.01', name: 'Caixa e Equivalentes', group: 'Ativo Circulante', nature: 'Ativo', report: 'BP', flow: 'current_assets' },
+      { code: '1.1.02', name: 'Contas a Receber', group: 'Ativo Circulante', nature: 'Ativo', report: 'BP', flow: 'current_assets' },
+      { code: '1.2.01', name: 'Imobilizado', group: 'Ativo Não Circulante', nature: 'Ativo', report: 'BP', flow: 'fixed_assets' },
+      { code: '2.1.01', name: 'Contas a Pagar', group: 'Passivo Circulante', nature: 'Passivo', report: 'BP', flow: 'current_liabilities' },
+      { code: '2.1.02', name: 'Impostos a Recolher', group: 'Passivo Circulante', nature: 'Passivo', report: 'BP', flow: 'current_liabilities' },
+      { code: '2.2.01', name: 'Empréstimos LP', group: 'Passivo Não Circulante', nature: 'Passivo', report: 'BP', flow: 'non_current_liabilities' },
+      { code: '3.0.01', name: 'Capital Social', group: 'Patrimônio Líquido', nature: 'Patrimônio Líquido', report: 'BP', flow: 'equity_capital' },
+      { code: '3.0.02', name: 'Lucros Acumulados', group: 'Patrimônio Líquido', nature: 'Patrimônio Líquido', report: 'BP', flow: 'retained_earnings' },
+      { code: '3.1.01', name: 'Receita de Vendas', group: 'Receita Operacional', nature: 'Receita', report: 'DRE', flow: 'gross_revenue' },
+      { code: '3.1.02', name: 'Receita de Serviços', group: 'Receita Operacional', nature: 'Receita', report: 'DRE', flow: 'gross_revenue' },
+      { code: '4.1.01', name: 'Taxas Gateway/Pagamento', group: 'Deduções', nature: 'Despesa', report: 'DRE', flow: 'deductions' },
+      { code: '4.1.02', name: 'Impostos sobre Receita', group: 'Deduções', nature: 'Despesa', report: 'DRE', flow: 'deductions' },
+    ];
+
+    return (
+      <div className="space-y-8 animate-in fade-in duration-500">
+        {/* Submenu estilizado conforme mockup */}
+        <div className="bg-[#f8f9fb] p-1.5 rounded-2xl inline-flex items-center gap-1 border border-slate-100/50">
+          {subTabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveSettingsSubTab(tab.id)}
+              className={`flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                activeSettingsSubTab === tab.id
+                  ? 'bg-white text-slate-900 shadow-sm border border-slate-100'
+                  : 'text-slate-400 hover:text-slate-600'
+              }`}
+            >
+              <span className={activeSettingsSubTab === tab.id ? 'text-blue-600' : 'text-slate-300'}>
+                {tab.icon}
+              </span>
+              {tab.id}
+            </button>
+          ))}
+        </div>
+
+        {activeSettingsSubTab === 'Plano de Contas' ? (
+          <div className="bg-white border border-slate-100 rounded-[2.5rem] shadow-sm overflow-hidden flex flex-col min-h-[600px]">
+            {/* Header do Plano de Contas */}
+            <div className="p-10 pb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+              <div>
+                <h3 className="text-xl font-bold text-slate-900 tracking-tight">Plano de Contas</h3>
+                <p className="text-sm text-slate-400 font-medium">Gerencie as contas contábeis gerenciais da empresa</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <button className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
+                  <RefreshCw size={14} /> Atualizar Plano
+                </button>
+                <button className="flex items-center gap-2 px-6 py-2.5 bg-[#0042b3] text-white rounded-xl text-xs font-bold hover:bg-blue-800 transition-all shadow-md">
+                  <Plus size={16} /> Nova Conta
+                </button>
+              </div>
+            </div>
+
+            {/* Barra de Busca */}
+            <div className="px-10 mb-6">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+                <input 
+                  type="text" 
+                  placeholder="Buscar por código, nome ou grupo..."
+                  className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-3 pl-12 pr-4 text-sm font-medium text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all"
+                />
+              </div>
+            </div>
+
+            {/* Tabela de Contas */}
+            <div className="overflow-x-auto no-scrollbar">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-white border-y border-slate-100">
+                    <th className="px-10 py-5 text-[10px] font-black text-slate-300 uppercase tracking-widest">Código</th>
+                    <th className="px-10 py-5 text-[10px] font-black text-slate-300 uppercase tracking-widest">Nome</th>
+                    <th className="px-10 py-5 text-[10px] font-black text-slate-300 uppercase tracking-widest">Grupo</th>
+                    <th className="px-10 py-5 text-[10px] font-black text-slate-300 uppercase tracking-widest">Natureza</th>
+                    <th className="px-10 py-5 text-[10px] font-black text-slate-300 uppercase tracking-widest">Relatório</th>
+                    <th className="px-10 py-5 text-[10px] font-black text-slate-300 uppercase tracking-widest">Linha/Fluxo/Seção</th>
+                    <th className="px-10 py-5 text-[10px] font-black text-slate-300 uppercase tracking-widest text-right"></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {chartOfAccounts.map((account, i) => (
+                    <tr key={i} className="hover:bg-slate-50/50 transition-colors group">
+                      <td className="px-10 py-5">
+                        <span className="text-xs font-black text-slate-900 font-mono">{account.code}</span>
+                      </td>
+                      <td className="px-10 py-5">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-slate-700">{account.name}</span>
+                          <span className="text-[8px] font-black bg-slate-100 text-slate-400 px-1.5 py-0.5 rounded uppercase tracking-tighter">Sistema</span>
+                        </div>
+                      </td>
+                      <td className="px-10 py-5">
+                        <span className="text-xs font-medium text-slate-400">{account.group}</span>
+                      </td>
+                      <td className="px-10 py-5">
+                        <span className={`text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-tight ${getNaturezaStyle(account.nature)}`}>
+                          {account.nature}
+                        </span>
+                      </td>
+                      <td className="px-10 py-5">
+                        <span className="text-xs font-black text-slate-900">{account.report}</span>
+                      </td>
+                      <td className="px-10 py-5">
+                        <span className="text-xs font-mono text-slate-400">{account.flow}</span>
+                      </td>
+                      <td className="px-10 py-5 text-right">
+                        <button className="p-2 text-slate-200 hover:text-slate-900 transition-colors">
+                          <MoreHorizontal size={18} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-white border border-slate-100 rounded-[2.5rem] p-10 min-h-[400px] shadow-sm">
+            {activeSettingsSubTab === 'Mapeamentos' && (
+              <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
+                <div className="p-4 bg-slate-50 rounded-full text-slate-300"><LinkIcon size={40}/></div>
+                <h3 className="text-lg font-bold text-slate-900 uppercase tracking-tight">Mapeamento de Categorias</h3>
+                <p className="text-sm text-slate-400 max-w-md">Vincule as categorias dos lançamentos financeiros às contas do seu Plano de Contas Contábil.</p>
+              </div>
+            )}
+
+            {activeSettingsSubTab === 'Saldos Iniciais' && (
+              <div className="space-y-8">
+                <div className="p-6 bg-amber-50 border border-amber-100 rounded-2xl flex items-start gap-4">
+                  <AlertCircle className="text-amber-500 mt-1" size={20} />
+                  <div className="space-y-1">
+                    <h4 className="text-sm font-bold text-amber-900 uppercase tracking-tight">Aviso de Configuração</h4>
+                    <p className="text-xs text-amber-700 leading-relaxed">Para que o Balanço Patrimonial seja gerado corretamente, você deve informar o saldo de abertura das contas de Ativo e Passivo em 01/01/2026.</p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-4">
+                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Data de Referência</label>
+                    <input type="date" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold outline-none" defaultValue="2026-01-01" />
+                  </div>
+                  <div className="space-y-4">
+                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Total de Saldos de Abertura (R$)</label>
+                    <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-black text-slate-900" placeholder="0,00" disabled />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeSettingsSubTab === 'Configurações' && (
+              <div className="space-y-6">
+                <h3 className="text-lg font-bold text-slate-900 uppercase tracking-tight">Preferências Contábeis</h3>
+                <div className="grid gap-4">
+                    <div className="flex items-center justify-between p-6 bg-slate-50/50 border border-slate-100 rounded-2xl">
+                      <div>
+                        <p className="text-sm font-bold text-slate-900 uppercase tracking-tight">Encerramento Automático</p>
+                        <p className="text-xs text-slate-400">Encerrar exercício social automaticamente ao final do ano.</p>
+                      </div>
+                      <button className="w-11 h-6 bg-slate-200 rounded-full relative"><div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full"></div></button>
+                    </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const renderBalanceSheetView = () => (
     <div className="space-y-6">
       {/* Banner de Status - Equação Contábil */}
@@ -120,7 +316,12 @@ const Accounting: React.FC<AccountingProps> = ({ user }) => {
         <div className="flex-1">
           <h4 className="text-sm font-bold text-slate-900 uppercase tracking-tight">Configuração incompleta</h4>
           <p className="text-xs text-slate-400 font-medium mt-0.5">• Saldos iniciais não configurados</p>
-          <button className="text-[11px] font-black text-blue-600 uppercase underline underline-offset-4 mt-3 hover:text-blue-700">Ir para configurações</button>
+          <button 
+            onClick={() => { setActiveTab('Configurações'); setActiveSettingsSubTab('Saldos Iniciais'); }}
+            className="text-[11px] font-black text-blue-600 uppercase underline underline-offset-4 mt-3 hover:text-blue-700"
+          >
+            Ir para configurações
+          </button>
         </div>
       </div>
 
@@ -527,6 +728,8 @@ const Accounting: React.FC<AccountingProps> = ({ user }) => {
         renderReconciliationView()
       ) : activeTab === 'Balanço' ? (
         renderBalanceSheetView()
+      ) : activeTab === 'Configurações' ? (
+        renderSettingsView()
       ) : (
         /* Visão DRE Existente */
         <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden min-h-[500px]">
