@@ -33,6 +33,7 @@ import Properties from './components/Properties';
 import Visits from './components/Visits';
 import Inspections from './components/Inspections';
 import Disbursements from './components/Disbursements';
+import AIChatAssistant from './components/AIChatAssistant'; // Import da IA
 import { supabase } from './lib/supabase';
 import { Bell, X, Calendar, Clock, Sparkles } from 'lucide-react';
 
@@ -255,6 +256,9 @@ const App: React.FC = () => {
           {renderView()}
         </main>
       </div>
+
+      {/* COMPONENTE DA IA */}
+      <AIChatAssistant />
 
       <style dangerouslySetInnerHTML={{ __html: `
         @keyframes toast-bar {
