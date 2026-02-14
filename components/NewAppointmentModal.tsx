@@ -1,7 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, Calendar, Clock, Tag, AlignLeft, Plus, Loader2 } from 'lucide-react';
+import { X, Calendar, Clock, Tag, AlignLeft, Plus, Loader2, Share2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { googleCalendar } from '../lib/googleCalendar';
 
 interface NewAppointmentModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ interface NewAppointmentModalProps {
 
 const NewAppointmentModal: React.FC<NewAppointmentModalProps> = ({ isOpen, onClose, user, defaultDate }) => {
   const [isSaving, setIsSaving] = useState(false);
+  const [syncGoogle, setSyncGoogle] = useState(googleCalendar.isConnected());
   
   const formatDateForInput = (date: Date) => {
     const year = date.getFullYear();
@@ -35,6 +37,7 @@ const NewAppointmentModal: React.FC<NewAppointmentModalProps> = ({ isOpen, onClo
         ...prev,
         date: defaultDate ? formatDateForInput(defaultDate) : formatDateForInput(new Date())
       }));
+      setSyncGoogle(googleCalendar.isConnected());
     }
   }, [isOpen, defaultDate]);
 
@@ -61,10 +64,21 @@ const NewAppointmentModal: React.FC<NewAppointmentModalProps> = ({ isOpen, onClo
           end_time: endDateTime,
           description: formData.description,
           is_completed: false,
-          notified: false // Garantindo o estado inicial
+          notified: false
         }]);
 
       if (error) throw error;
+
+      // Sincronização Google Calendar
+      if (syncGoogle && googleCalendar.isConnected()) {
+        await googleCalendar.createEvent({
+          summary: `Fluxa: ${formData.title}`,
+          description: `Categoria: ${formData.category}\n${formData.description}`,
+          start: { dateTime: startDateTime, timeZone: 'America/Sao_Paulo' },
+          end: { dateTime: endDateTime, timeZone: 'America/Sao_Paulo' }
+        });
+      }
+
       onClose();
     } catch (err) {
       console.error('Erro ao salvar compromisso:', err);
@@ -164,6 +178,22 @@ const NewAppointmentModal: React.FC<NewAppointmentModalProps> = ({ isOpen, onClo
                 </div>
               </div>
             </div>
+
+            {googleCalendar.isConnected() && (
+              <div className="p-4 bg-blue-50/50 rounded-2xl border border-blue-100 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Google_Calendar_icon_%282020%29.svg" className="w-5 h-5" alt="GCal" />
+                  <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Sincronizar Google Agenda</span>
+                </div>
+                <button 
+                  type="button"
+                  onClick={() => setSyncGoogle(!syncGoogle)}
+                  className={`w-10 h-5 rounded-full relative transition-all ${syncGoogle ? 'bg-blue-600' : 'bg-slate-200'}`}
+                >
+                  <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${syncGoogle ? 'left-6' : 'left-1'}`} />
+                </button>
+              </div>
+            )}
 
             <div className="space-y-2">
               <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Descrição (Opcional)</label>

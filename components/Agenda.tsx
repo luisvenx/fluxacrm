@@ -1,8 +1,9 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Calendar as CalendarIcon, Clock, CheckCircle2, ChevronLeft, ChevronRight, Loader2, Database, Plus, AlertCircle } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, CheckCircle2, ChevronLeft, ChevronRight, Loader2, Database, Plus, AlertCircle, Share2, Unlink, CheckCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import NewAppointmentModal from './NewAppointmentModal';
+import { googleCalendar } from '../lib/googleCalendar';
 
 interface AgendaProps {
   user: any;
@@ -14,6 +15,7 @@ const Agenda: React.FC<AgendaProps> = ({ user }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState(new Date().getDate());
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isGoogleConnected, setIsGoogleConnected] = useState(googleCalendar.isConnected());
 
   const monthYear = currentDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
   const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
@@ -29,7 +31,7 @@ const Agenda: React.FC<AgendaProps> = ({ user }) => {
       const { data, error } = await supabase
         .from('appointments')
         .select('*')
-        .eq('user_id', user.id) // ISOLAÇÃO
+        .eq('user_id', user.id)
         .gte('start_time', firstDay)
         .lte('start_time', lastDay)
         .order('start_time', { ascending: true });
@@ -66,6 +68,16 @@ const Agenda: React.FC<AgendaProps> = ({ user }) => {
     } catch (err) {
       console.error('Erro ao atualizar status:', err);
     }
+  };
+
+  const handleConnectGoogle = async () => {
+    await googleCalendar.connect();
+    setIsGoogleConnected(googleCalendar.isConnected());
+  };
+
+  const handleDisconnectGoogle = () => {
+    googleCalendar.disconnect();
+    setIsGoogleConnected(false);
   };
 
   const selectedFullDate = useMemo(() => {
@@ -141,6 +153,50 @@ const Agenda: React.FC<AgendaProps> = ({ user }) => {
       </div>
 
       <div className="space-y-8">
+        {/* Card de Integração Google */}
+        <div className={`p-6 rounded-[2rem] border-2 transition-all duration-500 ${isGoogleConnected ? 'bg-white border-emerald-100 shadow-sm' : 'bg-white border-indigo-100 shadow-sm hover:border-indigo-300'}`}>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center border shadow-sm ${isGoogleConnected ? 'bg-emerald-50 border-emerald-100' : 'bg-slate-50 border-slate-100'}`}>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Google_Calendar_icon_%282020%29.svg" className="w-6 h-6" alt="GCal" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Google Agenda</span>
+                <span className={`text-[8px] font-bold uppercase ${isGoogleConnected ? 'text-emerald-500' : 'text-slate-400'}`}>
+                  {isGoogleConnected ? 'Sincronização Ativa' : 'Desconectado'}
+                </span>
+              </div>
+            </div>
+            {isGoogleConnected ? (
+              <button 
+                onClick={handleDisconnectGoogle}
+                className="p-2 text-slate-300 hover:text-rose-500 transition-colors"
+                title="Desconectar"
+              >
+                <Unlink size={16} />
+              </button>
+            ) : (
+              <div className="p-1.5 bg-indigo-50 text-indigo-400 rounded-lg animate-pulse">
+                <Share2 size={14} />
+              </div>
+            )}
+          </div>
+          
+          {!isGoogleConnected ? (
+            <button 
+              onClick={handleConnectGoogle}
+              className="w-full py-3 bg-[#203267] text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-black transition-all shadow-lg shadow-indigo-900/10 active:scale-95 flex items-center justify-center gap-2"
+            >
+              Conectar Minha Conta
+            </button>
+          ) : (
+            <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 border border-emerald-100 rounded-xl">
+               <CheckCircle size={12} className="text-emerald-500" />
+               <span className="text-[9px] font-black text-emerald-600 uppercase tracking-tight">Eventos serão duplicados no Google</span>
+            </div>
+          )}
+        </div>
+
         <div className="flex items-center justify-between px-1">
           <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Dia {selectedDay}</h3>
           <button 

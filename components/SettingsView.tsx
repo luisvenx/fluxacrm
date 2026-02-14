@@ -9,24 +9,16 @@ import {
   Building2, 
   Save, 
   ShieldCheck, 
-  Smartphone, 
   Mail, 
-  ExternalLink,
-  Slack,
-  MessageSquare,
-  Calendar,
-  Cloud,
-  ChevronRight,
-  Plus,
-  CheckCircle2,
-  AlertCircle,
-  Loader2,
+  Loader2, 
   Database,
-  Briefcase,
-  Zap,
-  Sparkles
+  Calendar,
+  CheckCircle2,
+  Share2,
+  Unlink
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { googleCalendar } from '../lib/googleCalendar';
 
 interface SettingsViewProps {
   user: any;
@@ -38,6 +30,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ user }) => {
   const [activeTab, setActiveTab] = useState<SettingsTab>('Perfil');
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isGoogleConnected, setIsGoogleConnected] = useState(googleCalendar.isConnected());
   const [companyData, setCompanyData] = useState({
     id: '',
     name: '',
@@ -80,7 +73,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ user }) => {
     setIsSaving(true);
     try {
       const payload = {
-        user_id: user.id, // ISOLAÇÃO
+        user_id: user.id,
         name: companyData.name,
         document: companyData.document,
         email: companyData.email,
@@ -108,8 +101,19 @@ const SettingsView: React.FC<SettingsViewProps> = ({ user }) => {
     }
   };
 
+  const handleConnectGoogle = async () => {
+    await googleCalendar.connect();
+    setIsGoogleConnected(googleCalendar.isConnected());
+  };
+
+  const handleDisconnectGoogle = () => {
+    googleCalendar.disconnect();
+    setIsGoogleConnected(false);
+  };
+
   const menuItems = [
     { label: 'Perfil Institucional', id: 'Perfil' as SettingsTab, icon: <Building2 size={18}/> },
+    { label: 'Integrações', id: 'Integrações' as SettingsTab, icon: <Share2 size={18}/> },
     { label: 'Notificações', id: 'Notificações' as SettingsTab, icon: <Bell size={18}/> },
     { label: 'Segurança SQL', id: 'Segurança' as SettingsTab, icon: <Lock size={18}/> },
     { label: 'Faturamento', id: 'Faturamento' as SettingsTab, icon: <CreditCard size={18}/> },
@@ -162,6 +166,56 @@ const SettingsView: React.FC<SettingsViewProps> = ({ user }) => {
                  </div>
               </div>
             </div>
+          </div>
+        );
+      case 'Integrações':
+        return (
+          <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
+             <div>
+                <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest mb-2">Conectar Serviços Externos</h3>
+                <p className="text-xs text-slate-400 font-medium">Aumente a produtividade sincronizando seus dados com ferramentas globais.</p>
+             </div>
+
+             <div className="bg-white border-2 border-slate-100 rounded-[2rem] p-8 flex flex-col md:flex-row items-center justify-between gap-6 group hover:border-blue-100 transition-all">
+                <div className="flex items-center gap-6">
+                   <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center border border-slate-100 shadow-sm">
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Google_Calendar_icon_%282020%29.svg" className="w-10 h-10" alt="Google Calendar" />
+                   </div>
+                   <div>
+                      <h4 className="text-base font-bold text-slate-900">Google Agenda</h4>
+                      <p className="text-xs text-slate-400 font-medium mt-1">Sincronize visitas e compromissos automaticamente com seu calendário do Google.</p>
+                   </div>
+                </div>
+                {isGoogleConnected ? (
+                  <div className="flex items-center gap-3">
+                    <div className="px-4 py-2 bg-emerald-50 text-emerald-600 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 border border-emerald-100">
+                       <CheckCircle2 size={14} /> Conectado
+                    </div>
+                    <button 
+                      onClick={handleDisconnectGoogle}
+                      className="p-2.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
+                      title="Desconectar"
+                    >
+                      <Unlink size={20} />
+                    </button>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={handleConnectGoogle}
+                    className="bg-[#203267] text-white px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all shadow-xl shadow-indigo-900/20 active:scale-95"
+                  >
+                    Conectar Conta
+                  </button>
+                )}
+             </div>
+
+             <div className="bg-slate-50 border border-slate-100 border-dashed rounded-[2rem] p-10 flex flex-col items-center justify-center text-center gap-4 opacity-60">
+                <div className="p-3 bg-white rounded-xl border border-slate-100 text-slate-300"><Share2 size={24}/></div>
+                <div>
+                   <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Mais integrações em breve</p>
+                   <p className="text-[10px] text-slate-400 mt-1">Slack, WhatsApp Business e RD Station.</p>
+                </div>
+             </div>
           </div>
         );
       case 'Notificações':

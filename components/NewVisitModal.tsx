@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Eye, Calendar, Clock, User, Home, ChevronDown, Loader2, Save, Phone, UserCheck } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { googleCalendar } from '../lib/googleCalendar';
 
 interface NewVisitModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ interface NewVisitModalProps {
 const NewVisitModal: React.FC<NewVisitModalProps> = ({ isOpen, onClose, user }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [properties, setProperties] = useState<any[]>([]);
+  const [syncGoogle, setSyncGoogle] = useState(googleCalendar.isConnected());
   const [formData, setFormData] = useState({
     property_id: '',
     client_name: '',
@@ -24,11 +26,11 @@ const NewVisitModal: React.FC<NewVisitModalProps> = ({ isOpen, onClose, user }) 
 
   useEffect(() => {
     if (isOpen && user) {
-      supabase.from('properties').select('id, title').eq('user_id', user.id).then(({ data }) => {
+      supabase.from('properties').select('id, title, address').eq('user_id', user.id).then(({ data }) => {
         if (data) setProperties(data);
       });
-      // Pré-preenche o corretor com o nome do usuário se disponível
       setFormData(prev => ({ ...prev, visitor_name: user.user_metadata?.full_name || '' }));
+      setSyncGoogle(googleCalendar.isConnected());
     }
   }, [isOpen, user]);
 
@@ -39,11 +41,10 @@ const NewVisitModal: React.FC<NewVisitModalProps> = ({ isOpen, onClose, user }) 
 
     setIsSaving(true);
     try {
-      // Busca o título do imóvel para o compromisso na agenda
       const selectedProperty = properties.find(p => p.id === formData.property_id);
       const propTitle = selectedProperty ? selectedProperty.title : 'Imóvel';
+      const propAddress = selectedProperty ? selectedProperty.address : '';
 
-      // 1. Cadastrar a Visita
       const { error: visitError } = await supabase.from('visits').insert([{
         user_id: user.id,
         property_id: formData.property_id,
@@ -57,21 +58,29 @@ const NewVisitModal: React.FC<NewVisitModalProps> = ({ isOpen, onClose, user }) 
 
       if (visitError) throw visitError;
 
-      // 2. Automação: Cadastrar na Agenda (appointments)
       const startDateTime = new Date(`${formData.date}T${formData.time}:00`).toISOString();
+      const endDateTime = new Date(new Date(startDateTime).getTime() + 60 * 60 * 1000).toISOString();
       
       const { error: apptError } = await supabase.from('appointments').insert([{
         user_id: user.id,
         title: `Visita: ${propTitle} (${formData.client_name})`,
         category: 'Comercial',
         start_time: startDateTime,
-        description: `Visita agendada via módulo imobiliário.\nCorretor: ${formData.visitor_name}\nCliente: ${formData.client_name}\nTelefone: ${formData.client_phone}`,
+        end_time: endDateTime,
+        description: `Visita agendada via Fluxa Imob.\nCorretor: ${formData.visitor_name}\nCliente: ${formData.client_name}\nTelefone: ${formData.client_phone}`,
         is_completed: false,
-        notified: false // Garantindo estado inicial
+        notified: false
       }]);
 
-      if (apptError) {
-        console.warn('Visita criada, mas houve um erro ao sincronizar com a agenda:', apptError);
+      // Sincronização Google
+      if (syncGoogle && googleCalendar.isConnected()) {
+        await googleCalendar.createEvent({
+          summary: `Visita: ${propTitle} (${formData.client_name})`,
+          location: propAddress,
+          description: `Corretor: ${formData.visitor_name}\nCliente: ${formData.client_name}\nTelefone: ${formData.client_phone}`,
+          start: { dateTime: startDateTime, timeZone: 'America/Sao_Paulo' },
+          end: { dateTime: endDateTime, timeZone: 'America/Sao_Paulo' }
+        });
       }
 
       onClose();
@@ -162,6 +171,25 @@ const NewVisitModal: React.FC<NewVisitModalProps> = ({ isOpen, onClose, user }) 
                 </div>
              </div>
           </div>
+
+          {googleCalendar.isConnected() && (
+            <div className="p-5 bg-blue-50/50 rounded-2xl border border-blue-100 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Google_Calendar_icon_%282020%29.svg" className="w-6 h-6" alt="GCal" />
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Sincronização Google</span>
+                  <span className="text-[8px] font-bold text-slate-400 uppercase">Visita aparecerá no seu celular</span>
+                </div>
+              </div>
+              <button 
+                type="button"
+                onClick={() => setSyncGoogle(!syncGoogle)}
+                className={`w-10 h-5 rounded-full relative transition-all ${syncGoogle ? 'bg-blue-600' : 'bg-slate-200'}`}
+              >
+                <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${syncGoogle ? 'left-6' : 'left-1'}`} />
+              </button>
+            </div>
+          )}
 
           <div className="flex items-center gap-3 pt-8 pb-4">
             <button type="button" onClick={onClose} className="flex-1 py-5 bg-white border-2 border-slate-200 rounded-full text-[10px] font-black uppercase text-slate-400 tracking-widest hover:bg-slate-50 transition-all">Cancelar</button>
