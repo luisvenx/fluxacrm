@@ -26,7 +26,53 @@ CREATE TABLE IF NOT EXISTS profiles (
 );
 
 -------------------------------------------------------------------------------
--- 2. AUTOMAÇÃO DE CADASTRO (TRIGGER)
+-- 2. TABELA DO PLANO DE CONTAS E MAPEAMENTOS
+-------------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS chart_of_accounts (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id) NOT NULL,
+  code TEXT NOT NULL,
+  name TEXT NOT NULL,
+  account_group TEXT,
+  nature TEXT,
+  report_type TEXT, -- BP or DRE
+  flow_section TEXT,
+  is_system BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
+);
+
+CREATE TABLE IF NOT EXISTS accounting_mappings (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id) NOT NULL,
+  type TEXT NOT NULL, -- Categoria, Centro de Custo, Fornecedor
+  entity_name TEXT NOT NULL,
+  account_id UUID REFERENCES chart_of_accounts(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
+);
+
+CREATE TABLE IF NOT EXISTS initial_balances (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id) NOT NULL,
+  account_id UUID REFERENCES chart_of_accounts(id) ON DELETE CASCADE,
+  reference_date DATE NOT NULL,
+  amount NUMERIC(15,2) NOT NULL DEFAULT 0,
+  notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
+);
+
+CREATE TABLE IF NOT EXISTS accounting_settings (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id) NOT NULL UNIQUE,
+  default_regime TEXT DEFAULT 'Regime de Caixa',
+  fiscal_year_start TEXT DEFAULT 'Janeiro',
+  main_cash_account_id UUID REFERENCES chart_of_accounts(id) ON DELETE SET NULL,
+  retained_earnings_account_id UUID REFERENCES chart_of_accounts(id) ON DELETE SET NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
+);
+
+-------------------------------------------------------------------------------
+-- 3. AUTOMAÇÃO DE CADASTRO (TRIGGER)
 -------------------------------------------------------------------------------
 
 -- Função que cria registros em 'users' e 'profiles' automaticamente
@@ -63,7 +109,7 @@ CREATE TRIGGER on_auth_user_created
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 -------------------------------------------------------------------------------
--- 3. RESTANTE DA ESTRUTURA (FINANCEIRO / CRM)
+-- 4. RESTANTE DA ESTRUTURA (FINANCEIRO / CRM)
 -------------------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS cost_centers (
@@ -307,7 +353,7 @@ CREATE TABLE IF NOT EXISTS marketing_tasks (
 );
 
 -------------------------------------------------------------------------------
--- 4. CONFIGURAÇÕES DE SEGURANÇA (RLS)
+-- 5. CONFIGURAÇÕES DE SEGURANÇA (RLS)
 -------------------------------------------------------------------------------
 
 -- Habilitar RLS em todas as tabelas públicas

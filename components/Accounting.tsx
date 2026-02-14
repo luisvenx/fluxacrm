@@ -29,9 +29,12 @@ import {
   Link as LinkIcon,
   Search,
   RefreshCw,
-  MoreHorizontal
+  MoreHorizontal,
+  Trash2,
+  Save
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import NewAccountModal from './NewAccountModal';
 
 interface AccountingProps {
   user: any;
@@ -41,28 +44,84 @@ const Accounting: React.FC<AccountingProps> = ({ user }) => {
   const [activeTab, setActiveTab] = useState('Balanço');
   const [activeSettingsSubTab, setActiveSettingsSubTab] = useState('Plano de Contas');
   const [isLoading, setIsLoading] = useState(true);
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
+  const [isNewAccountModalOpen, setIsNewAccountModalOpen] = useState(false);
+  
+  // Dados Contábeis
   const [dreLines, setDreLines] = useState<any[]>([]);
+  const [accounts, setAccounts] = useState<any[]>([]);
+  const [mappings, setMappings] = useState<any[]>([]);
+  const [initialBalances, setInitialBalances] = useState<any[]>([]);
+  const [costCenters, setCostCenters] = useState<any[]>([]);
+
+  // Estado das Configurações Contábeis
+  const [accSettings, setAccSettings] = useState({
+    id: '',
+    default_regime: 'Regime de Caixa',
+    fiscal_year_start: 'Janeiro',
+    main_cash_account_id: '',
+    retained_earnings_account_id: ''
+  });
+
+  // Form Saldos Iniciais
+  const [balanceForm, setBalanceForm] = useState({
+    accountId: '',
+    date: new Date().toISOString().split('T')[0],
+    amount: '',
+    notes: ''
+  });
+
+  // Form Mapeamento
+  const [mappingForm, setMappingForm] = useState({
+    type: 'Categoria',
+    entity: '',
+    accountId: ''
+  });
+
   const [dfcMetrics, setDfcMetrics] = useState({
     caixaInicial: 0,
     variacao: 0,
     caixaFinal: 0,
     ebitda: 0
   });
-  
-  const [filters, setFilters] = useState({
-    period: 'Este Mês',
-    regime: 'Caixa',
-    vision: 'Consolidado',
-    compare: false
-  });
 
   const fetchData = async () => {
     if (!user) return;
     setIsLoading(true);
     try {
-      const { data: txs } = await supabase.from('transactions').select('*').eq('user_id', user.id);
-      const { data: taxesData } = await supabase.from('taxes').select('rate').eq('user_id', user.id);
+      const [
+        { data: txs },
+        { data: taxesData },
+        { data: accountsData },
+        { data: mappingsData },
+        { data: balancesData },
+        { data: ccData },
+        { data: settingsData }
+      ] = await Promise.all([
+        supabase.from('transactions').select('*').eq('user_id', user.id),
+        supabase.from('taxes').select('rate').eq('user_id', user.id),
+        supabase.from('chart_of_accounts').select('*').eq('user_id', user.id).order('code'),
+        supabase.from('accounting_mappings').select('*, chart_of_accounts(name, code)').eq('user_id', user.id),
+        supabase.from('initial_balances').select('*, chart_of_accounts(name, code)').eq('user_id', user.id),
+        supabase.from('cost_centers').select('id, name').eq('user_id', user.id),
+        supabase.from('accounting_settings').select('*').eq('user_id', user.id).maybeSingle()
+      ]);
       
+      setAccounts(accountsData || []);
+      setMappings(mappingsData || []);
+      setInitialBalances(balancesData || []);
+      setCostCenters(ccData || []);
+      
+      if (settingsData) {
+        setAccSettings({
+          id: settingsData.id,
+          default_regime: settingsData.default_regime || 'Regime de Caixa',
+          fiscal_year_start: settingsData.fiscal_year_start || 'Janeiro',
+          main_cash_account_id: settingsData.main_cash_account_id || '',
+          retained_earnings_account_id: settingsData.retained_earnings_account_id || ''
+        });
+      }
+
       const revenue = txs?.filter(t => t.type === 'IN' && t.status === 'PAID').reduce((acc, t) => acc + Number(t.amount), 0) || 0;
       const taxRate = (taxesData?.reduce((acc, t) => acc + Number(t.rate), 0) || 0) / 100;
       const taxAmount = revenue * taxRate;
@@ -99,6 +158,93 @@ const Accounting: React.FC<AccountingProps> = ({ user }) => {
     }
   };
 
+  const handleSaveAccountingSettings = async () => {
+    if (!user) return;
+    setIsSavingSettings(true);
+    try {
+      const payload = {
+        user_id: user.id,
+        default_regime: accSettings.default_regime,
+        fiscal_year_start: accSettings.fiscal_year_start,
+        main_cash_account_id: accSettings.main_cash_account_id || null,
+        retained_earnings_account_id: accSettings.retained_earnings_account_id || null
+      };
+
+      if (accSettings.id) {
+        await supabase.from('accounting_settings').update(payload).eq('id', accSettings.id);
+      } else {
+        await supabase.from('accounting_settings').insert([payload]);
+      }
+      
+      alert('Configurações salvas com sucesso!');
+      fetchData();
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao salvar configurações.');
+    } finally {
+      setIsSavingSettings(false);
+    }
+  };
+
+  const handleAddBalance = async () => {
+    if (!balanceForm.accountId || !balanceForm.amount) return alert('Preencha a conta e o valor.');
+    
+    try {
+      const { error } = await supabase.from('initial_balances').insert([{
+        user_id: user.id,
+        account_id: balanceForm.accountId,
+        reference_date: balanceForm.date,
+        amount: parseFloat(balanceForm.amount.replace(',', '.')),
+        notes: balanceForm.notes
+      }]);
+
+      if (error) throw error;
+      setBalanceForm({ ...balanceForm, amount: '', notes: '' });
+      fetchData();
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao salvar saldo inicial.');
+    }
+  };
+
+  const deleteBalance = async (id: string) => {
+    try {
+      await supabase.from('initial_balances').delete().eq('id', id).eq('user_id', user.id);
+      fetchData();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleAddMapping = async () => {
+    if (!mappingForm.entity || !mappingForm.accountId) return alert('Selecione a entidade e a conta contábil.');
+    
+    try {
+      const { error } = await supabase.from('accounting_mappings').insert([{
+        user_id: user.id,
+        type: mappingForm.type,
+        entity_name: mappingForm.entity,
+        account_id: mappingForm.accountId
+      }]);
+
+      if (error) throw error;
+      setMappingForm({ ...mappingForm, entity: '', accountId: '' });
+      fetchData();
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao salvar mapeamento.');
+    }
+  };
+
+  const deleteMapping = async (id: string) => {
+    try {
+      await supabase.from('accounting_mappings').delete().eq('id', id).eq('user_id', user.id);
+      fetchData();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     fetchData();
   }, [user]);
@@ -126,24 +272,8 @@ const Accounting: React.FC<AccountingProps> = ({ user }) => {
       { id: 'Configurações', icon: <Settings size={16} /> },
     ];
 
-    const chartOfAccounts = [
-      { code: '1.1.01', name: 'Caixa e Equivalentes', group: 'Ativo Circulante', nature: 'Ativo', report: 'BP', flow: 'current_assets' },
-      { code: '1.1.02', name: 'Contas a Receber', group: 'Ativo Circulante', nature: 'Ativo', report: 'BP', flow: 'current_assets' },
-      { code: '1.2.01', name: 'Imobilizado', group: 'Ativo Não Circulante', nature: 'Ativo', report: 'BP', flow: 'fixed_assets' },
-      { code: '2.1.01', name: 'Contas a Pagar', group: 'Passivo Circulante', nature: 'Passivo', report: 'BP', flow: 'current_liabilities' },
-      { code: '2.1.02', name: 'Impostos a Recolher', group: 'Passivo Circulante', nature: 'Passivo', report: 'BP', flow: 'current_liabilities' },
-      { code: '2.2.01', name: 'Empréstimos LP', group: 'Passivo Não Circulante', nature: 'Passivo', report: 'BP', flow: 'non_current_liabilities' },
-      { code: '3.0.01', name: 'Capital Social', group: 'Patrimônio Líquido', nature: 'Patrimônio Líquido', report: 'BP', flow: 'equity_capital' },
-      { code: '3.0.02', name: 'Lucros Acumulados', group: 'Patrimônio Líquido', nature: 'Patrimônio Líquido', report: 'BP', flow: 'retained_earnings' },
-      { code: '3.1.01', name: 'Receita de Vendas', group: 'Receita Operacional', nature: 'Receita', report: 'DRE', flow: 'gross_revenue' },
-      { code: '3.1.02', name: 'Receita de Serviços', group: 'Receita Operacional', nature: 'Receita', report: 'DRE', flow: 'gross_revenue' },
-      { code: '4.1.01', name: 'Taxas Gateway/Pagamento', group: 'Deduções', nature: 'Despesa', report: 'DRE', flow: 'deductions' },
-      { code: '4.1.02', name: 'Impostos sobre Receita', group: 'Deduções', nature: 'Despesa', report: 'DRE', flow: 'deductions' },
-    ];
-
     return (
       <div className="space-y-8 animate-in fade-in duration-500">
-        {/* Submenu estilizado conforme mockup */}
         <div className="bg-[#f8f9fb] p-1.5 rounded-2xl inline-flex items-center gap-1 border border-slate-100/50">
           {subTabs.map((tab) => (
             <button
@@ -165,23 +295,24 @@ const Accounting: React.FC<AccountingProps> = ({ user }) => {
 
         {activeSettingsSubTab === 'Plano de Contas' ? (
           <div className="bg-white border border-slate-100 rounded-[2.5rem] shadow-sm overflow-hidden flex flex-col min-h-[600px]">
-            {/* Header do Plano de Contas */}
             <div className="p-10 pb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
               <div>
                 <h3 className="text-xl font-bold text-slate-900 tracking-tight">Plano de Contas</h3>
                 <p className="text-sm text-slate-400 font-medium">Gerencie as contas contábeis gerenciais da empresa</p>
               </div>
               <div className="flex items-center gap-3">
-                <button className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
-                  <RefreshCw size={14} /> Atualizar Plano
+                <button onClick={fetchData} className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
+                  <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} /> Atualizar Plano
                 </button>
-                <button className="flex items-center gap-2 px-6 py-2.5 bg-[#0042b3] text-white rounded-xl text-xs font-bold hover:bg-blue-800 transition-all shadow-md">
+                <button 
+                  onClick={() => setIsNewAccountModalOpen(true)}
+                  className="flex items-center gap-2 px-6 py-2.5 bg-[#0042b3] text-white rounded-xl text-xs font-bold hover:bg-blue-800 transition-all shadow-md active:scale-95"
+                >
                   <Plus size={16} /> Nova Conta
                 </button>
               </div>
             </div>
 
-            {/* Barra de Busca */}
             <div className="px-10 mb-6">
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
@@ -193,7 +324,6 @@ const Accounting: React.FC<AccountingProps> = ({ user }) => {
               </div>
             </div>
 
-            {/* Tabela de Contas */}
             <div className="overflow-x-auto no-scrollbar">
               <table className="w-full text-left border-collapse">
                 <thead>
@@ -208,7 +338,7 @@ const Accounting: React.FC<AccountingProps> = ({ user }) => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
-                  {chartOfAccounts.map((account, i) => (
+                  {(accounts.length > 0 ? accounts : []).map((account, i) => (
                     <tr key={i} className="hover:bg-slate-50/50 transition-colors group">
                       <td className="px-10 py-5">
                         <span className="text-xs font-black text-slate-900 font-mono">{account.code}</span>
@@ -216,11 +346,13 @@ const Accounting: React.FC<AccountingProps> = ({ user }) => {
                       <td className="px-10 py-5">
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-semibold text-slate-700">{account.name}</span>
-                          <span className="text-[8px] font-black bg-slate-100 text-slate-400 px-1.5 py-0.5 rounded uppercase tracking-tighter">Sistema</span>
+                          {account.is_system && (
+                            <span className="text-[8px] font-black bg-slate-100 text-slate-400 px-1.5 py-0.5 rounded uppercase tracking-tighter">Sistema</span>
+                          )}
                         </div>
                       </td>
                       <td className="px-10 py-5">
-                        <span className="text-xs font-medium text-slate-400">{account.group}</span>
+                        <span className="text-xs font-medium text-slate-400">{account.account_group}</span>
                       </td>
                       <td className="px-10 py-5">
                         <span className={`text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-tight ${getNaturezaStyle(account.nature)}`}>
@@ -228,10 +360,10 @@ const Accounting: React.FC<AccountingProps> = ({ user }) => {
                         </span>
                       </td>
                       <td className="px-10 py-5">
-                        <span className="text-xs font-black text-slate-900">{account.report}</span>
+                        <span className="text-xs font-black text-slate-900">{account.report_type}</span>
                       </td>
                       <td className="px-10 py-5">
-                        <span className="text-xs font-mono text-slate-400">{account.flow}</span>
+                        <span className="text-xs font-mono text-slate-400">{account.flow_section}</span>
                       </td>
                       <td className="px-10 py-5 text-right">
                         <button className="p-2 text-slate-200 hover:text-slate-900 transition-colors">
@@ -244,53 +376,352 @@ const Accounting: React.FC<AccountingProps> = ({ user }) => {
               </table>
             </div>
           </div>
+        ) : activeSettingsSubTab === 'Mapeamentos' ? (
+          <div className="space-y-8 animate-in fade-in duration-500">
+            <div className="bg-white border border-slate-100 rounded-3xl p-8 shadow-sm space-y-8">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 tracking-tight">Novo Mapeamento</h3>
+                <p className="text-xs text-slate-400 font-medium">Vincule categorias, centros de custo e outras entidades às contas contábeis</p>
+              </div>
+
+              <div className="flex flex-col lg:flex-row items-end gap-5">
+                <div className="flex-1 w-full space-y-2">
+                   <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Tipo</label>
+                   <div className="relative group">
+                     <select 
+                        value={mappingForm.type}
+                        onChange={e => setMappingForm({...mappingForm, type: e.target.value, entity: ''})}
+                        className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 px-4 text-sm font-semibold text-slate-700 appearance-none outline-none focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all"
+                     >
+                       <option>Categoria</option>
+                       <option>Centro de Custo</option>
+                       <option>Fornecedor</option>
+                     </select>
+                     <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none group-hover:text-slate-500" size={16} />
+                   </div>
+                </div>
+
+                <div className="flex-[2] w-full space-y-2">
+                   <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">{mappingForm.type}</label>
+                   <div className="relative group">
+                     {mappingForm.type === 'Centro de Custo' ? (
+                        <select 
+                          value={mappingForm.entity}
+                          onChange={e => setMappingForm({...mappingForm, entity: e.target.value})}
+                          className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 px-4 text-sm font-semibold text-slate-700 appearance-none outline-none"
+                        >
+                          <option value="">Selecione...</option>
+                          {costCenters.map(cc => <option key={cc.id} value={cc.name}>{cc.name}</option>)}
+                        </select>
+                     ) : (
+                        <input 
+                          type="text" 
+                          placeholder="Selecione..." 
+                          value={mappingForm.entity}
+                          onChange={e => setMappingForm({...mappingForm, entity: e.target.value})}
+                          className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 px-4 text-sm font-semibold text-slate-700 outline-none focus:bg-white transition-all" 
+                        />
+                     )}
+                     <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none" size={16} />
+                   </div>
+                </div>
+
+                <div className="flex-[2] w-full space-y-2">
+                   <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Conta Contábil</label>
+                   <div className="relative group">
+                     <select 
+                        value={mappingForm.accountId}
+                        onChange={e => setMappingForm({...mappingForm, accountId: e.target.value})}
+                        className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 px-4 text-sm font-semibold text-slate-700 appearance-none outline-none focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all"
+                     >
+                       <option value="">Selecione a conta...</option>
+                       {accounts.map(acc => (
+                         <option key={acc.id} value={acc.id}>{acc.code} - {acc.name}</option>
+                       ))}
+                     </select>
+                     <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none group-hover:text-slate-500" size={16} />
+                   </div>
+                </div>
+
+                <button 
+                  onClick={handleAddMapping}
+                  className="bg-[#0042b3] text-white px-8 py-3 rounded-xl text-sm font-bold hover:bg-blue-800 transition-all flex items-center gap-2 whitespace-nowrap shadow-lg shadow-blue-600/20 active:scale-95"
+                >
+                  <Plus size={18} /> Adicionar
+                </button>
+              </div>
+            </div>
+
+            <div className="bg-white border border-slate-100 rounded-3xl shadow-sm overflow-hidden min-h-[400px] flex flex-col">
+              <div className="p-8 pb-4">
+                <h3 className="text-lg font-bold text-slate-900 tracking-tight">Mapeamentos Existentes</h3>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-white border-y border-slate-100">
+                      <th className="px-10 py-5 text-[10px] font-black text-slate-300 uppercase tracking-widest">Tipo</th>
+                      <th className="px-10 py-5 text-[10px] font-black text-slate-300 uppercase tracking-widest">Entidade</th>
+                      <th className="px-10 py-5 text-[10px] font-black text-slate-300 uppercase tracking-widest">Conta Contábil</th>
+                      <th className="px-10 py-5 w-10"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {mappings.length === 0 ? (
+                      <tr>
+                        <td colSpan={4} className="py-24 text-center">
+                          <p className="text-xs font-bold text-slate-300 uppercase tracking-widest">Nenhum mapeamento configurado</p>
+                        </td>
+                      </tr>
+                    ) : (
+                      mappings.map((mapping) => (
+                        <tr key={mapping.id} className="hover:bg-slate-50/50 transition-colors group">
+                          <td className="px-10 py-5">
+                            <span className="text-xs font-black text-slate-400 uppercase tracking-widest">{mapping.type}</span>
+                          </td>
+                          <td className="px-10 py-5">
+                            <span className="text-sm font-bold text-slate-800">{mapping.entity_name}</span>
+                          </td>
+                          <td className="px-10 py-5">
+                            <div className="flex items-center gap-2">
+                               <span className="text-xs font-black text-blue-600 font-mono">{mapping.chart_of_accounts?.code}</span>
+                               <span className="text-sm font-semibold text-slate-700">{mapping.chart_of_accounts?.name}</span>
+                            </div>
+                          </td>
+                          <td className="px-10 py-5 text-right">
+                             <button 
+                                onClick={() => deleteMapping(mapping.id)}
+                                className="p-2 text-slate-200 hover:text-rose-500 transition-colors"
+                              >
+                               <Trash2 size={16}/>
+                             </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        ) : activeSettingsSubTab === 'Saldos Iniciais' ? (
+          <div className="space-y-8 animate-in fade-in duration-500">
+            {/* Novo Saldo Inicial - Card Superior */}
+            <div className="bg-white border border-slate-100 rounded-3xl p-8 shadow-sm space-y-8">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 tracking-tight">Novo Saldo Inicial</h3>
+                <p className="text-xs text-slate-400 font-medium">Configure os saldos iniciais das contas do Balanço Patrimonial</p>
+              </div>
+
+              <div className="flex flex-col lg:flex-row items-end gap-5">
+                <div className="flex-[2] w-full space-y-2">
+                   <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Conta</label>
+                   <div className="relative group">
+                     <select 
+                        value={balanceForm.accountId}
+                        onChange={e => setBalanceForm({...balanceForm, accountId: e.target.value})}
+                        className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 px-4 text-sm font-semibold text-slate-700 appearance-none outline-none focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all"
+                     >
+                       <option value="">Selecione a conta...</option>
+                       {accounts.map(acc => (
+                         <option key={acc.id} value={acc.id}>{acc.code} - {acc.name}</option>
+                       ))}
+                     </select>
+                     <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none group-hover:text-slate-500" size={16} />
+                   </div>
+                </div>
+
+                <div className="flex-1 w-full space-y-2">
+                   <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Data de Referência</label>
+                   <div className="relative group">
+                     <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none" size={16} />
+                     <input 
+                        type="date" 
+                        value={balanceForm.date}
+                        onChange={e => setBalanceForm({...balanceForm, date: e.target.value})}
+                        className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 pl-11 pr-4 text-sm font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all"
+                     />
+                   </div>
+                </div>
+
+                <div className="flex-1 w-full space-y-2">
+                   <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Valor (R$)</label>
+                   <input 
+                      type="text" 
+                      placeholder="0,00"
+                      value={balanceForm.amount}
+                      onChange={e => setBalanceForm({...balanceForm, amount: e.target.value})}
+                      className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 px-4 text-sm font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all shadow-inner"
+                   />
+                </div>
+
+                <div className="flex-[2] w-full space-y-2">
+                   <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Observação</label>
+                   <input 
+                      type="text" 
+                      placeholder="Opcional"
+                      value={balanceForm.notes}
+                      /* Corrected the variable name from formData to balanceForm */
+                      onChange={e => setBalanceForm({...balanceForm, notes: e.target.value})}
+                      className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 px-4 text-sm font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all"
+                   />
+                </div>
+
+                <button 
+                  onClick={handleAddBalance}
+                  className="bg-[#0042b3] text-white px-8 py-3 rounded-xl text-sm font-bold hover:bg-blue-800 transition-all flex items-center gap-2 whitespace-nowrap shadow-lg shadow-blue-600/20 active:scale-95"
+                >
+                  <Plus size={18} /> Adicionar
+                </button>
+              </div>
+            </div>
+
+            {/* Saldos Configurados - Card Inferior */}
+            <div className="bg-white border border-slate-100 rounded-3xl shadow-sm overflow-hidden min-h-[400px] flex flex-col">
+              <div className="p-8 pb-4">
+                <h3 className="text-lg font-bold text-slate-900 tracking-tight">Saldos Configurados</h3>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-white border-y border-slate-100">
+                      <th className="px-10 py-5 text-[10px] font-black text-slate-300 uppercase tracking-widest">Conta</th>
+                      <th className="px-10 py-5 text-[10px] font-black text-slate-300 uppercase tracking-widest">Data</th>
+                      <th className="px-10 py-5 text-[10px] font-black text-slate-300 uppercase tracking-widest text-right">Valor</th>
+                      <th className="px-10 py-5 text-[10px] font-black text-slate-300 uppercase tracking-widest">Observação</th>
+                      <th className="px-10 py-5 w-10"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {initialBalances.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="py-24 text-center">
+                          <p className="text-xs font-bold text-slate-300 uppercase tracking-widest">Nenhum saldo inicial configurado</p>
+                        </td>
+                      </tr>
+                    ) : (
+                      initialBalances.map((item) => (
+                        <tr key={item.id} className="hover:bg-slate-50/50 transition-colors group">
+                          <td className="px-10 py-5">
+                            <div className="flex items-center gap-2">
+                               <span className="text-xs font-black text-slate-900 font-mono">{item.chart_of_accounts?.code}</span>
+                               <span className="text-sm font-semibold text-slate-700">{item.chart_of_accounts?.name}</span>
+                            </div>
+                          </td>
+                          <td className="px-10 py-5">
+                            <span className="text-xs font-medium text-slate-500">{new Date(item.reference_date).toLocaleDateString('pt-BR')}</span>
+                          </td>
+                          <td className="px-10 py-5 text-right">
+                            <span className="text-sm font-black text-slate-900">{formatCurrency(item.amount)}</span>
+                          </td>
+                          <td className="px-10 py-5">
+                            <span className="text-xs text-slate-400 italic line-clamp-1">{item.notes || '-'}</span>
+                          </td>
+                          <td className="px-10 py-5 text-right">
+                             <button 
+                                onClick={() => deleteBalance(item.id)}
+                                className="p-2 text-slate-200 hover:text-rose-500 transition-colors"
+                              >
+                               <Trash2 size={16}/>
+                             </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         ) : (
-          <div className="bg-white border border-slate-100 rounded-[2.5rem] p-10 min-h-[400px] shadow-sm">
-            {activeSettingsSubTab === 'Mapeamentos' && (
-              <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
-                <div className="p-4 bg-slate-50 rounded-full text-slate-300"><LinkIcon size={40}/></div>
-                <h3 className="text-lg font-bold text-slate-900 uppercase tracking-tight">Mapeamento de Categorias</h3>
-                <p className="text-sm text-slate-400 max-w-md">Vincule as categorias dos lançamentos financeiros às contas do seu Plano de Contas Contábil.</p>
-              </div>
-            )}
+          <div className="bg-white border border-slate-100 rounded-[2.5rem] p-10 min-h-[400px] shadow-sm space-y-12">
+            <div>
+              <h3 className="text-xl font-bold text-slate-900 tracking-tight">Configurações Contábeis</h3>
+              <p className="text-sm text-slate-400 font-medium">Configure as preferências gerais do módulo contábil</p>
+            </div>
 
-            {activeSettingsSubTab === 'Saldos Iniciais' && (
-              <div className="space-y-8">
-                <div className="p-6 bg-amber-50 border border-amber-100 rounded-2xl flex items-start gap-4">
-                  <AlertCircle className="text-amber-500 mt-1" size={20} />
-                  <div className="space-y-1">
-                    <h4 className="text-sm font-bold text-amber-900 uppercase tracking-tight">Aviso de Configuração</h4>
-                    <p className="text-xs text-amber-700 leading-relaxed">Para que o Balanço Patrimonial seja gerado corretamente, você deve informar o saldo de abertura das contas de Ativo e Passivo em 01/01/2026.</p>
-                  </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+              <div className="space-y-2">
+                <label className="text-[11px] font-black text-slate-900 uppercase tracking-widest ml-1">Regime Padrão</label>
+                <div className="relative">
+                  <select 
+                    value={accSettings.default_regime}
+                    onChange={e => setAccSettings({...accSettings, default_regime: e.target.value})}
+                    className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3.5 px-5 text-sm font-semibold text-slate-700 appearance-none outline-none focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all"
+                  >
+                    <option>Regime de Caixa</option>
+                    <option>Regime de Competência</option>
+                  </select>
+                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none" size={18} />
                 </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="space-y-4">
-                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Data de Referência</label>
-                    <input type="date" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold outline-none" defaultValue="2026-01-01" />
-                  </div>
-                  <div className="space-y-4">
-                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Total de Saldos de Abertura (R$)</label>
-                    <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-black text-slate-900" placeholder="0,00" disabled />
-                  </div>
-                </div>
+                <p className="text-[10px] text-slate-400 font-medium ml-1">Define qual regime será usado por padrão nos relatórios</p>
               </div>
-            )}
 
-            {activeSettingsSubTab === 'Configurações' && (
-              <div className="space-y-6">
-                <h3 className="text-lg font-bold text-slate-900 uppercase tracking-tight">Preferências Contábeis</h3>
-                <div className="grid gap-4">
-                    <div className="flex items-center justify-between p-6 bg-slate-50/50 border border-slate-100 rounded-2xl">
-                      <div>
-                        <p className="text-sm font-bold text-slate-900 uppercase tracking-tight">Encerramento Automático</p>
-                        <p className="text-xs text-slate-400">Encerrar exercício social automaticamente ao final do ano.</p>
-                      </div>
-                      <button className="w-11 h-6 bg-slate-200 rounded-full relative"><div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full"></div></button>
-                    </div>
+              <div className="space-y-2">
+                <label className="text-[11px] font-black text-slate-900 uppercase tracking-widest ml-1">Início do Ano Fiscal</label>
+                <div className="relative">
+                  <select 
+                    value={accSettings.fiscal_year_start}
+                    onChange={e => setAccSettings({...accSettings, fiscal_year_start: e.target.value})}
+                    className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3.5 px-5 text-sm font-semibold text-slate-700 appearance-none outline-none focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all"
+                  >
+                    {['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'].map(m => (
+                      <option key={m}>{m}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none" size={18} />
                 </div>
+                <p className="text-[10px] text-slate-400 font-medium ml-1">Mês de início do ano fiscal para cálculos acumulados</p>
               </div>
-            )}
+
+              <div className="space-y-2">
+                <label className="text-[11px] font-black text-slate-900 uppercase tracking-widest ml-1">Conta de Caixa Principal</label>
+                <div className="relative">
+                  <select 
+                    value={accSettings.main_cash_account_id}
+                    onChange={e => setAccSettings({...accSettings, main_cash_account_id: e.target.value})}
+                    className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3.5 px-5 text-sm font-semibold text-slate-700 appearance-none outline-none focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all"
+                  >
+                    <option value="">Selecione...</option>
+                    {accounts.filter(a => a.nature === 'Ativo').map(acc => (
+                      <option key={acc.id} value={acc.id}>{acc.code} - {acc.name}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none" size={18} />
+                </div>
+                <p className="text-[10px] text-slate-400 font-medium ml-1">Conta padrão para cálculo do saldo de caixa no DFC</p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[11px] font-black text-slate-900 uppercase tracking-widest ml-1">Conta de Lucros Acumulados</label>
+                <div className="relative">
+                  <select 
+                    value={accSettings.retained_earnings_account_id}
+                    onChange={e => setAccSettings({...accSettings, retained_earnings_account_id: e.target.value})}
+                    className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3.5 px-5 text-sm font-semibold text-slate-700 appearance-none outline-none focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all"
+                  >
+                    <option value="">Selecione...</option>
+                    {accounts.filter(a => a.nature === 'Patrimônio Líquido').map(acc => (
+                      <option key={acc.id} value={acc.id}>{acc.code} - {acc.name}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none" size={18} />
+                </div>
+                <p className="text-[10px] text-slate-400 font-medium ml-1">Conta onde o lucro líquido é acumulado no Balanço</p>
+              </div>
+            </div>
+
+            <div className="pt-6">
+              <button 
+                onClick={handleSaveAccountingSettings}
+                disabled={isSavingSettings}
+                className="bg-[#0042b3] text-white px-8 py-3 rounded-xl text-sm font-bold hover:bg-blue-800 transition-all flex items-center gap-2 whitespace-nowrap shadow-lg shadow-blue-600/20 active:scale-95 disabled:opacity-70"
+              >
+                {isSavingSettings ? <Loader2 size={18} className="animate-spin" /> : <><Save size={18} /> Salvar Configurações</>}
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -299,7 +730,6 @@ const Accounting: React.FC<AccountingProps> = ({ user }) => {
 
   const renderBalanceSheetView = () => (
     <div className="space-y-6">
-      {/* Banner de Status - Equação Contábil */}
       <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 flex items-center gap-3">
         <CheckCircle2 size={18} className="text-emerald-500" />
         <div className="flex flex-col">
@@ -308,7 +738,6 @@ const Accounting: React.FC<AccountingProps> = ({ user }) => {
         </div>
       </div>
 
-      {/* Alerta de Configuração */}
       <div className="bg-white border border-slate-100 rounded-xl p-6 shadow-sm flex items-start gap-4">
         <div className="p-2 bg-slate-50 text-slate-400 rounded-lg">
           <Info size={20} />
@@ -325,10 +754,7 @@ const Accounting: React.FC<AccountingProps> = ({ user }) => {
         </div>
       </div>
 
-      {/* Colunas Ativo / Passivo */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
-        {/* Lado do Ativo */}
         <div className="bg-white border border-slate-100 rounded-[2.5rem] p-8 md:p-10 shadow-sm space-y-8">
            <div className="flex justify-between items-start">
               <div>
@@ -339,7 +765,6 @@ const Accounting: React.FC<AccountingProps> = ({ user }) => {
            </div>
 
            <div className="space-y-6">
-              {/* Ativo Circulante */}
               <div className="space-y-3">
                  <div className="flex justify-between items-center border-b border-slate-50 pb-2">
                     <span className="text-sm font-bold text-slate-800">Ativo Circulante</span>
@@ -357,7 +782,6 @@ const Accounting: React.FC<AccountingProps> = ({ user }) => {
                  </div>
               </div>
 
-              {/* Ativo Não Circulante */}
               <div className="space-y-3">
                  <div className="flex justify-between items-center border-b border-slate-50 pb-2">
                     <span className="text-sm font-bold text-slate-800">Ativo Não Circulante</span>
@@ -371,7 +795,6 @@ const Accounting: React.FC<AccountingProps> = ({ user }) => {
            </div>
         </div>
 
-        {/* Lado do Passivo + PL */}
         <div className="bg-white border border-slate-100 rounded-[2.5rem] p-8 md:p-10 shadow-sm space-y-10">
            <div className="flex justify-between items-start">
               <div>
@@ -382,7 +805,6 @@ const Accounting: React.FC<AccountingProps> = ({ user }) => {
            </div>
 
            <div className="space-y-8">
-              {/* Passivo */}
               <div className="space-y-4">
                  <div className="flex justify-between items-center border-b border-slate-50 pb-2">
                     <span className="text-sm font-bold text-slate-900">Passivo</span>
@@ -422,7 +844,6 @@ const Accounting: React.FC<AccountingProps> = ({ user }) => {
                  </div>
               </div>
 
-              {/* Patrimônio Líquido */}
               <div className="space-y-4">
                  <div className="flex justify-between items-center border-b border-slate-50 pb-2">
                     <span className="text-sm font-bold text-slate-900">Patrimônio Líquido</span>
@@ -461,7 +882,6 @@ const Accounting: React.FC<AccountingProps> = ({ user }) => {
         </div>
       </div>
 
-      {/* Footer / Summary Bar */}
       <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="flex flex-wrap items-center gap-10">
           <div className="space-y-1">
@@ -489,7 +909,6 @@ const Accounting: React.FC<AccountingProps> = ({ user }) => {
 
   const renderReconciliationView = () => (
     <div className="space-y-8">
-      {/* Cards de Resumo Reconciliação */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white border border-slate-100 rounded-2xl p-8 shadow-sm">
           <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Lucro Líquido (DRE)</p>
@@ -510,7 +929,6 @@ const Accounting: React.FC<AccountingProps> = ({ user }) => {
         </div>
       </div>
 
-      {/* Tabela de Reconciliação */}
       <div className="bg-white border border-slate-100 rounded-[2.5rem] shadow-sm overflow-hidden flex flex-col">
         <div className="p-10 pb-6">
            <div className="flex items-center gap-3">
@@ -561,7 +979,6 @@ const Accounting: React.FC<AccountingProps> = ({ user }) => {
           </table>
         </div>
 
-        {/* Box Explicativo Inferior */}
         <div className="p-10 pt-10 border-t border-slate-50">
            <div className="p-8 bg-slate-50/50 border border-slate-100 rounded-3xl space-y-4">
               <h4 className="text-[13px] font-bold text-slate-600">Por que existe diferença?</h4>
@@ -587,8 +1004,6 @@ const Accounting: React.FC<AccountingProps> = ({ user }) => {
 
   return (
     <div className="bg-[#fcfcfd] min-h-screen animate-in fade-in duration-700 pb-24 md:pb-20 px-4 md:px-10 pt-6 md:pt-8">
-      
-      {/* 1. Header Principal */}
       <div className="flex items-start gap-4 mb-10">
         <div className="p-3 bg-blue-50 text-blue-600 rounded-xl border border-blue-100">
           <Scale size={24} />
@@ -599,7 +1014,6 @@ const Accounting: React.FC<AccountingProps> = ({ user }) => {
         </div>
       </div>
 
-      {/* 2. Barra de Filtros Master */}
       <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm mb-8 flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="flex flex-wrap items-center gap-8 w-full md:w-auto">
           <div className="flex items-center gap-3">
@@ -626,7 +1040,6 @@ const Accounting: React.FC<AccountingProps> = ({ user }) => {
         <div className="text-xs font-bold text-slate-400 whitespace-nowrap">01 fev - 28 fev 2026</div>
       </div>
 
-      {/* 3. Navegação por Abas */}
       <div className="flex items-center gap-1 border-b border-slate-200 mb-8 overflow-x-auto no-scrollbar">
         {[
           { id: 'DRE', icon: <FileText size={16} /> },
@@ -651,7 +1064,6 @@ const Accounting: React.FC<AccountingProps> = ({ user }) => {
         <div className="py-32 flex flex-col items-center justify-center"><Loader2 className="animate-spin text-blue-600 mb-4" size={40} /></div>
       ) : activeTab === 'DFC' ? (
         <div className="space-y-6">
-          {/* Cards Superiores DFC */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm flex items-center justify-between">
               <div>
@@ -731,7 +1143,6 @@ const Accounting: React.FC<AccountingProps> = ({ user }) => {
       ) : activeTab === 'Configurações' ? (
         renderSettingsView()
       ) : (
-        /* Visão DRE Existente */
         <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden min-h-[500px]">
           <div className="p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div className="flex items-center gap-3">
@@ -768,6 +1179,12 @@ const Accounting: React.FC<AccountingProps> = ({ user }) => {
           </div>
         </div>
       )}
+
+      <NewAccountModal 
+        isOpen={isNewAccountModalOpen} 
+        onClose={() => { setIsNewAccountModalOpen(false); fetchData(); }} 
+        user={user} 
+      />
     </div>
   );
 };
