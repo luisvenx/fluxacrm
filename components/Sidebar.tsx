@@ -176,7 +176,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           <img 
             src="https://lh3.googleusercontent.com/d/1Cga62qbLuN6sEj_qXQB-8IYIHHN0MVdD" 
             alt="Fluxa Logo" 
-            className={`transition-all duration-500 object-contain ${isCollapsed ? 'h-7 lg:h-7 lg:w-7' : 'h-8'}`}
+            className={`transition-all duration-500 object-contain ${isCollapsed ? 'h-10 lg:h-10 lg:w-10' : 'h-14'}`}
           />
         </div>
         
