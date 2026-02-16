@@ -32,11 +32,6 @@ const Taxes: React.FC<TaxesProps> = ({ user }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [provisionedTotal, setProvisionedTotal] = useState(0);
 
-  const [filters, setFilters] = useState({
-    status: 'Todos',
-    sphere: 'Todos'
-  });
-
   const fetchData = async () => {
     if (!user) return;
     setIsLoading(true);
@@ -76,25 +71,49 @@ const Taxes: React.FC<TaxesProps> = ({ user }) => {
       {/* Header Corporativo */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
         <div>
-          <h2 className="text-3xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">
-            Compliance <span className="text-blue-600 not-italic">Tributário</span>
+          <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">
+            Compliance <span className="text-[#01223d] not-italic">Tributário</span>
           </h2>
-          <p className="text-slate-400 font-bold text-[11px] uppercase tracking-widest mt-3">Monitoramento de obrigações e provisão fiscal auditada</p>
+          <p className="text-slate-400 font-bold text-[11px] uppercase tracking-widest mt-3">Provisão fiscal e obrigações auditadas no ledger SQL</p>
         </div>
         <button 
           onClick={() => setIsNewTaxModalOpen(true)} 
-          className="w-full md:w-auto bg-blue-600 text-white px-8 py-3.5 rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-blue-700 shadow-lg transition-all flex items-center justify-center gap-2 active:scale-95"
+          className="w-full md:w-auto bg-[#01223d] text-white px-8 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-black shadow-lg transition-all flex items-center justify-center gap-2 active:scale-95 group"
         >
-          <Plus size={18} strokeWidth={3} /> Nova Regra Fiscal
+          <Plus size={18} strokeWidth={3} className="text-[#b4a183] group-hover:rotate-90 transition-transform" /> Nova Regra Fiscal
         </button>
       </div>
 
-      {/* KPI Row (StatCards) */}
+      {/* KPI Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-        <StatCard title="Tributos Ativos" value={taxes.length.toString()} subtitle="Configurados na conta" icon={<Building2 />} color="blue" />
-        <StatCard title="Provisão Mensal" value={formatCurrency(provisionedTotal)} subtitle="Estimativa s/ faturamento" icon={<Percent />} color="blue" />
-        <StatCard title="Total Liquidado" value="R$ 0,00" subtitle="Impostos Pagos" icon={<CheckCircle2 />} color="emerald" />
-        <StatCard title="Total Pendente" value="R$ 0,00" subtitle="Obrigações em Aberto" icon={<Clock />} color="blue" />
+        <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex items-center justify-between group hover:border-[#b4a183] transition-all">
+           <div>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tributos Ativos</p>
+              <h3 className="text-2xl font-black text-slate-900 tracking-tighter mt-1">{taxes.length}</h3>
+           </div>
+           <div className="p-2.5 bg-slate-50 text-[#01223d] rounded-lg shadow-sm"><Building2 size={20}/></div>
+        </div>
+        <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex items-center justify-between group">
+           <div>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Provisão Ref.</p>
+              <h3 className="text-2xl font-black text-slate-900 tracking-tighter mt-1">{formatCurrency(provisionedTotal)}</h3>
+           </div>
+           <div className="p-2.5 bg-slate-50 text-[#b4a183] rounded-lg shadow-sm"><Percent size={20}/></div>
+        </div>
+        <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex items-center justify-between">
+           <div>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Liquidado</p>
+              <h3 className="text-2xl font-black text-emerald-600 tracking-tighter mt-1">R$ 0,00</h3>
+           </div>
+           <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-lg shadow-sm"><CheckCircle2 size={20}/></div>
+        </div>
+        <div className="bg-[#01223d] rounded-xl p-6 shadow-2xl flex items-center justify-between text-white overflow-hidden relative">
+           <div className="relative z-10">
+              <p className="text-[10px] font-black text-white/30 uppercase tracking-widest">Pendente</p>
+              <h3 className="text-2xl font-black text-white tracking-tighter mt-1">R$ 0,00</h3>
+           </div>
+           <Clock size={40} className="absolute -right-2 -bottom-2 opacity-10" />
+        </div>
       </div>
 
       {/* Toolbar SaaS */}
@@ -104,8 +123,8 @@ const Taxes: React.FC<TaxesProps> = ({ user }) => {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`flex-1 py-2.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${
-                activeTab === tab ? 'bg-white text-blue-600 shadow-sm border border-slate-100' : 'text-slate-400 hover:text-slate-700'
+              className={`flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                activeTab === tab ? 'bg-[#01223d] text-white shadow-sm' : 'text-slate-400 hover:text-slate-700'
               }`}
             >
               {tab}
@@ -114,41 +133,28 @@ const Taxes: React.FC<TaxesProps> = ({ user }) => {
         </div>
         
         <div className="flex items-center gap-3 px-2">
-           <div className="relative">
-              <select 
-                value={filters.sphere}
-                onChange={e => setFilters({...filters, sphere: e.target.value})}
-                className="bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-[10px] font-black uppercase appearance-none pr-10 outline-none focus:border-blue-500 transition-all"
-              >
-                <option>Esfera: Todas</option>
-                <option>Federal</option>
-                <option>Estadual</option>
-                <option>Municipal</option>
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none" size={14} />
-           </div>
-           <button onClick={fetchData} className="p-2.5 bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-blue-600 transition-all shadow-sm">
+           <button onClick={fetchData} className="p-2.5 bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-[#b4a183] transition-all shadow-sm">
              <RefreshCcw size={16} className={isLoading ? 'animate-spin' : ''} />
            </button>
         </div>
       </div>
 
-      {/* Tabela Fiscal (Journal Style) */}
-      <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden min-h-[450px] flex flex-col">
+      {/* Tabela Fiscal - Arredondamento Reduzido */}
+      <div className="bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden min-h-[450px] flex flex-col">
         {isLoading ? (
           <div className="flex-1 flex flex-col items-center justify-center py-20">
-             <Loader2 className="animate-spin text-blue-600 mb-4" size={32} />
-             <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Carregando matriz fiscal...</p>
+             <Loader2 className="animate-spin text-[#01223d] mb-4" size={32} />
+             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Processando matriz fiscal...</p>
           </div>
         ) : (
           <div className="overflow-x-auto no-scrollbar">
             <table className="w-full text-left border-collapse min-w-[800px]">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200">
-                  <th className="px-10 py-5 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Tributo & Identificação Técnica</th>
-                  <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-center">Esfera</th>
-                  <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-center">Alíquota Real</th>
-                  <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-center">Recorrência</th>
+                  <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Tributo & Identificação</th>
+                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Esfera</th>
+                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Alíquota</th>
+                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Recorrência</th>
                   <th className="px-8 py-5 w-10"></th>
                 </tr>
               </thead>
@@ -158,7 +164,7 @@ const Taxes: React.FC<TaxesProps> = ({ user }) => {
                     <td className="px-10 py-6">
                       <div className="flex flex-col">
                         <span className="text-sm font-black text-slate-900 tracking-tight uppercase italic">{tax.name}</span>
-                        <span className="text-[9px] font-bold text-slate-400 uppercase mt-1 tracking-widest">Base: {tax.calculation_base || 'Faturamento Consolidado'}</span>
+                        <span className="text-[9px] font-bold text-slate-400 uppercase mt-1 tracking-widest">Base: {tax.calculation_base || 'Geral'}</span>
                       </div>
                     </td>
                     <td className="px-8 py-6 text-center">
@@ -167,15 +173,14 @@ const Taxes: React.FC<TaxesProps> = ({ user }) => {
                       </span>
                     </td>
                     <td className="px-8 py-6 text-center">
-                      <div className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-600 px-4 py-2 rounded-lg border border-blue-100 shadow-sm group-hover:scale-105 transition-transform">
-                        <Percent size={12} strokeWidth={3} />
-                        <span className="text-sm font-black tracking-tighter">{tax.rate}%</span>
+                      <div className="inline-flex items-center gap-1.5 bg-slate-50 text-[#01223d] px-4 py-2 rounded-lg border border-slate-100 shadow-sm group-hover:scale-105 transition-transform">
+                        <span className="text-sm font-black tracking-tighter italic">{tax.rate}%</span>
                       </div>
                     </td>
                     <td className="px-8 py-6 text-center">
                       <div className="flex flex-col items-center">
                         <span className="text-[10px] font-black text-slate-700 uppercase tracking-widest">{tax.recurrence}</span>
-                        <span className="text-[9px] font-bold text-slate-400 uppercase mt-0.5">Vencimento: Dia {tax.due_day}</span>
+                        <span className="text-[9px] font-bold text-slate-400 uppercase mt-0.5 tracking-tight italic">Dia {tax.due_day}</span>
                       </div>
                     </td>
                     <td className="px-10 py-6 text-right">
@@ -188,7 +193,7 @@ const Taxes: React.FC<TaxesProps> = ({ user }) => {
                   <tr>
                     <td colSpan={5} className="py-32 text-center opacity-30">
                        <Receipt size={48} strokeWidth={1} className="mx-auto text-slate-200 mb-4" />
-                       <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Nenhuma regra fiscal ativa</p>
+                       <p className="text-xs font-black text-slate-400 uppercase tracking-widest italic">Nenhuma regra fiscal ativa</p>
                     </td>
                   </tr>
                 )}

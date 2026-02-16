@@ -67,7 +67,7 @@ const LoginView: React.FC<LoginViewProps> = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-white relative font-['Inter'] selection:bg-blue-600 selection:text-white">
+    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-white relative font-['Inter'] selection:bg-[#b4a183] selection:text-white">
       
       {/* Blueprint Pattern Background */}
       <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.03]" 
@@ -77,13 +77,13 @@ const LoginView: React.FC<LoginViewProps> = () => {
       <div className="relative z-10 w-full max-w-[480px] p-8 flex flex-col items-center">
         
         {/* Logo Section - Pure & Animated */}
-        <div className="mb-12 flex flex-col items-center animate-in fade-in zoom-in-95 duration-1000">
+        <div className="mb-10 flex flex-col items-center animate-in fade-in zoom-in-95 duration-1000">
           <div className="relative">
-            <div className="absolute -inset-4 bg-blue-500/5 blur-2xl rounded-full"></div>
+            <div className="absolute -inset-4 bg-[#b4a183]/5 blur-2xl rounded-full"></div>
             <img 
-              src="https://lh3.googleusercontent.com/d/1Cga62qbLuN6sEj_qXQB-8IYIHHN0MVdD" 
+              src="https://lh3.googleusercontent.com/d/1etimAcTlGnq4yMgwIaChmuykWjsktTKO" 
               alt="Fluxa Logo" 
-              className="h-20 w-auto object-contain relative animate-logo-float"
+              className="h-14 w-auto object-contain relative animate-logo-float"
             />
           </div>
         </div>
@@ -95,7 +95,7 @@ const LoginView: React.FC<LoginViewProps> = () => {
             <h1 className="text-2xl font-black text-slate-900 tracking-tight uppercase leading-none">
               {isRegistering ? 'Provisionar' : 'Autenticar'}
             </h1>
-            <div className="h-1 w-12 bg-blue-600 mt-4 rounded-full"></div>
+            <div className="h-1 w-12 bg-[#b4a183] mt-4 rounded-full"></div>
           </div>
 
           {error && (
@@ -119,7 +119,7 @@ const LoginView: React.FC<LoginViewProps> = () => {
                 <input 
                   type="text" 
                   required
-                  className="w-full bg-slate-50/50 border-b-2 border-slate-100 px-0 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition-all placeholder:text-slate-300"
+                  className="w-full bg-slate-50/50 border-b-2 border-slate-100 px-0 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:border-[#b4a183] focus:bg-white transition-all placeholder:text-slate-300"
                   value={formData.name}
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
                 />
@@ -131,7 +131,7 @@ const LoginView: React.FC<LoginViewProps> = () => {
               <input 
                 type="email" 
                 required
-                className="w-full bg-slate-50/50 border-b-2 border-slate-100 px-0 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition-all placeholder:text-slate-300"
+                className="w-full bg-slate-50/50 border-b-2 border-slate-100 px-0 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:border-[#b4a183] focus:bg-white transition-all placeholder:text-slate-300"
                 value={formData.email}
                 onChange={(e) => setFormData({...formData, email: e.target.value})}
               />
@@ -143,14 +143,14 @@ const LoginView: React.FC<LoginViewProps> = () => {
                 <input 
                   type={showPassword ? "text" : "password"} 
                   required
-                  className="w-full bg-slate-50/50 border-b-2 border-slate-100 px-0 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition-all"
+                  className="w-full bg-slate-50/50 border-b-2 border-slate-100 px-0 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:border-[#b4a183] focus:bg-white transition-all"
                   value={formData.password}
                   onChange={(e) => setFormData({...formData, password: e.target.value})}
                 />
                 <button 
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 text-slate-300 hover:text-blue-600 transition-colors"
+                  className="absolute right-0 top-1/2 -translate-y-1/2 text-slate-300 hover:text-[#b4a183] transition-colors"
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -163,7 +163,7 @@ const LoginView: React.FC<LoginViewProps> = () => {
                 <input 
                   type={showPassword ? "text" : "password"} 
                   required
-                  className="w-full bg-slate-50/50 border-b-2 border-slate-100 px-0 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition-all"
+                  className="w-full bg-slate-50/50 border-b-2 border-slate-100 px-0 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:border-[#b4a183] focus:bg-white transition-all"
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
                 />
@@ -177,11 +177,11 @@ const LoginView: React.FC<LoginViewProps> = () => {
                 className="w-full bg-slate-900 text-white py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] shadow-xl shadow-slate-200 transition-all active:scale-[0.98] hover:bg-black disabled:opacity-50 flex items-center justify-center gap-3 group"
               >
                 {isLoading ? (
-                  <Loader2 size={18} className="animate-spin text-blue-500" />
+                  <Loader2 size={18} className="animate-spin text-[#b4a183]" />
                 ) : (
                   <>
                     {isRegistering ? 'Iniciar Provisionamento' : 'Acessar Workspace'}
-                    <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform text-blue-500" />
+                    <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform text-[#b4a183]" />
                   </>
                 )}
               </button>
@@ -195,7 +195,7 @@ const LoginView: React.FC<LoginViewProps> = () => {
                 setError(null);
                 setSuccess(null);
               }}
-              className="text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-blue-600 transition-all border-b border-transparent hover:border-blue-600 pb-1"
+              className="text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-[#b4a183] transition-all border-b border-transparent hover:border-[#b4a183] pb-1"
             >
               {isRegistering ? 'Já possuo uma estrutura? Entrar' : "Novo por aqui? Criar conta corporativa"}
             </button>

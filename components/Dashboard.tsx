@@ -110,15 +110,14 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   return (
     <div className="bg-[#fcfcfd] min-h-screen pb-24 md:pb-10 animate-in fade-in duration-700 font-['Inter']">
       
-      {/* Header Visual - Matching Image Top Section */}
       <div className="px-6 md:px-8 pt-8 flex flex-col gap-6">
         <div className="flex justify-between items-start">
            <div>
-              <h1 className="text-xl font-bold text-slate-900 tracking-tight">Dashboard Financeiro</h1>
-              <p className="text-xs text-slate-400 font-medium">Visão geral das suas finanças</p>
+              <h1 className="text-xl font-bold text-slate-900 tracking-tight uppercase italic">Monitoramento <span className="text-[#01223d] not-italic">Financeiro</span></h1>
+              <p className="text-xs text-slate-400 font-medium uppercase tracking-widest">Inteligência de Dados v2.9</p>
            </div>
            <button className="flex items-center gap-2 px-4 py-1.5 bg-white border border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
-             <Tv size={14} className="text-slate-400" /> Modo TV
+             <Tv size={14} className="text-[#b4a183]" /> Modo TV
            </button>
         </div>
 
@@ -133,7 +132,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                 <button 
                   key={p} 
                   onClick={() => setActivePeriod(p)}
-                  className={`px-4 py-1.5 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all ${activePeriod === p ? 'bg-[#01223d] text-white' : 'text-slate-500 hover:bg-slate-50'}`}
+                  className={`px-4 py-1.5 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all ${activePeriod === p ? 'bg-[#01223d] text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
                 >
                   {p}
                 </button>
@@ -166,64 +165,60 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
            </div>
         </div>
 
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">Indicadores Principais</p>
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">Métricas de Performance</p>
 
         {/* ROW 1: 4 Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-           {/* Entradas */}
            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col justify-between group hover:border-[#b4a183] transition-all">
               <div className="flex justify-between items-start mb-4">
                  <div>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Entradas</p>
                     <h3 className="text-2xl font-black text-slate-900 tracking-tight mt-2">{formatCurrency(metrics.entradas)}</h3>
-                    <p className="text-[10px] text-slate-400 mt-1">0 transações</p>
+                    <p className="text-[10px] text-slate-400 mt-1 uppercase font-bold">SQL Realtime</p>
                  </div>
-                 <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
+                 <div className="p-2 bg-slate-50 text-[#01223d] rounded-lg border border-slate-100 shadow-sm">
                     <TrendingUp size={16} />
                  </div>
               </div>
            </div>
 
-           {/* Saídas */}
            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col justify-between group hover:border-rose-200 transition-all">
               <div className="flex justify-between items-start mb-4">
                  <div>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Saídas</p>
                     <h3 className="text-2xl font-black text-slate-900 tracking-tight mt-2">{formatCurrency(metrics.saidas)}</h3>
-                    <p className="text-[10px] text-slate-400 mt-1">0 transações</p>
+                    <p className="text-[10px] text-slate-400 mt-1 uppercase font-bold">Despesa Operacional</p>
                  </div>
-                 <div className="p-2 bg-rose-50 text-rose-500 rounded-lg">
+                 <div className="p-2 bg-rose-50 text-rose-500 rounded-lg shadow-sm">
                     <ArrowUpRight size={16} />
                  </div>
               </div>
            </div>
 
-           {/* Lucro Líquido */}
            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col justify-between group">
               <div className="flex justify-between items-start mb-4">
                  <div>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lucro Líquido</p>
                     <h3 className="text-2xl font-black text-slate-900 tracking-tight mt-2">{formatCurrency(metrics.lucro)}</h3>
                     <div className="flex items-center gap-1 mt-1">
-                       <span className="text-[10px] text-slate-400">% do LL —</span>
+                       <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">% LL —</span>
                        <Info size={12} className="text-slate-300" />
                     </div>
                  </div>
-                 <div className="p-2 bg-emerald-50 text-emerald-500 rounded-lg opacity-50">
+                 <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg opacity-50 shadow-sm">
                     <TrendingUp size={16} />
                  </div>
               </div>
            </div>
 
-           {/* Ticket Médio */}
            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col justify-between group">
               <div className="flex justify-between items-start mb-4">
                  <div>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ticket Médio</p>
                     <h3 className="text-2xl font-black text-slate-900 tracking-tight mt-2">{formatCurrency(metrics.ticketMedio)}</h3>
-                    <p className="text-[10px] text-slate-400 mt-1">0 clientes ativos</p>
+                    <p className="text-[10px] text-slate-400 mt-1 uppercase font-bold">{metrics.activeClients} Clientes</p>
                  </div>
-                 <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+                 <div className="p-2 bg-slate-50 text-[#b4a183] rounded-lg border border-slate-100 shadow-sm">
                     <Users size={16} />
                  </div>
               </div>
@@ -232,7 +227,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
         {/* ROW 2: Intermediate KPI Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-           {/* Meta Gauge Card */}
            <div className="lg:col-span-3 bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col items-center justify-center min-h-[280px] relative">
               <div className="absolute top-4 left-4">
                  <div className="relative group">
@@ -243,8 +237,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                  </div>
               </div>
               <div className="absolute top-4 right-4 flex gap-2">
-                 <button className="text-slate-300 hover:text-slate-900"><Zap size={14}/></button>
-                 <button className="text-slate-300 hover:text-slate-900"><Maximize2 size={14}/></button>
+                 <button className="text-slate-300 hover:text-[#01223d]"><Zap size={14}/></button>
+                 <button className="text-slate-300 hover:text-[#01223d]"><Maximize2 size={14}/></button>
               </div>
 
               <div className="relative flex flex-col items-center gap-6 mt-4">
@@ -253,33 +247,32 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                     <Target size={32} className="absolute inset-0 m-auto text-slate-300" />
                  </div>
                  <div className="text-center">
-                    <p className="text-xs text-slate-400 font-medium">Meta não definida</p>
-                    <button className="mt-4 px-6 py-2 border border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 flex items-center gap-2 hover:bg-slate-50 transition-all">
-                       <Target size={14} className="text-slate-300" /> Definir Meta
+                    <p className="text-xs text-slate-400 font-medium uppercase">Meta não definida</p>
+                    <button className="mt-4 px-6 py-2 border border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 flex items-center gap-2 hover:bg-[#01223d] hover:text-white transition-all shadow-sm">
+                       <Target size={14} className="text-[#b4a183]" /> Definir Meta
                     </button>
                  </div>
               </div>
            </div>
 
-           {/* A Receber Card */}
            <div className="lg:col-span-3 bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col justify-between">
               <div>
                  <div className="flex items-center gap-2 mb-4">
-                    <Wallet size={16} className="text-amber-500" />
+                    <Wallet size={16} className="text-[#b4a183]" />
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">A Receber</p>
                  </div>
                  <h3 className="text-2xl font-black text-slate-900 tracking-tight">{formatCurrency(metrics.aReceber)}</h3>
-                 <p className="text-[10px] text-slate-400 font-medium mt-1">Total em aberto (atual + futuro)</p>
+                 <p className="text-[10px] text-slate-400 font-medium mt-1 uppercase tracking-tight">Vencimentos Futuros</p>
                  
                  <div className="mt-6 space-y-2">
                     <div className="flex justify-between text-[10px] font-bold uppercase tracking-tight">
                        <span className="text-slate-400">Recebido</span>
-                       <span className="text-slate-400">Em aberto</span>
+                       <span className="text-slate-400">Pendente</span>
                     </div>
                     <div className="h-1.5 w-full bg-slate-50 rounded-full overflow-hidden">
-                       <div className="h-full bg-amber-400/20" style={{ width: '0%' }}></div>
+                       <div className="h-full bg-[#b4a183]/40" style={{ width: '0%' }}></div>
                     </div>
-                    <div className="flex justify-between text-[11px] font-black text-slate-800">
+                    <div className="flex justify-between text-[11px] font-black text-slate-800 italic">
                        <span>{formatCurrency(0)}</span>
                        <span>{formatCurrency(metrics.aReceber)}</span>
                     </div>
@@ -290,49 +283,46 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                  <div className="bg-slate-50/50 p-3 rounded-lg border border-slate-100">
                     <div className="flex items-center gap-2 text-slate-400 mb-1">
                        <Receipt size={12} />
-                       <span className="text-[9px] font-black uppercase">Pendências</span>
+                       <span className="text-[9px] font-black uppercase">Faturas</span>
                     </div>
-                    <p className="text-sm font-black text-slate-900">0</p>
+                    <p className="text-sm font-black text-[#01223d]">0</p>
                  </div>
                  <div className="bg-slate-50/50 p-3 rounded-lg border border-slate-100">
                     <div className="flex items-center gap-2 text-slate-400 mb-1">
                        <Users size={12} />
-                       <span className="text-[9px] font-black uppercase">Clientes</span>
+                       <span className="text-[9px] font-black uppercase">Leads</span>
                     </div>
-                    <p className="text-sm font-black text-slate-900">0</p>
+                    <p className="text-sm font-black text-[#01223d]">0</p>
                  </div>
               </div>
            </div>
 
-           {/* Contas a Pagar Card */}
            <div className="lg:col-span-3 bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col">
               <div className="flex items-center gap-2 mb-4">
                  <Receipt size={16} className="text-rose-500" />
                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Contas a Pagar</p>
               </div>
               <h3 className="text-2xl font-black text-slate-900 tracking-tight">{formatCurrency(metrics.contasPagar)}</h3>
-              <p className="text-[10px] text-slate-400 font-medium mt-1">0 contas pendentes</p>
+              <p className="text-[10px] text-slate-400 font-medium mt-1 uppercase tracking-tight">Obrigações Exigíveis</p>
               
               <div className="mt-8 flex-1 border-t border-slate-50 pt-6">
-                 {/* Visual placeholder for graph as in image */}
                  <div className="h-2 w-full bg-slate-50 rounded-full" />
               </div>
            </div>
 
-           {/* MRR Card */}
            <div className="lg:col-span-3 bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col">
               <div className="flex justify-between items-start mb-4">
                  <div className="flex items-center gap-2">
-                    <RefreshCcw size={16} className="text-blue-500" />
+                    <RefreshCcw size={16} className="text-[#01223d]" />
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">MRR</p>
                  </div>
-                 <span className="bg-slate-100 text-slate-500 text-[9px] font-black px-2 py-0.5 rounded uppercase">{metrics.countContracts} contratos</span>
+                 <span className="bg-slate-900 text-[#b4a183] text-[9px] font-black px-2 py-0.5 rounded uppercase">{metrics.countContracts} Ativos</span>
               </div>
               <h3 className="text-2xl font-black text-slate-900 tracking-tight">{formatCurrency(metrics.mrr)}</h3>
-              <p className="text-[10px] text-slate-400 font-medium mt-1">Garantido mensalmente • Clique para detalhes</p>
+              <p className="text-[10px] text-slate-400 font-medium mt-1 uppercase tracking-tight">Recorrência Mensal</p>
               
               <div className="mt-auto py-8 text-center opacity-30">
-                 <p className="text-[11px] font-bold text-slate-400 uppercase">Nenhum contrato recorrente ativo</p>
+                 <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest italic">Nenhum contrato recorrente</p>
               </div>
            </div>
         </div>
@@ -341,7 +331,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
            <div className="bg-white border border-slate-200 rounded-xl p-8 shadow-sm">
               <div className="flex justify-between items-center mb-10">
-                 <h3 className="text-slate-900 font-bold text-[14px]">Entradas x Saídas</h3>
+                 <h3 className="text-slate-900 font-bold text-[14px] uppercase tracking-tight italic">Fluxo de <span className="text-[#01223d] not-italic">Caixa</span></h3>
               </div>
               <div className="h-[250px] w-full relative">
                  <div className="absolute inset-0 flex flex-col justify-between">
@@ -350,18 +340,17 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                  <div className="absolute bottom-0 left-0 right-0 flex justify-between px-2 text-[9px] font-bold text-slate-300">
                     <span>02/02</span><span>08/02</span><span>14/02</span><span>20/02</span><span>28/02</span>
                  </div>
-                 {/* Dummy data points line */}
                  <div className="absolute bottom-1/4 left-0 right-0 h-px bg-[#b4a183] opacity-30 shadow-[0_0_10px_#b4a183]"></div>
               </div>
               <div className="flex justify-center gap-4 mt-8">
-                 <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400"><div className="w-2 h-2 rounded-full bg-emerald-400"></div> Entradas</div>
-                 <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400"><div className="w-2 h-2 rounded-full bg-rose-400"></div> Saídas</div>
+                 <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-tighter"><div className="w-2 h-2 rounded-full bg-emerald-400"></div> Entradas</div>
+                 <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-tighter"><div className="w-2 h-2 rounded-full bg-rose-400"></div> Saídas</div>
               </div>
            </div>
 
            <div className="bg-white border border-slate-200 rounded-xl p-8 shadow-sm">
               <div className="flex justify-between items-center mb-10">
-                 <h3 className="text-slate-900 font-bold text-[14px]">Lucro Líquido por Período</h3>
+                 <h3 className="text-slate-900 font-bold text-[14px] uppercase tracking-tight italic">Evolução do <span className="text-[#01223d] not-italic">Patrimônio</span></h3>
               </div>
               <div className="h-[250px] w-full relative">
                  <div className="absolute inset-0 flex flex-col justify-between">

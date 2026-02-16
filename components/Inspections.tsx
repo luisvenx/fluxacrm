@@ -69,20 +69,22 @@ const Inspections: React.FC<InspectionsProps> = ({ user }) => {
       
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <h2 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight uppercase">Vistorias Técnicas</h2>
-          <p className="text-slate-500 font-bold text-[10px] uppercase tracking-widest mt-2">Controle de entrada, saída e rotina</p>
+          <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight uppercase italic leading-none">
+            Vistorias <span className="text-[#01223d] not-italic">Técnicas</span>
+          </h2>
+          <p className="text-slate-500 font-bold text-[10px] uppercase tracking-widest mt-3">Controle de preservação de ativos imobiliários</p>
         </div>
         
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="w-full md:w-auto bg-slate-900 text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-800 shadow-xl shadow-slate-900/20 transition-all flex items-center justify-center gap-2 active:scale-95 group"
+          className="w-full md:w-auto bg-[#01223d] text-white px-8 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-black shadow-xl transition-all flex items-center justify-center gap-3 active:scale-95 group"
         >
-          <Plus size={18} className="group-hover:rotate-90 transition-transform" />
-          Nova Vistoria
+          <Plus size={18} className="text-[#b4a183] group-hover:rotate-90 transition-transform" strokeWidth={3} />
+          Registrar Laudo
         </button>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-4 items-center justify-between bg-white p-3 border-2 border-slate-100 rounded-[2rem] shadow-sm">
+      <div className="flex flex-col lg:flex-row gap-4 items-center justify-between bg-white p-2 border border-slate-200 rounded-xl shadow-sm">
         <div className="relative flex-1 w-full lg:max-w-md ml-0 lg:ml-2">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
           <input 
@@ -90,81 +92,73 @@ const Inspections: React.FC<InspectionsProps> = ({ user }) => {
             placeholder="Buscar por imóvel ou vistoriador..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-2.5 pl-11 pr-4 text-xs font-bold focus:ring-2 focus:ring-blue-100 focus:border-blue-400 text-slate-600 transition-all outline-none"
+            className="w-full bg-slate-50 border border-slate-100 rounded-lg py-2 pl-11 pr-4 text-xs font-bold text-slate-600 outline-none"
           />
         </div>
-        <button onClick={fetchInspections} className="p-2.5 bg-white border-2 border-slate-100 rounded-xl text-slate-400 hover:text-blue-600">
+        <button onClick={fetchInspections} className="p-2.5 bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-[#b4a183] shadow-sm">
            <RefreshCcw size={16} className={isLoading ? 'animate-spin' : ''} />
         </button>
       </div>
 
-      <div className="bg-white border-2 border-slate-100 rounded-[2.5rem] shadow-xl overflow-hidden min-h-[500px] flex flex-col">
-        {isLoading ? (
-          <div className="py-40 text-center">
-            <Loader2 className="animate-spin mx-auto text-blue-500 mb-4" size={40} />
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Carregando Laudos...</p>
-          </div>
-        ) : filteredInspections.length === 0 ? (
-          <div className="py-40 text-center opacity-30">
-            <ClipboardCheck size={48} className="mx-auto text-slate-200 mb-4" />
-            <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Nenhuma vistoria pendente ou realizada</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto no-scrollbar">
-            <table className="w-full text-left border-collapse min-w-[900px]">
-              <thead>
-                <tr className="bg-slate-50/50 border-b-2 border-slate-100">
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Data & Tipo</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Imóvel</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Vistoriador</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">Fotos</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">Status</th>
-                  <th className="px-8 py-6 w-10"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y-2 divide-slate-50">
-                {filteredInspections.map((item) => (
+      <div className="bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden min-h-[500px] flex flex-col">
+        <div className="overflow-x-auto no-scrollbar flex-1">
+          <table className="w-full text-left border-collapse min-w-[900px]">
+            <thead>
+              <tr className="bg-slate-50 border-b border-slate-200">
+                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Data & Tipo</th>
+                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Ativo Imobiliário</th>
+                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Vistoriador</th>
+                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">Fotos</th>
+                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">Status</th>
+                <th className="px-8 py-5 w-10"></th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {isLoading ? (
+                <tr><td colSpan={6} className="py-40 text-center"><Loader2 className="animate-spin mx-auto text-[#01223d] mb-4" size={32} /><p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Auditoria Técnica...</p></td></tr>
+              ) : filteredInspections.length === 0 ? (
+                <tr><td colSpan={6} className="py-40 text-center opacity-30"><Database size={48} className="mx-auto mb-4" /><p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Nenhum laudo registrado</p></td></tr>
+              ) : (
+                filteredInspections.map((item) => (
                   <tr 
                     key={item.id} 
                     onClick={() => setSelectedInspection(item)}
-                    className="hover:bg-slate-50/50 transition-all group cursor-pointer"
+                    className="hover:bg-slate-50 transition-all group cursor-pointer"
                   >
                     <td className="px-8 py-6">
                       <div className="flex flex-col">
-                        <span className="text-sm font-black text-slate-900 tracking-tight group-hover:text-blue-600 transition-colors">{new Date(item.date).toLocaleDateString('pt-BR')}</span>
+                        <span className="text-sm font-black text-slate-900 tracking-tight italic uppercase">{new Date(item.date).toLocaleDateString('pt-BR')}</span>
                         <span className={`text-[9px] font-black uppercase mt-1 ${item.type === 'Saída' ? 'text-rose-500' : 'text-blue-500'}`}>
-                           • Vistoria de {item.type}
+                           {item.type}
                         </span>
                       </div>
                     </td>
                     <td className="px-8 py-6">
                       <div className="flex items-center gap-3">
-                         <div className="p-2 bg-slate-50 rounded-xl text-slate-400"><Home size={14} /></div>
+                         <div className="p-2 bg-[#01223d] rounded-lg text-[#b4a183] italic font-black shadow-sm">
+                            {item.properties?.title?.substring(0,1).toUpperCase()}
+                         </div>
                          <div className="min-w-0">
-                            <p className="text-sm font-bold text-slate-900 truncate max-w-[200px] uppercase group-hover:text-blue-600 transition-colors">{item.properties?.title}</p>
-                            <p className="text-[10px] text-slate-400 truncate max-w-[200px] font-medium">{item.properties?.address}</p>
+                            <p className="text-sm font-bold text-slate-900 uppercase truncate max-w-[200px] italic">{item.properties?.title}</p>
+                            <p className="text-[9px] font-black text-slate-400 uppercase truncate max-w-[200px] tracking-tight">{item.properties?.address}</p>
                          </div>
                       </div>
                     </td>
                     <td className="px-8 py-6">
                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 bg-slate-900 text-white rounded-lg flex items-center justify-center text-[10px] font-black italic">
-                             {item.inspector_name?.substring(0,1).toUpperCase() || 'U'}
-                          </div>
-                          <span className="text-xs font-bold text-slate-700">{item.inspector_name}</span>
+                          <span className="text-xs font-bold text-slate-700 uppercase italic tracking-tight">{item.inspector_name}</span>
                        </div>
                     </td>
                     <td className="px-8 py-6 text-center">
-                       <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-100 rounded-lg">
-                          <Camera size={12} className="text-slate-400" />
+                       <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-200 rounded-md">
+                          <Camera size={12} className="text-[#b4a183]" />
                           <span className="text-[10px] font-black text-slate-600">{item.photos?.length || 0}</span>
                        </div>
                     </td>
                     <td className="px-8 py-6 text-center">
-                       <span className={`text-[9px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest border-2 ${
+                       <span className={`text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest border shadow-sm ${
                          item.status === 'Realizada' ? 'bg-emerald-50 text-emerald-600 border-emerald-500' : 
-                         item.status === 'Cancelada' ? 'bg-rose-50 text-rose-600 border-rose-500' :
-                         'bg-amber-50 text-amber-600 border-amber-300'
+                         'bg-slate-50 text-slate-400 border-slate-200'
                        }`}>
                          {item.status}
                        </span>
@@ -173,11 +167,11 @@ const Inspections: React.FC<InspectionsProps> = ({ user }) => {
                        <button className="p-2 text-slate-200 hover:text-slate-900"><MoreVertical size={18} /></button>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <NewInspectionModal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); fetchInspections(); }} user={user} />

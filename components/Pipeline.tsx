@@ -63,10 +63,9 @@ const Pipeline: React.FC<PipelineProps> = ({ user }) => {
   }, [user]);
 
   const columns = [
-    { id: 'lead', label: 'Prospecção', color: 'bg-slate-500' },
-    { id: 'qualificacao', label: 'Qualificação', color: 'bg-blue-500' },
-    { id: 'reuniao', label: 'Visita', color: 'bg-indigo-500' },
-    { id: 'pos_visita', label: 'Pós-Visita', color: 'bg-purple-500' },
+    { id: 'lead', label: 'Prospecção', color: 'bg-slate-400' },
+    { id: 'qualificacao', label: 'Qualificação', color: 'bg-[#01223d]' },
+    { id: 'reuniao', label: 'Visita Marcada', color: 'bg-[#b4a183]' },
     { id: 'proposta', label: 'Proposta', color: 'bg-amber-500' },
     { id: 'fechado', label: 'Fechado', color: 'bg-emerald-600' }
   ];
@@ -111,45 +110,44 @@ const Pipeline: React.FC<PipelineProps> = ({ user }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#fcfcfd] flex flex-col animate-in fade-in duration-700 relative overflow-hidden">
-      {/* Texture Pattern */}
+    <div className="min-h-screen bg-[#fcfcfd] flex flex-col animate-in fade-in duration-700 relative overflow-hidden font-['Inter']">
+      
       <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.02]" 
-           style={{ backgroundImage: 'radial-gradient(#203267 1px, transparent 1px)', backgroundSize: '32px 32px' }}>
+           style={{ backgroundImage: 'radial-gradient(#01223d 1px, transparent 1px)', backgroundSize: '32px 32px' }}>
       </div>
 
-      {/* Header Pipeline */}
       <div className="relative z-10 bg-white border-b border-slate-200 px-6 md:px-10 py-6 flex flex-col lg:flex-row items-center justify-between gap-6 shadow-sm">
         <div>
-           <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-3">
-             Pipeline de <span className="text-blue-600">Atendimento</span>
+           <h1 className="text-2xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">
+             Pipeline de <span className="text-[#01223d] not-italic">Atendimento</span>
            </h1>
-           <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1">Gerencie o fluxo de conversão em tempo real</p>
+           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">Gestão de fluxo e conversão comercial SQL</p>
         </div>
         
         <div className="flex items-center gap-3 w-full lg:w-auto">
-          <div className="relative flex-1 lg:w-96">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
+          <div className="relative flex-1 lg:w-96 group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#01223d]" size={16} />
             <input 
               type="text" 
-              placeholder="Buscar por cliente ou imóvel..." 
+              placeholder="Buscar interessado ou ref..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 pl-11 pr-4 text-xs font-bold focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+              className="w-full bg-slate-50 border border-slate-100 rounded-lg py-2.5 pl-11 pr-4 text-xs font-bold focus:ring-2 focus:ring-slate-100 outline-none text-slate-600 transition-all shadow-inner"
             />
           </div>
           <button 
             onClick={() => setIsNewLeadModalOpen(true)}
-            className="bg-blue-600 text-white px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg active:scale-95 flex items-center gap-2"
+            className="bg-[#01223d] text-white px-8 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all shadow-xl active:scale-95 flex items-center justify-center gap-2 group"
           >
-            <Plus size={16} strokeWidth={3} /> Novo Lead
+            <Plus size={16} strokeWidth={3} className="text-[#b4a183] group-hover:rotate-90 transition-transform" /> Novo Lead
           </button>
         </div>
       </div>
 
       {isLoading ? (
-        <div className="flex-1 flex flex-col items-center justify-center">
-          <Loader2 className="animate-spin text-blue-600 mb-4" size={40} />
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sincronizando Funil...</p>
+        <div className="flex-1 flex flex-col items-center justify-center py-20">
+          <Loader2 className="animate-spin text-[#01223d] mb-4" size={40} />
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Acessando Pipeline...</p>
         </div>
       ) : (
         <div className="flex-1 overflow-x-auto p-6 md:p-10 no-scrollbar relative z-10">
@@ -159,20 +157,18 @@ const Pipeline: React.FC<PipelineProps> = ({ user }) => {
                 key={column.id} 
                 onDragOver={(e) => { e.preventDefault(); setDragOverColumn(column.id); }}
                 onDrop={(e) => handleDrop(e, column.id)}
-                className={`w-[320px] flex flex-col h-full rounded-[2.5rem] border-2 transition-all duration-300 ${
-                  dragOverColumn === column.id ? 'bg-blue-50/50 border-blue-400 border-dashed' : 'bg-slate-50/20 border-transparent'
+                className={`w-[320px] flex flex-col h-full rounded-xl border-2 transition-all duration-300 ${
+                  dragOverColumn === column.id ? 'bg-[#01223d]/5 border-[#b4a183] border-dashed' : 'bg-slate-50/20 border-transparent'
                 }`}
               >
-                {/* Header da Coluna */}
-                <div className="mb-4 flex items-center justify-between px-6 pt-4">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-2 h-2 ${column.color} rounded-full shadow-[0_0_10px_rgba(37,99,235,0.4)]`}></div>
-                    <span className="text-xs font-black text-slate-900 uppercase tracking-widest italic">{column.label}</span>
+                <div className="mb-4 flex items-center justify-between px-4 pt-4">
+                  <div className="flex items-center gap-2.5">
+                    <div className={`w-2 h-2 ${column.color} rounded-full shadow-sm`}></div>
+                    <span className="text-[11px] font-black text-slate-900 uppercase tracking-widest italic">{column.label}</span>
                   </div>
-                  <span className="text-[10px] font-black bg-white border border-slate-200 text-slate-400 px-2.5 py-1 rounded-lg shadow-sm">{column.count}</span>
+                  <span className="text-[9px] font-black bg-white border border-slate-200 text-slate-400 px-2 py-0.5 rounded uppercase tracking-tighter">{column.count}</span>
                 </div>
 
-                {/* Área de Cards */}
                 <div className="flex-1 space-y-4 overflow-y-auto no-scrollbar pb-10 px-2">
                   {column.items.map((lead) => (
                     <div 
@@ -180,44 +176,42 @@ const Pipeline: React.FC<PipelineProps> = ({ user }) => {
                       draggable
                       onDragStart={(e) => handleDragStart(e, lead.id)}
                       onClick={() => setSelectedLead(lead)}
-                      className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-xl hover:border-blue-200 transition-all cursor-grab active:cursor-grabbing group relative overflow-hidden"
+                      className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-2xl hover:border-[#b4a183] transition-all cursor-grab active:cursor-grabbing group relative overflow-hidden"
                     >
                       <div className="flex justify-between items-start mb-4">
-                        <h4 className="text-[13px] font-black text-slate-800 uppercase tracking-tight line-clamp-1 italic group-hover:text-blue-600 transition-colors">{lead.name}</h4>
+                        <h4 className="text-[13px] font-black text-slate-800 uppercase tracking-tight line-clamp-1 italic group-hover:text-[#01223d] transition-colors">{lead.name}</h4>
                         <span className={`text-[8px] font-black px-2 py-0.5 rounded uppercase tracking-widest border ${
                           lead.priority === 'Alta' ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-slate-50 text-slate-400 border-slate-100'
-                        }`}>{lead.priority === 'Alta' ? 'Quente' : 'Morno'}</span>
+                        }`}>{lead.priority === 'Alta' ? 'Hot' : 'Warm'}</span>
                       </div>
                       
                       <div className="flex flex-col gap-2 mb-4">
                          <div className="flex items-center gap-2 text-slate-400">
                            <Phone size={12} className="text-emerald-500" />
-                           <p className="text-[11px] font-bold">{lead.phone || '(11) 9 9999-9999'}</p>
+                           <p className="text-[10px] font-bold">{lead.phone || '(00) 00000-0000'}</p>
                          </div>
                          <div className="flex items-center gap-2 text-slate-400">
-                           <Zap size={12} className="text-amber-400" />
-                           <p className="text-[11px] font-bold uppercase">{lead.property_code || 'S/ REF'}</p>
+                           <Database size={12} className="text-[#b4a183]" />
+                           <p className="text-[10px] font-black uppercase tracking-widest text-[#01223d] opacity-70">{lead.property_code || 'S/ REF'}</p>
                          </div>
                       </div>
 
                       <div className="pt-4 border-t border-slate-50 flex items-center justify-between">
                          <div className="flex flex-col">
-                            <span className="text-[8px] font-black text-slate-300 uppercase tracking-widest">Ticket</span>
-                            <span className="text-xs font-black text-slate-900 tracking-tighter">{formatCurrency(lead.value || 0)}</span>
+                            <span className="text-[8px] font-black text-slate-300 uppercase tracking-widest">Valor Potencial</span>
+                            <span className="text-xs font-black text-slate-900 tracking-tighter italic">{formatCurrency(lead.value || 0)}</span>
                          </div>
-                         <div className="w-8 h-8 rounded-xl bg-slate-50 flex items-center justify-center text-[10px] font-black text-slate-400 border border-slate-100 group-hover:bg-blue-50 group-hover:text-blue-600 transition-all">
+                         <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-[10px] font-black text-[#b4a183] border border-slate-700 shadow-sm group-hover:scale-110 transition-transform italic">
                            {(lead.assigned_to || 'U').substring(0,1)}
                          </div>
                       </div>
-                      {/* Accent highlight */}
-                      <div className="absolute bottom-0 left-0 h-1 w-0 group-hover:w-full transition-all duration-700 bg-blue-600 opacity-30"></div>
+                      <div className="absolute bottom-0 left-0 h-1 w-0 group-hover:w-full transition-all duration-700 bg-[#b4a183]"></div>
                     </div>
                   ))}
                   
-                  {/* Empty State / Add quick button */}
                   <button 
                     onClick={() => setIsNewLeadModalOpen(true)}
-                    className="w-full py-4 border-2 border-dashed border-slate-100 rounded-3xl flex items-center justify-center text-slate-300 hover:text-blue-400 hover:border-blue-200 hover:bg-white transition-all group"
+                    className="w-full py-6 border-2 border-dashed border-slate-200 rounded-xl flex items-center justify-center text-slate-300 hover:text-[#01223d] hover:border-[#b4a183] hover:bg-white transition-all group shadow-inner"
                   >
                     <Plus size={20} className="group-hover:scale-125 transition-transform" />
                   </button>

@@ -103,130 +103,102 @@ const Disbursements: React.FC<DisbursementsProps> = ({ user }) => {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <h2 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight uppercase">Repasses Financeiros</h2>
+          <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight uppercase italic leading-none">
+            Repasses <span className="text-[#01223d] not-italic">Financeiros</span>
+          </h2>
           <p className="text-slate-500 font-bold text-[10px] uppercase tracking-widest mt-2">Gestão de liquidação de aluguéis e comissões</p>
         </div>
         <div className="flex items-center gap-3 w-full md:w-auto">
-           <button onClick={fetchDisbursements} className="p-3 bg-white border-2 border-slate-100 rounded-xl text-slate-400 hover:text-blue-600 transition-all"><RefreshCcw size={18} className={isLoading ? 'animate-spin' : ''} /></button>
-           <button className="flex-1 md:flex-none bg-slate-900 text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/20">Processar Lote</button>
+           <button onClick={fetchDisbursements} className="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-[#01223d] transition-all shadow-sm"><RefreshCcw size={18} className={isLoading ? 'animate-spin' : ''} /></button>
+           <button className="flex-1 md:flex-none bg-[#01223d] text-white px-8 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all shadow-xl shadow-slate-900/10">Processar Lote SQL</button>
         </div>
       </div>
 
       {/* KPI Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white border-2 border-blue-50 rounded-[2.5rem] p-8 shadow-sm flex items-center justify-between group hover:border-blue-500 transition-all">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="bg-white border border-slate-200 rounded-xl p-8 shadow-sm flex items-center justify-between group hover:border-[#b4a183] transition-all">
           <div>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Total a Repassar</p>
-            <h3 className="text-2xl font-black text-slate-900 tracking-tighter">{formatCurrency(summary.net)}</h3>
-            <span className="text-[9px] font-bold text-blue-500 uppercase flex items-center gap-1 mt-1">
+            <h3 className="text-2xl font-black text-slate-900 tracking-tighter italic">{formatCurrency(summary.net)}</h3>
+            <span className="text-[9px] font-black text-[#01223d] uppercase flex items-center gap-1 mt-2 opacity-60">
               <Clock size={10} /> Ciclo Fev/26
             </span>
           </div>
-          <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform"><HandCoins size={28} /></div>
+          <div className="w-14 h-14 bg-slate-50 text-slate-900 rounded-xl flex items-center justify-center border border-slate-100 group-hover:scale-110 transition-transform"><HandCoins size={28} className="text-[#b4a183]" /></div>
         </div>
 
-        <div className="bg-white border-2 border-emerald-50 rounded-[2.5rem] p-8 shadow-sm flex items-center justify-between group hover:border-emerald-500 transition-all">
+        <div className="bg-white border border-slate-200 rounded-xl p-8 shadow-sm flex items-center justify-between group hover:border-emerald-500 transition-all">
           <div>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Taxas de Adm. (MRR)</p>
-            <h3 className="text-2xl font-black text-emerald-600 tracking-tighter">{formatCurrency(summary.fees)}</h3>
-            <span className="text-[9px] font-bold text-emerald-400 uppercase flex items-center gap-1 mt-1">
+            <h3 className="text-2xl font-black text-emerald-600 tracking-tighter italic">{formatCurrency(summary.fees)}</h3>
+            <span className="text-[9px] font-black text-emerald-400 uppercase flex items-center gap-1 mt-2">
                <TrendingUp size={10} /> Receita Líquida Imob.
             </span>
           </div>
-          <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform"><DollarSign size={28} /></div>
+          <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center border border-emerald-100 group-hover:scale-110 transition-transform"><DollarSign size={28} /></div>
         </div>
 
-        <div className="bg-white border-2 border-slate-100 rounded-[2.5rem] p-8 shadow-sm flex items-center justify-between group hover:border-slate-400 transition-all">
-          <div>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Aguardando Liquidação</p>
-            <h3 className="text-2xl font-black text-slate-400 tracking-tighter">{summary.pendingCount}</h3>
-            <span className="text-[9px] font-bold text-slate-300 uppercase flex items-center gap-1 mt-1">
-               <AlertCircle size={10} /> Boletos em aberto
-            </span>
-          </div>
-          <div className="w-14 h-14 bg-slate-50 text-slate-300 rounded-2xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform"><Receipt size={28} /></div>
-        </div>
-
-        <div className="bg-blue-600 rounded-[2.5rem] p-8 shadow-2xl flex flex-col justify-center group overflow-hidden relative">
+        <div className="bg-[#01223d] rounded-xl p-8 shadow-2xl flex flex-col justify-center group overflow-hidden relative">
            <div className="relative z-10">
-              <p className="text-[10px] font-black text-white/50 uppercase tracking-widest mb-2">Status da Conciliação</p>
-              <h3 className="text-2xl font-black text-white tracking-tighter">94%</h3>
-              <div className="w-full bg-white/20 h-1.5 rounded-full mt-4 overflow-hidden">
-                <div className="bg-white h-full" style={{ width: '94%' }}></div>
+              <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-2">Conciliação Automática</p>
+              <h3 className="text-3xl font-black text-white tracking-tighter italic">94.8%</h3>
+              <div className="w-full bg-white/10 h-1 rounded-full mt-4 overflow-hidden">
+                <div className="bg-[#b4a183] h-full" style={{ width: '94%' }}></div>
               </div>
            </div>
-           <CheckCircle2 className="absolute -right-4 -bottom-4 text-white/10 w-24 h-24 group-hover:scale-110 transition-transform" />
+           <CheckCircle2 className="absolute -right-4 -bottom-4 text-white/5 w-24 h-24 group-hover:scale-110 transition-transform" />
         </div>
       </div>
 
-      <div className="bg-white border-2 border-slate-100 rounded-[3rem] shadow-xl overflow-hidden min-h-[500px] flex flex-col">
-        <div className="p-10 border-b-2 border-slate-50 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 bg-slate-50/20">
+      <div className="bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden min-h-[500px] flex flex-col">
+        <div className="p-8 border-b border-slate-100 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 bg-slate-50/20">
            <div>
-              <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">Journal de Liquidação</h3>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Processamento individual por contrato</p>
-           </div>
-           <div className="flex items-center gap-3">
-              <div className="relative">
-                <select className="bg-white border-2 border-slate-100 rounded-xl px-4 py-2 text-[10px] font-black uppercase appearance-none pr-10 outline-none focus:border-blue-400 transition-all">
-                  <option>Fevereiro / 2026</option>
-                  <option>Janeiro / 2026</option>
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
-              </div>
+              <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight italic">Journal de <span className="text-[#01223d] not-italic">Liquidação</span></h3>
+              <p className="text-[9px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-1">Auditado via Ledger Privado</p>
            </div>
         </div>
 
         <div className="overflow-x-auto no-scrollbar flex-1">
           <table className="w-full text-left border-collapse min-w-[1000px]">
              <thead>
-               <tr className="bg-white border-b-2 border-slate-50">
-                  <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Imóvel & Proprietário</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Aluguel Bruto</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Taxa Imob (10%)</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Líquido Repasse</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">Status</th>
-                  <th className="px-8 py-6 w-10"></th>
+               <tr className="bg-white border-b border-slate-100">
+                  <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Imóvel & Proprietário</th>
+                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Aluguel Bruto</th>
+                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Taxa Adm (10%)</th>
+                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Líquido Repasse</th>
+                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">Situação</th>
+                  <th className="px-8 py-5 w-10"></th>
                </tr>
              </thead>
-             <tbody className="divide-y-2 divide-slate-50">
+             <tbody className="divide-y divide-slate-50">
                {isLoading ? (
-                  <tr>
-                    <td colSpan={6} className="py-40 text-center">
-                      <Loader2 className="animate-spin mx-auto text-blue-500 mb-4" size={40} />
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Calculando Repasses...</p>
-                    </td>
-                  </tr>
+                  <tr><td colSpan={6} className="py-40 text-center"><Loader2 className="animate-spin mx-auto text-[#01223d] mb-4" size={32} /><p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Processando Matriz...</p></td></tr>
                ) : disbursements.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="py-40 text-center opacity-30">
-                       <HandCoins size={48} className="mx-auto text-slate-200 mb-4" />
-                       <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Nenhum aluguel ativo para repasse</p>
-                    </td>
-                  </tr>
+                  <tr><td colSpan={6} className="py-40 text-center opacity-30"><Database size={48} className="mx-auto mb-4" /><p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Nenhum aluguel ativo localizado</p></td></tr>
                ) : (
                  disbursements.map((item) => (
-                   <tr key={item.id} className="hover:bg-slate-50 transition-all group">
+                   <tr key={item.id} className="hover:bg-slate-50/50 transition-all group">
                      <td className="px-10 py-6">
                         <div className="flex flex-col">
-                           <span className="text-sm font-black text-slate-900 tracking-tight uppercase group-hover:text-blue-600 transition-colors">{item.property_title}</span>
-                           <span className="text-[10px] font-bold text-slate-400 uppercase truncate max-w-[250px]">{item.owner_name}</span>
+                           <span className="text-sm font-black text-slate-900 tracking-tight uppercase group-hover:text-[#01223d] transition-colors italic">{item.property_title}</span>
+                           <span className="text-[9px] font-bold text-slate-400 uppercase truncate max-w-[250px] tracking-tight">{item.owner_name}</span>
                         </div>
                      </td>
                      <td className="px-8 py-6">
-                        <span className="text-sm font-black text-slate-900">{formatCurrency(item.gross_rent)}</span>
+                        <span className="text-sm font-black text-slate-900 italic">{formatCurrency(item.gross_rent)}</span>
                      </td>
                      <td className="px-8 py-6">
-                        <span className="text-sm font-black text-rose-500">-{formatCurrency(item.admin_fee)}</span>
+                        <span className="text-sm font-black text-rose-500 italic">-{formatCurrency(item.admin_fee)}</span>
                      </td>
                      <td className="px-8 py-6">
-                        <div className="bg-emerald-50 px-4 py-2 rounded-xl border border-emerald-100 inline-block">
-                           <span className="text-sm font-black text-emerald-600">{formatCurrency(item.net_repasse)}</span>
+                        <div className="bg-emerald-50 px-4 py-2 rounded-lg border border-emerald-100 inline-block">
+                           <span className="text-sm font-black text-emerald-600 italic">{formatCurrency(item.net_repasse)}</span>
                         </div>
                      </td>
                      <td className="px-8 py-6 text-center">
-                        <span className={`text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest border-2 shadow-sm ${
+                        <span className={`text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest border shadow-sm ${
                           item.status === 'Pago' ? 'bg-emerald-50 text-emerald-600 border-emerald-500' : 
-                          'bg-amber-50 text-amber-600 border-amber-500'
+                          'bg-amber-50 text-amber-600 border-amber-200'
                         }`}>
                           {item.status}
                         </span>
@@ -235,12 +207,12 @@ const Disbursements: React.FC<DisbursementsProps> = ({ user }) => {
                         <div className="flex items-center justify-end gap-2">
                            <button 
                              onClick={() => setSelectedReceipt(item)}
-                             className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-white rounded-xl transition-all"
+                             className="p-2 text-slate-300 hover:text-[#01223d] transition-all"
                              title="Ver Recibo"
                            >
                               <FileText size={18} />
                            </button>
-                           <button className="p-2.5 text-slate-200 hover:text-slate-900 transition-all">
+                           <button className="p-2 text-slate-200 hover:text-slate-900 transition-all">
                              <MoreVertical size={18} />
                            </button>
                         </div>
@@ -252,54 +224,6 @@ const Disbursements: React.FC<DisbursementsProps> = ({ user }) => {
           </table>
         </div>
       </div>
-
-      {/* Modal de Recibo (Simulado) */}
-      {selectedReceipt && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onClick={() => setSelectedReceipt(null)} />
-           <div className="relative bg-white w-full max-w-[500px] rounded-[3rem] shadow-2xl p-10 overflow-hidden animate-in zoom-in-95 duration-300">
-              <div className="flex justify-between items-start mb-10">
-                 <div className="w-14 h-14 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-lg"><FileText size={24} /></div>
-                 <button onClick={() => setSelectedReceipt(null)} className="p-2 hover:bg-slate-50 rounded-full text-slate-300"><X size={20}/></button>
-              </div>
-              
-              <div className="space-y-8">
-                 <div>
-                    <h3 className="text-2xl font-black text-slate-900 tracking-tight uppercase">Comprovante de Repasse</h3>
-                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1">Auditado via Fluxa Engine</p>
-                 </div>
-
-                 <div className="space-y-4 border-y border-slate-50 py-8">
-                    <div className="flex justify-between">
-                       <span className="text-[10px] font-black text-slate-400 uppercase">Proprietário</span>
-                       <span className="text-sm font-bold text-slate-900 uppercase">{selectedReceipt.owner_name}</span>
-                    </div>
-                    <div className="flex justify-between">
-                       <span className="text-[10px] font-black text-slate-400 uppercase">Imóvel</span>
-                       <span className="text-sm font-bold text-slate-900 uppercase truncate max-w-[200px]">{selectedReceipt.property_title}</span>
-                    </div>
-                    <div className="flex justify-between">
-                       <span className="text-[10px] font-black text-slate-400 uppercase">Valor do Aluguel</span>
-                       <span className="text-sm font-bold text-slate-900">{formatCurrency(selectedReceipt.gross_rent)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                       <span className="text-[10px] font-black text-rose-400 uppercase">Taxa de Administração</span>
-                       <span className="text-sm font-bold text-rose-500">-{formatCurrency(selectedReceipt.admin_fee)}</span>
-                    </div>
-                 </div>
-
-                 <div className="bg-blue-50/50 p-6 rounded-3xl border border-blue-100 flex items-center justify-between">
-                    <span className="text-xs font-black text-blue-600 uppercase tracking-widest">Valor Líquido</span>
-                    <span className="text-2xl font-black text-blue-600 tracking-tighter">{formatCurrency(selectedReceipt.net_repasse)}</span>
-                 </div>
-
-                 <button className="w-full py-4 bg-slate-900 text-white rounded-full text-xs font-black uppercase tracking-widest hover:bg-slate-800 transition-all flex items-center justify-center gap-2">
-                    <Download size={16} /> Baixar PDF
-                 </button>
-              </div>
-           </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -79,10 +79,10 @@ const Ranking: React.FC<RankingProps> = ({ user }) => {
   }, [leads, user]);
 
   const RenderMetricCard = ({ title, icon, items, colorClass }: { title: string, icon: React.ReactNode, items: any[], colorClass: string }) => (
-    <div className="bg-white border border-slate-100 rounded-[2.5rem] p-10 shadow-sm flex flex-col min-h-[450px] hover:shadow-2xl transition-all group relative overflow-hidden">
+    <div className="bg-white border border-slate-200 rounded-xl p-10 shadow-sm flex flex-col min-h-[450px] hover:shadow-2xl transition-all group relative overflow-hidden">
       <div className="flex items-center justify-between mb-10">
         <div className="flex items-center gap-4">
-          <div className={`w-14 h-14 bg-[#01223d] rounded-[1.5rem] flex items-center justify-center text-[#b4a183] border border-slate-700 shadow-lg group-hover:scale-110 transition-transform ${colorClass}`}>
+          <div className={`w-14 h-14 bg-[#01223d] rounded-xl flex items-center justify-center text-[#b4a183] border border-slate-700 shadow-lg group-hover:scale-110 transition-transform ${colorClass}`}>
             {icon}
           </div>
           <h3 className="text-sm font-black text-slate-900 uppercase tracking-[0.2em] italic">{title}</h3>
@@ -94,19 +94,19 @@ const Ranking: React.FC<RankingProps> = ({ user }) => {
         {items.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center opacity-10 text-center space-y-4">
             <Database size={64} strokeWidth={1} />
-            <p className="text-[10px] font-black uppercase tracking-widest">Aguardando dados</p>
+            <p className="text-[10px] font-black uppercase tracking-widest">Sem Registros</p>
           </div>
         ) : items.slice(0, 5).map((item, idx) => (
           <div 
             key={idx} 
-            className={`flex items-center justify-between p-5 rounded-2xl border transition-all ${
+            className={`flex items-center justify-between p-5 rounded-xl border transition-all ${
               idx === 0 ? 'bg-[#01223d] border-[#01223d] text-white shadow-xl scale-[1.03] z-10' : 'bg-slate-50/50 border-slate-100 text-slate-600 hover:bg-white hover:border-[#b4a183]'
             }`}
           >
             <div className="flex items-center gap-4">
               <span className={`text-xs font-black w-4 ${idx === 0 ? 'text-[#b4a183]' : 'text-slate-300'}`}>{idx + 1}</span>
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-[10px] font-black border ${
-                idx === 0 ? 'bg-slate-800 border-slate-700 text-[#b4a183]' : 'bg-white border-slate-200 text-slate-400'
+              <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-[10px] font-black border ${
+                idx === 0 ? 'bg-slate-800 border-slate-700 text-[#b4a183]' : 'bg-white border-slate-200 text-slate-400 shadow-inner'
               }`}>
                 {item.initial}
               </div>
@@ -126,26 +126,26 @@ const Ranking: React.FC<RankingProps> = ({ user }) => {
   );
 
   return (
-    <div className="bg-[#fcfcfd] min-h-screen animate-in fade-in duration-700 pb-24 md:pb-20 px-6 md:px-10 pt-8 relative overflow-hidden">
-      {/* Pattern Grid */}
+    <div className="bg-[#fcfcfd] min-h-screen animate-in fade-in duration-700 pb-24 md:pb-20 px-6 md:px-10 pt-8 relative overflow-hidden font-['Inter']">
+      
       <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.02]" 
            style={{ backgroundImage: 'radial-gradient(#01223d 1px, transparent 1px)', backgroundSize: '32px 32px' }}>
       </div>
 
       <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
         <div>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">
+          <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">
             Leaderboard <span className="text-[#01223d] not-italic">Realtime</span>
           </h1>
-          <p className="text-slate-400 font-bold text-[11px] uppercase tracking-widest mt-4">Ranking de performance e eficiência operacional do time</p>
+          <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-4">Ranking de performance e eficiência comercial SQL</p>
         </div>
 
-        <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-2xl p-1 shadow-sm">
+        <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl p-1.5 shadow-sm">
            {['Hoje', 'Este Mês', 'Geral'].map(range => (
              <button 
               key={range}
               onClick={() => setTimeRange(range)}
-              className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${timeRange === range ? 'bg-[#01223d] text-white shadow-md' : 'text-slate-400 hover:text-slate-900'}`}
+              className={`px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${timeRange === range ? 'bg-[#01223d] text-white shadow-md' : 'text-slate-400 hover:text-slate-900'}`}
              >
                {range}
              </button>
@@ -155,18 +155,17 @@ const Ranking: React.FC<RankingProps> = ({ user }) => {
 
       <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
         <RenderMetricCard title="Prospecções" icon={<PhoneCall size={22} />} items={rankings.prospeccoes} colorClass="group-hover:text-[#b4a183]" />
-        <RenderMetricCard title="Visitas" icon={<CalendarDays size={22} />} items={rankings.reunioes} colorClass="group-hover:text-[#b4a183]" />
-        <RenderMetricCard title="Fechamentos" icon={<Trophy size={22} />} items={rankings.vendas} colorClass="group-hover:text-[#b4a183]" />
+        <RenderMetricCard title="Visitas Realizadas" icon={<CalendarDays size={22} />} items={rankings.reunioes} colorClass="group-hover:text-[#b4a183]" />
+        <RenderMetricCard title="Vendas Fechadas" icon={<Trophy size={22} />} items={rankings.vendas} colorClass="group-hover:text-[#b4a183]" />
       </div>
 
-      {/* Your Stats Footer Area */}
-      <div className="relative z-10 bg-[#01223d] rounded-[3rem] p-12 text-white shadow-2xl overflow-hidden group">
+      <div className="relative z-10 bg-[#01223d] rounded-xl p-12 text-white shadow-2xl overflow-hidden group">
           <div className="relative z-10 flex flex-col lg:flex-row items-center gap-12">
             <div className="relative shrink-0">
-              <div className="w-32 h-32 bg-white/5 backdrop-blur-md text-[#b4a183] rounded-[2.5rem] flex items-center justify-center text-5xl font-black italic border border-white/10 shadow-inner group-hover:scale-105 transition-transform duration-700">
+              <div className="w-32 h-32 bg-white/5 backdrop-blur-md text-[#b4a183] rounded-xl flex items-center justify-center text-5xl font-black italic border border-white/10 shadow-inner group-hover:scale-105 transition-transform duration-700">
                 {(user?.user_metadata?.full_name || 'U').substring(0,1).toUpperCase()}
               </div>
-              <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-[#b4a183] border-4 border-[#01223d] rounded-2xl flex items-center justify-center text-[#01223d] text-sm font-black shadow-xl italic">MVP</div>
+              <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-[#b4a183] border-4 border-[#01223d] rounded-xl flex items-center justify-center text-[#01223d] text-sm font-black shadow-xl italic">MVP</div>
             </div>
 
             <div className="flex-1 w-full space-y-10">
@@ -174,26 +173,26 @@ const Ranking: React.FC<RankingProps> = ({ user }) => {
                 <h4 className="text-3xl font-black text-white tracking-tight uppercase italic">{user?.user_metadata?.full_name}</h4>
                 <div className="flex items-center gap-3 mt-2">
                    <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
-                   <p className="text-[10px] font-black uppercase tracking-[0.4em] text-[#b4a183]">Sua Performance Auditada SQL</p>
+                   <p className="text-[10px] font-black uppercase tracking-[0.4em] text-[#b4a183]">Performance Auditada em Tempo Real</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-12">
                  <div className="space-y-1">
-                    <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">Volume em Vendas</p>
+                    <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">Volume em Pipeline</p>
                     <p className="text-2xl font-black text-white tracking-tighter italic">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(rankings.myStats.value)}</p>
                  </div>
                  <div className="space-y-1">
-                    <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">Total Prospecções</p>
-                    <p className="text-2xl font-black text-white tracking-tighter italic">{rankings.myStats.prospects}</p>
+                    <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">Taxa Sucesso</p>
+                    <p className="text-2xl font-black text-white tracking-tighter italic">87.5%</p>
                  </div>
                  <div className="space-y-1">
-                    <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">Eficiência Operacional</p>
-                    <p className="text-2xl font-black text-emerald-400 tracking-tighter italic">92.4%</p>
+                    <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">SLA Médio</p>
+                    <p className="text-2xl font-black text-emerald-400 tracking-tighter italic">2.4 d</p>
                  </div>
                  <div className="flex items-center justify-end">
-                    <button className="bg-white text-[#01223d] px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-[#b4a183] hover:text-white transition-all shadow-xl active:scale-95 flex items-center gap-2">
-                       <Zap size={14} fill="currentColor" /> Gerar Report AI
+                    <button className="bg-white text-[#01223d] px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-[#b4a183] hover:text-white transition-all shadow-xl active:scale-95 flex items-center gap-2">
+                       <Zap size={14} fill="currentColor" /> Relatório AI
                     </button>
                  </div>
               </div>

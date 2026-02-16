@@ -12,7 +12,8 @@ import {
   Loader2,
   Database,
   RefreshCcw,
-  Sparkles
+  Sparkles,
+  ChevronRight
 } from 'lucide-react';
 import NewNPSModal from './NewNPSModal';
 import { supabase } from '../lib/supabase';
@@ -70,149 +71,150 @@ const OperationalNPS: React.FC<OperationalNPSProps> = ({ user }) => {
   }, [responses]);
 
   return (
-    <div className="bg-[#fcfcfd] min-h-screen space-y-6 md:space-y-8 animate-in fade-in duration-700 pb-24 md:pb-20 px-4 md:px-10 pt-6 md:pt-8">
+    <div className="bg-[#fcfcfd] min-h-screen animate-in fade-in duration-700 pb-24 md:pb-20 px-6 md:px-10 pt-8 relative overflow-hidden font-['Inter']">
       
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0">
-            <Star size={24} />
-          </div>
-          <div>
-            <h2 className="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">Voz do Cliente (NPS)</h2>
-          </div>
+      <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.02]" 
+           style={{ backgroundImage: 'radial-gradient(#01223d 1px, transparent 1px)', backgroundSize: '32px 32px' }}>
+      </div>
+
+      <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
+        <div>
+          <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">
+            Voz do <span className="text-[#01223d] not-italic">Consumidor</span>
+          </h2>
+          <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-4">Auditória de satisfação e qualidade (NPS/CSAT) SQL</p>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
-          <div className="flex bg-white border border-slate-200 rounded-full p-1 shadow-sm">
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <div className="bg-white border border-slate-200 rounded-xl p-1 flex items-center shadow-sm mr-2">
             <button 
               onClick={() => setActiveSegment('Clientes')}
-              className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${activeSegment === 'Clientes' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-400 hover:text-slate-900'}`}
+              className={`px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeSegment === 'Clientes' ? 'bg-[#01223d] text-white shadow-md' : 'text-slate-400 hover:text-slate-900'}`}
             >
               Clientes
             </button>
             <button 
               onClick={() => setActiveSegment('Equipe')}
-              className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${activeSegment === 'Equipe' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-400 hover:text-slate-900'}`}
+              className={`px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeSegment === 'Equipe' ? 'bg-[#01223d] text-white shadow-md' : 'text-slate-400 hover:text-slate-900'}`}
             >
               eNPS
             </button>
           </div>
           <button 
             onClick={() => setIsNewNPSModalOpen(true)}
-            className="bg-blue-600 text-white px-6 py-3 rounded-xl md:rounded-full text-xs font-bold hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all flex items-center justify-center gap-2 active:scale-95"
+            className="flex-1 md:flex-none bg-[#01223d] text-white px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-black shadow-xl transition-all flex items-center justify-center gap-2 active:scale-95 group"
           >
-            <Plus size={20} /> Registrar Resposta
+            <Plus size={20} strokeWidth={3} className="text-[#b4a183] group-hover:rotate-90 transition-transform" /> Registrar
           </button>
         </div>
       </div>
 
-      {/* KPI NPS Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-        <div className="bg-white border border-slate-100 rounded-[1.75rem] p-5 md:p-6 shadow-sm hover:shadow-md transition-all group">
-          <p className="text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">NPS Score Geral</p>
+      <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="bg-white border border-slate-200 rounded-xl p-8 shadow-sm flex flex-col justify-between h-44 group hover:border-[#b4a183] transition-all">
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">NPS Score Consolidado</p>
           <div className="flex items-end justify-between">
-            <h3 className={`text-3xl md:text-4xl font-black tracking-tighter ${stats.score >= 70 ? 'text-emerald-500' : stats.score >= 50 ? 'text-amber-500' : 'text-rose-500'}`}>
+            <h3 className={`text-4xl font-black tracking-tighter italic ${stats.score >= 70 ? 'text-emerald-500' : stats.score >= 50 ? 'text-[#b4a183]' : 'text-rose-500'}`}>
               {isLoading ? '...' : stats.score}
             </h3>
-            <div className="p-2 bg-slate-50 rounded-xl group-hover:scale-110 transition-transform">
-               <TrendingUp size={20} className={stats.score >= 70 ? 'text-emerald-500' : 'text-rose-400'} />
+            <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 group-hover:scale-110 transition-transform">
+               <TrendingUp size={20} className={stats.score >= 70 ? 'text-emerald-500' : 'text-[#01223d]'} />
             </div>
           </div>
-          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2">Zona de {stats.score >= 75 ? 'Excelência' : stats.score >= 50 ? 'Qualidade' : 'Aperfeiçoamento'}</p>
+          <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mt-2 border-t border-slate-50 pt-2">Zona de {stats.score >= 75 ? 'Excelência' : stats.score >= 50 ? 'Qualidade' : 'Aperfeiçoamento'}</p>
         </div>
 
-        <div className="bg-white border border-slate-100 rounded-[1.75rem] p-5 md:p-6 shadow-sm hover:shadow-md transition-all group">
-          <p className="text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">Promotores</p>
-          <div className="flex items-center gap-3">
-             <div className="p-2.5 bg-emerald-50 text-emerald-500 rounded-2xl"><Smile size={24} /></div>
-             <h3 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">{stats.promotores}</h3>
+        <div className="bg-white border border-slate-200 rounded-xl p-8 shadow-sm flex flex-col justify-between h-44 group">
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Promotores (Loyalty)</p>
+          <div className="flex items-center gap-4">
+             <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl border border-emerald-100"><Smile size={24} /></div>
+             <div>
+                <h3 className="text-3xl font-black text-slate-900 tracking-tighter italic">{stats.promotores}</h3>
+                <p className="text-[8px] font-bold text-emerald-500 uppercase tracking-tighter">Score 9-10</p>
+             </div>
           </div>
-          <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest mt-2">9-10: Clientes Fiéis</p>
         </div>
 
-        <div className="bg-white border border-slate-100 rounded-[1.75rem] p-5 md:p-6 shadow-sm hover:shadow-md transition-all group">
-          <p className="text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">Detratores</p>
-          <div className="flex items-center gap-3">
-             <div className="p-2.5 bg-rose-50 text-rose-500 rounded-2xl"><Frown size={24} /></div>
-             <h3 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">{stats.detratores}</h3>
+        <div className="bg-white border border-slate-200 rounded-xl p-8 shadow-sm flex flex-col justify-between h-44 group">
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Detratores (Churn Risk)</p>
+          <div className="flex items-center gap-4">
+             <div className="p-3 bg-rose-50 text-rose-500 rounded-xl border border-rose-100"><Frown size={24} /></div>
+             <div>
+                <h3 className="text-3xl font-black text-slate-900 tracking-tighter italic">{stats.detratores}</h3>
+                <p className="text-[8px] font-bold text-rose-500 uppercase tracking-tighter">Score 0-6</p>
+             </div>
           </div>
-          <p className="text-[10px] text-rose-500 font-bold uppercase tracking-widest mt-2">0-6: Risco de Churn</p>
         </div>
 
-        <div className="bg-[#002147] rounded-[1.75rem] p-5 md:p-6 shadow-xl text-white relative overflow-hidden group">
+        <div className="bg-[#01223d] rounded-xl p-8 shadow-2xl text-white relative overflow-hidden flex flex-col justify-between h-44 group">
           <div className="relative z-10">
-            <p className="text-[10px] md:text-[11px] font-bold text-white/50 uppercase tracking-widest mb-4">Amostragem Base</p>
-            <h3 className="text-2xl md:text-3xl font-bold tracking-tight">{stats.rate} Respostas</h3>
+            <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-2">Amostragem Base</p>
+            <h3 className="text-3xl font-black tracking-tighter italic uppercase">{stats.rate} Feedback</h3>
           </div>
-          <BarChart className="absolute -right-4 -bottom-4 text-white/5 w-24 h-24 group-hover:scale-110 transition-transform" />
+          <BarChart size={140} className="absolute -right-8 -bottom-8 text-white/5 group-hover:scale-110 transition-transform pointer-events-none" />
+          <button onClick={fetchNPS} className="relative z-10 w-fit p-2 bg-white/10 rounded-lg hover:bg-white/20 transition-all">
+             <RefreshCcw size={14} className={`text-[#b4a183] ${isLoading ? 'animate-spin' : ''}`} />
+          </button>
         </div>
       </div>
 
-      {/* Tabela de Feedbacks */}
-      <div className="bg-white border border-slate-100 rounded-2xl md:rounded-[2.5rem] shadow-sm overflow-hidden min-h-[450px] flex flex-col">
-        <div className="p-6 md:p-8 border-b border-slate-50 flex items-center justify-between">
-           <div className="flex items-center gap-4">
-              <h3 className="text-base md:text-lg font-bold text-slate-900 tracking-tight">Comentários e Percepções</h3>
-              <span className="bg-slate-50 text-slate-400 text-[10px] font-black px-2.5 py-1 rounded-lg uppercase">{responses.length} feedbacks</span>
+      <div className="relative z-10 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden min-h-[450px] flex flex-col">
+        <div className="p-10 pb-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/20">
+           <div>
+              <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight italic leading-none">Journal Qualitativo</h3>
+              <p className="text-[9px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-2">Percepções auditadas via SQL Ledger</p>
            </div>
-           <button onClick={fetchNPS} className="p-2 text-slate-300 hover:text-slate-900 transition-colors bg-slate-50 rounded-xl">
-             <RefreshCcw size={18} className={isLoading ? 'animate-spin' : ''} />
-           </button>
+           <span className="bg-white border border-slate-200 text-slate-400 text-[10px] font-black px-4 py-1.5 rounded-lg uppercase tracking-widest shadow-sm">{responses.length} Registros</span>
         </div>
 
-        {isLoading ? (
-          <div className="flex-1 flex flex-col items-center justify-center py-20">
-             <Loader2 className="animate-spin text-blue-600 mb-4" size={32} />
-             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Processando feedbacks...</p>
-          </div>
-        ) : responses.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center py-24 opacity-30 text-center space-y-4">
-             <MessageSquare size={48} className="mx-auto" />
-             <p className="text-sm font-bold uppercase tracking-widest">Sem respostas registradas</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto no-scrollbar">
-            <table className="w-full text-left border-collapse min-w-[800px]">
-              <thead>
-                <tr className="bg-slate-50/30">
-                  <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Cliente & Contexto</th>
-                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Score</th>
-                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Comentário Qualitativo</th>
-                  <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Data</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {responses.map((res) => (
-                  <tr key={res.id} className="hover:bg-slate-50/50 transition-colors group cursor-default">
+        <div className="overflow-x-auto no-scrollbar flex-1">
+          <table className="w-full text-left border-collapse min-w-[900px]">
+            <thead>
+              <tr className="bg-white border-b border-slate-100">
+                <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Conta & Contexto</th>
+                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Score</th>
+                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Depoimento Consumidor</th>
+                <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Auditoria</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-50">
+              {isLoading ? (
+                <tr><td colSpan={4} className="py-40 text-center"><Loader2 size={32} className="animate-spin mx-auto text-[#01223d] mb-4" /><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Processando Feedbacks...</p></td></tr>
+              ) : responses.length === 0 ? (
+                <tr><td colSpan={4} className="py-40 text-center opacity-30"><MessageSquare size={48} className="mx-auto mb-4" /><p className="text-xs font-black text-slate-300 uppercase tracking-widest">Sem feedbacks registrados</p></td></tr>
+              ) : (
+                responses.map((res) => (
+                  <tr key={res.id} className="hover:bg-slate-50 transition-all group cursor-default">
                     <td className="px-10 py-6">
-                      <p className="text-sm font-bold text-slate-900 uppercase tracking-tight truncate max-w-[200px]">{res.customers?.name || 'Cliente Removido'}</p>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">{res.context || 'Geral'}</p>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-bold text-slate-900 uppercase tracking-tight italic truncate max-w-[200px]">{res.customers?.name || 'Conta Removida'}</span>
+                        <span className="text-[9px] font-black text-[#01223d] uppercase tracking-widest mt-1 opacity-60">Contexto: {res.context || 'Geral'}</span>
+                      </div>
                     </td>
                     <td className="px-8 py-6 text-center">
-                      <span className={`w-10 h-10 inline-flex items-center justify-center rounded-xl font-black text-sm shadow-sm border ${
-                        res.score >= 9 ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
-                        res.score >= 7 ? 'bg-amber-50 text-amber-600 border-amber-100' :
-                        'bg-rose-50 text-rose-600 border-rose-100'
+                      <div className={`w-12 h-12 inline-flex items-center justify-center rounded-xl font-black text-base shadow-md border-2 italic ${
+                        res.score >= 9 ? 'bg-emerald-50 text-emerald-600 border-emerald-500' :
+                        res.score >= 7 ? 'bg-amber-50 text-[#b4a183] border-[#b4a183]' :
+                        'bg-rose-50 text-rose-600 border-rose-500'
                       }`}>
                         {res.score}
-                      </span>
+                      </div>
                     </td>
                     <td className="px-8 py-6">
-                      <p className="text-xs text-slate-600 font-medium leading-relaxed max-w-md italic line-clamp-2">
-                        "{res.comment || 'Nenhuma observação adicional fornecida.'}"
+                      <p className="text-sm text-slate-600 font-medium leading-relaxed max-w-md italic line-clamp-2">
+                        "{res.comment || 'O consumidor não forneceu observações qualitativas.'}"
                       </p>
                     </td>
                     <td className="px-10 py-6 text-right">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase">
+                      <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">
                         {new Date(res.created_at).toLocaleDateString('pt-BR')}
                       </span>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <NewNPSModal isOpen={isNewNPSModalOpen} onClose={() => { setIsNewNPSModalOpen(false); fetchNPS(); }} />
