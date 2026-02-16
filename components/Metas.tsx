@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Target, 
@@ -64,29 +65,29 @@ const Metas: React.FC<MetasProps> = ({ user }) => {
   return (
     <div className="bg-[#fcfcfd] min-h-screen animate-in fade-in duration-700 pb-24 md:pb-20 px-6 md:px-10 pt-8 relative overflow-hidden">
       <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.02]" 
-           style={{ backgroundImage: 'radial-gradient(#203267 1px, transparent 1px)', backgroundSize: '32px 32px' }}>
+           style={{ backgroundImage: 'radial-gradient(#01223d 1px, transparent 1px)', backgroundSize: '32px 32px' }}>
       </div>
 
       {/* Header Metas */}
       <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
         <div>
           <h1 className="text-4xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">
-            Objetivos <span className="text-blue-600 not-italic">& Resultados</span>
+            Objetivos <span className="text-[#01223d] not-italic">& Resultados</span>
           </h1>
           <p className="text-slate-400 font-bold text-[11px] uppercase tracking-widest mt-4">Monitoramento tático de KPIs e OKRs organizacionais</p>
         </div>
 
         <button 
           onClick={() => setIsNewGoalModalOpen(true)}
-          className="w-full md:w-auto bg-blue-600 text-white px-8 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 shadow-xl transition-all flex items-center justify-center gap-3 active:scale-95"
+          className="w-full md:w-auto bg-[#01223d] text-white px-8 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-black shadow-xl transition-all flex items-center justify-center gap-3 active:scale-95"
         >
-          <Plus size={18} strokeWidth={3} /> Configurar Meta
+          <Plus size={18} strokeWidth={3} className="text-[#b4a183]" /> Configurar Meta
         </button>
       </div>
 
       {/* KPI Row */}
       <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-         <div className="bg-white border border-slate-100 p-8 rounded-[2rem] shadow-sm flex flex-col justify-between h-40 group hover:border-blue-100 transition-all">
+         <div className="bg-white border border-slate-100 p-8 rounded-[2rem] shadow-sm flex flex-col justify-between h-40 group hover:border-[#b4a183] transition-all">
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Atingimento Médio</p>
             <div className="flex items-end justify-between">
                <h3 className="text-4xl font-black text-slate-900 tracking-tighter">{avgAtingimento}%</h3>
@@ -99,17 +100,16 @@ const Metas: React.FC<MetasProps> = ({ user }) => {
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Metas em Ciclo</p>
             <div className="flex items-end justify-between">
                <h3 className="text-4xl font-black text-slate-900 tracking-tighter">{goals.length}</h3>
-               <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
+               <div className="w-10 h-10 bg-slate-50 text-[#01223d] rounded-xl flex items-center justify-center">
                   <Target size={20} />
                </div>
             </div>
          </div>
-         <div className="bg-[#203267] p-8 rounded-[2rem] shadow-2xl flex flex-col justify-between h-40 relative overflow-hidden group">
+         <div className="bg-[#01223d] p-8 rounded-[2rem] shadow-2xl flex flex-col justify-between h-40 relative overflow-hidden group">
             <p className="text-[10px] font-black text-white/40 uppercase tracking-widest relative z-10">Meta Master</p>
             <div className="flex items-end justify-between relative z-10">
                <h3 className="text-3xl font-black text-white tracking-tighter italic uppercase">Active</h3>
-               {/* Fix: Added missing Sparkles import to lucide-react list above */}
-               <Sparkles size={24} className="text-blue-400 group-hover:rotate-12 transition-transform" />
+               <Sparkles size={24} className="text-[#b4a183] group-hover:rotate-12 transition-transform" />
             </div>
             <div className="absolute -right-6 -bottom-6 opacity-5 group-hover:scale-110 transition-transform duration-700">
                <Target size={150} />
@@ -133,7 +133,7 @@ const Metas: React.FC<MetasProps> = ({ user }) => {
       </div>
 
       {isLoading ? (
-        <div className="py-20 text-center"><Loader2 className="animate-spin mx-auto text-blue-600 mb-4" size={40} /><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Calculando Execução...</p></div>
+        <div className="py-20 text-center"><Loader2 className="animate-spin mx-auto text-[#01223d] mb-4" size={40} /><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Calculando Execução...</p></div>
       ) : filteredGoals.length === 0 ? (
         <div className="bg-white border-2 border-dashed border-slate-100 rounded-[3rem] p-24 text-center opacity-30">
            <Database size={48} className="mx-auto mb-4" />
@@ -144,11 +144,11 @@ const Metas: React.FC<MetasProps> = ({ user }) => {
           {filteredGoals.map((goal) => {
             const perc = Math.min((Number(goal.current_value) / Number(goal.target_value)) * 100, 100);
             return (
-              <div key={goal.id} className="bg-white border border-slate-100 rounded-[2rem] p-10 shadow-sm hover:shadow-2xl hover:border-blue-200 transition-all group flex flex-col justify-between min-h-[300px] relative overflow-hidden">
+              <div key={goal.id} className="bg-white border border-slate-100 rounded-[2rem] p-10 shadow-sm hover:shadow-2xl hover:border-[#b4a183] transition-all group flex flex-col justify-between min-h-[300px] relative overflow-hidden">
                 <div>
                   <div className="flex justify-between items-start mb-6">
                     <div className="space-y-1">
-                      <span className="text-[9px] font-black uppercase tracking-widest bg-blue-50 text-blue-600 px-3 py-1 rounded-md border border-blue-100">{goal.metric}</span>
+                      <span className="text-[9px] font-black uppercase tracking-widest bg-slate-50 text-[#01223d] px-3 py-1 rounded-md border border-slate-100">{goal.metric}</span>
                       <h4 className="text-2xl font-black text-slate-900 tracking-tight uppercase italic mt-4 leading-none">{goal.title}</h4>
                     </div>
                     <div className={`p-4 rounded-2xl border-2 transition-all ${perc >= 100 ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-slate-50 text-slate-200 border-slate-100'}`}>
@@ -166,19 +166,19 @@ const Metas: React.FC<MetasProps> = ({ user }) => {
                        </span>
                     </div>
                     <div className="text-right">
-                       <span className={`text-xl font-black ${perc >= 100 ? 'text-emerald-500' : 'text-blue-600'}`}>{perc.toFixed(1)}%</span>
+                       <span className={`text-xl font-black ${perc >= 100 ? 'text-emerald-500' : 'text-[#01223d]'}`}>{perc.toFixed(1)}%</span>
                        <p className="text-[9px] text-slate-300 font-bold uppercase flex items-center gap-1 mt-1 justify-end"><Clock size={10}/> Ciclo {goal.period}</p>
                     </div>
                   </div>
                   <div className="h-3 w-full bg-slate-50 rounded-full overflow-hidden border border-slate-100 p-0.5">
                     <div 
-                      className={`h-full transition-all duration-[2000ms] rounded-full shadow-lg ${perc >= 100 ? 'bg-emerald-500 shadow-emerald-200' : 'bg-blue-600 shadow-blue-200'}`} 
+                      className={`h-full transition-all duration-[2000ms] rounded-full shadow-lg ${perc >= 100 ? 'bg-emerald-500 shadow-emerald-200' : 'bg-[#01223d] shadow-blue-200'}`} 
                       style={{ width: `${perc}%` }}
                     ></div>
                   </div>
                 </div>
                 {/* Visual bar footer */}
-                <div className="absolute bottom-0 left-0 h-1 w-0 group-hover:w-full transition-all duration-700 bg-blue-600"></div>
+                <div className="absolute bottom-0 left-0 h-1 w-0 group-hover:w-full transition-all duration-700 bg-[#01223d]"></div>
               </div>
             );
           })}

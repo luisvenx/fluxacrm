@@ -138,7 +138,7 @@ const Crm: React.FC<CrmProps> = ({ user }) => {
   if (isLoading) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center bg-[#fcfcfd] min-h-[80vh]">
-         <Loader2 className="animate-spin text-blue-600 mb-4" size={40} />
+         <Loader2 className="animate-spin text-[#01223d] mb-4" size={40} />
          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center px-4">Processando Dados do Supabase...</p>
       </div>
     );
@@ -150,7 +150,7 @@ const Crm: React.FC<CrmProps> = ({ user }) => {
       {/* HEADER SECTION */}
       <div className="px-6 md:px-10 pt-8 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Dashboard Comercial</h1>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight uppercase">Dashboard Comercial</h1>
           <p className="text-sm text-slate-400 font-medium">Acompanhe a performance do time comercial em tempo real</p>
         </div>
 
@@ -161,13 +161,13 @@ const Crm: React.FC<CrmProps> = ({ user }) => {
                <button 
                 key={p} 
                 onClick={() => setActivePeriod(p)}
-                className={`px-3 py-1.5 rounded-md text-[11px] font-bold transition-all whitespace-nowrap ${activePeriod === p ? 'bg-blue-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
+                className={`px-3 py-1.5 rounded-md text-[11px] font-bold transition-all whitespace-nowrap ${activePeriod === p ? 'bg-[#01223d] text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
                >
                  {p}
                </button>
              ))}
           </div>
-          <button onClick={fetchData} className="p-2 bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-blue-600 transition-all shadow-sm">
+          <button onClick={fetchData} className="p-2 bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-[#b4a183] transition-all shadow-sm">
              <RefreshCcw size={16} />
           </button>
         </div>
@@ -177,7 +177,7 @@ const Crm: React.FC<CrmProps> = ({ user }) => {
         
         {/* TOP KPI ROW (TIER 1) */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="bg-white border border-blue-100 rounded-xl p-6 shadow-sm flex justify-between items-start group">
+          <div className="bg-white border border-slate-100 rounded-xl p-6 shadow-sm flex justify-between items-start group">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Valor Potencial Total</span>
@@ -186,12 +186,12 @@ const Crm: React.FC<CrmProps> = ({ user }) => {
               <h3 className="text-3xl font-black text-slate-900 tracking-tighter">{formatCurrency(dashboardData.potentialValue)}</h3>
               <p className="text-[10px] font-medium text-slate-400">Total acumulado em pipeline</p>
             </div>
-            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 shadow-sm border border-blue-100 group-hover:scale-110 transition-transform">
+            <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center text-[#01223d] shadow-sm border border-slate-100 group-hover:scale-110 transition-transform">
               <DollarSign size={20} />
             </div>
           </div>
 
-          <div className="bg-white border border-rose-100 rounded-xl p-6 shadow-sm flex justify-between items-start group">
+          <div className="bg-white border border-slate-100 rounded-xl p-6 shadow-sm flex justify-between items-start group">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Taxa Contato → Reunião</span>
@@ -200,12 +200,12 @@ const Crm: React.FC<CrmProps> = ({ user }) => {
               <h3 className="text-3xl font-black text-slate-900 tracking-tighter">{dashboardData.contactRate}%</h3>
               <p className="text-[10px] font-medium text-slate-400">Eficiência de agendamento</p>
             </div>
-            <div className="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center text-rose-500 shadow-sm border border-rose-100 group-hover:scale-110 transition-transform">
+            <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center text-[#01223d] shadow-sm border border-slate-100 group-hover:scale-110 transition-transform">
               <TrendingUp size={20} />
             </div>
           </div>
 
-          <div className="bg-white border border-rose-100 rounded-xl p-6 shadow-sm flex justify-between items-start group">
+          <div className="bg-white border border-slate-100 rounded-xl p-6 shadow-sm flex justify-between items-start group">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Taxa de Fechamento</span>
@@ -214,7 +214,7 @@ const Crm: React.FC<CrmProps> = ({ user }) => {
               <h3 className="text-3xl font-black text-slate-900 tracking-tighter">{dashboardData.closingRate}%</h3>
               <p className="text-[10px] font-medium text-slate-400">Conversão final de vendas</p>
             </div>
-            <div className="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center text-rose-500 shadow-sm border border-rose-100 group-hover:scale-110 transition-transform">
+            <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center text-[#b4a183] shadow-sm border border-slate-100 group-hover:scale-110 transition-transform">
               <Target size={20} />
             </div>
           </div>
@@ -227,13 +227,13 @@ const Crm: React.FC<CrmProps> = ({ user }) => {
             { label: 'Qualificados', val: dashboardData.stages.contato, icon: <UserPlus size={14}/> },
             { label: 'Reuniões', val: dashboardData.stages.reuniao, icon: <Calendar size={14}/> },
             { label: 'Propostas', val: dashboardData.stages.proposta, icon: <CalendarDays size={14}/> },
-            { label: 'No-show', val: '0', icon: <Users size={14}/> }, // Campo simulado se não houver no banco
+            { label: 'No-show', val: '0', icon: <Users size={14}/> }, 
             { label: 'Fechamentos', val: dashboardData.stages.fechado, icon: <Trophy size={14}/> },
           ].map((kpi, idx) => (
-            <div key={idx} className="bg-white border border-slate-100 rounded-xl p-4 shadow-sm group hover:border-blue-200 transition-all">
+            <div key={idx} className="bg-white border border-slate-100 rounded-xl p-4 shadow-sm group hover:border-[#b4a183] transition-all">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">{kpi.label}</span>
-                <div className="p-1.5 bg-blue-50 text-blue-500 rounded-lg">{kpi.icon}</div>
+                <div className="p-1.5 bg-slate-50 text-[#01223d] rounded-lg">{kpi.icon}</div>
               </div>
               <h4 className="text-2xl font-black text-slate-900 mb-1">{kpi.val}</h4>
               <p className="text-[8px] font-bold text-slate-300 uppercase">Auditado SQL</p>
@@ -250,11 +250,11 @@ const Crm: React.FC<CrmProps> = ({ user }) => {
                <h4 className="text-[13px] font-bold text-slate-900 mb-6 uppercase tracking-widest">Funil de Conversão</h4>
                <div className="space-y-6">
                   {[
-                    { label: 'Lead', count: dashboardData.totalLeads, perc: '100%', color: 'bg-blue-600' },
-                    { label: 'Qualificação', count: dashboardData.stages.contato, perc: dashboardData.totalLeads > 0 ? `${(dashboardData.stages.contato/dashboardData.totalLeads*100).toFixed(0)}%` : '0%', color: 'bg-blue-400' },
-                    { label: 'Reunião Marcada', count: dashboardData.stages.reuniao, perc: dashboardData.totalLeads > 0 ? `${(dashboardData.stages.reuniao/dashboardData.totalLeads*100).toFixed(0)}%` : '0%', color: 'bg-blue-300' },
-                    { label: 'Proposta Enviada', count: dashboardData.stages.proposta, perc: dashboardData.totalLeads > 0 ? `${(dashboardData.stages.proposta/dashboardData.totalLeads*100).toFixed(0)}%` : '0%', color: 'bg-blue-200' },
-                    { label: 'Fechado', count: dashboardData.stages.fechado, perc: dashboardData.totalLeads > 0 ? `${(dashboardData.stages.fechado/dashboardData.totalLeads*100).toFixed(0)}%` : '0%', color: 'bg-fuchsia-500' },
+                    { label: 'Lead', count: dashboardData.totalLeads, perc: '100%', color: 'bg-[#01223d]' },
+                    { label: 'Qualificação', count: dashboardData.stages.contato, perc: dashboardData.totalLeads > 0 ? `${(dashboardData.stages.contato/dashboardData.totalLeads*100).toFixed(0)}%` : '0%', color: 'bg-[#0a3556]' },
+                    { label: 'Reunião Marcada', count: dashboardData.stages.reuniao, perc: dashboardData.totalLeads > 0 ? `${(dashboardData.stages.reuniao/dashboardData.totalLeads*100).toFixed(0)}%` : '0%', color: 'bg-[#b4a183]' },
+                    { label: 'Proposta Enviada', count: dashboardData.stages.proposta, perc: dashboardData.totalLeads > 0 ? `${(dashboardData.stages.proposta/dashboardData.totalLeads*100).toFixed(0)}%` : '0%', color: 'bg-[#01223d]/50' },
+                    { label: 'Fechado', count: dashboardData.stages.fechado, perc: dashboardData.totalLeads > 0 ? `${(dashboardData.stages.fechado/dashboardData.totalLeads*100).toFixed(0)}%` : '0%', color: 'bg-emerald-600' },
                   ].map((step, i) => (
                     <div key={i} className="relative">
                       <div className="flex justify-between items-end mb-1">
@@ -280,7 +280,7 @@ const Crm: React.FC<CrmProps> = ({ user }) => {
             <div className="bg-white border border-slate-100 rounded-xl p-6 shadow-sm">
                <div className="flex items-center justify-between mb-6">
                  <div className="flex items-center gap-2">
-                    <AlertCircle size={16} className="text-orange-500" />
+                    <AlertCircle size={16} className="text-[#b4a183]" />
                     <h4 className="text-[13px] font-bold text-slate-900 uppercase tracking-widest">Alertas</h4>
                  </div>
                  <span className="bg-rose-50 text-rose-600 text-[10px] font-black px-2 py-0.5 rounded-md">{dashboardData.alerts.length}</span>
@@ -304,7 +304,7 @@ const Crm: React.FC<CrmProps> = ({ user }) => {
           <div className="lg:col-span-6 space-y-6">
             <div className="bg-white border border-slate-100 rounded-xl p-8 shadow-sm">
                <div className="flex items-center gap-2 mb-8">
-                  <div className="p-1.5 bg-blue-50 text-blue-600 rounded-lg"><Target size={18} /></div>
+                  <div className="p-1.5 bg-slate-50 text-[#01223d] rounded-lg"><Target size={18} /></div>
                   <h4 className="text-[13px] font-bold text-slate-900 uppercase tracking-widest">Progresso de Metas Estratégicas</h4>
                </div>
 
@@ -325,12 +325,12 @@ const Crm: React.FC<CrmProps> = ({ user }) => {
                                <p className="text-[10px] text-slate-400 font-medium">{goal.current_value} / {goal.target_value}</p>
                             </div>
                             <div className="text-right">
-                               <span className={`text-sm font-black ${perc >= 100 ? 'text-emerald-500' : 'text-rose-500'}`}>{perc.toFixed(1)}%</span>
+                               <span className={`text-sm font-black ${perc >= 100 ? 'text-emerald-500' : 'text-[#01223d]'}`}>{perc.toFixed(1)}%</span>
                                <p className="text-[9px] text-slate-300 font-bold uppercase flex items-center gap-1 mt-0.5 justify-end"><Clock size={10}/> Ativo</p>
                             </div>
                          </div>
                          <div className="h-1.5 w-full bg-slate-50 rounded-full overflow-hidden border border-slate-100">
-                            <div className={`h-full transition-all duration-[2000ms] ${perc >= 100 ? 'bg-emerald-500' : 'bg-blue-600'}`} style={{ width: `${perc}%` }}></div>
+                            <div className={`h-full transition-all duration-[2000ms] ${perc >= 100 ? 'bg-emerald-500' : 'bg-[#01223d]'}`} style={{ width: `${perc}%` }}></div>
                          </div>
                       </div>
                     );
@@ -346,9 +346,9 @@ const Crm: React.FC<CrmProps> = ({ user }) => {
                     const h = (p.leads / max) * 100;
                     return (
                       <div key={i} className="flex-1 flex flex-col items-center group relative h-full justify-end">
-                         <div className="absolute bottom-full mb-2 bg-slate-900 text-white text-[8px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">{p.leads} leads</div>
+                         <div className="absolute bottom-full mb-2 bg-[#01223d] text-white text-[8px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">{p.leads} leads</div>
                          <div 
-                           className="w-1.5 bg-blue-600 rounded-t-full transition-all duration-1000 group-hover:bg-blue-400 shadow-sm" 
+                           className="w-1.5 bg-[#01223d] rounded-t-full transition-all duration-1000 group-hover:bg-[#b4a183] shadow-sm" 
                            style={{ height: `${h}%` }}
                          ></div>
                       </div>
@@ -375,7 +375,7 @@ const Crm: React.FC<CrmProps> = ({ user }) => {
                      <div key={i} className="flex items-center justify-between p-3 hover:bg-slate-50 rounded-xl transition-all group">
                         <div className="flex items-center gap-4">
                            <span className="text-[11px] font-black text-slate-400 w-4">{i + 1}</span>
-                           <div className={`w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-[10px] font-black text-blue-400 border border-slate-700 shadow-sm`}>
+                           <div className={`w-8 h-8 rounded-lg bg-[#01223d] flex items-center justify-center text-[10px] font-black text-[#b4a183] border border-slate-700 shadow-sm`}>
                               {member.initial}
                            </div>
                            <div className="flex items-center gap-2">
@@ -392,12 +392,12 @@ const Crm: React.FC<CrmProps> = ({ user }) => {
              <div className="bg-white border border-slate-100 rounded-xl p-8 shadow-sm text-center flex flex-col items-center justify-center gap-6 min-h-[350px] relative overflow-hidden group">
                 <div className="w-full flex justify-between items-center mb-4 relative z-10">
                    <div className="flex items-center gap-2">
-                      <Sparkles size={16} className="text-blue-600" />
+                      <Sparkles size={16} className="text-[#b4a183]" />
                       <h4 className="text-[13px] font-bold text-slate-900 uppercase tracking-widest">Briefing AI</h4>
                    </div>
                 </div>
                 
-                <div className="p-4 bg-blue-50 rounded-2xl text-blue-600 mb-2 relative z-10 group-hover:scale-110 transition-transform">
+                <div className="p-4 bg-slate-50 rounded-2xl text-[#b4a183] mb-2 relative z-10 group-hover:scale-110 transition-transform">
                    <Sparkles size={32} />
                 </div>
                 <div className="relative z-10">
@@ -406,8 +406,8 @@ const Crm: React.FC<CrmProps> = ({ user }) => {
                       O agente Gemini analisará seus {dashboardData.totalLeads} leads e {dashboardData.goals.length} metas para sugerir ações de fechamento.
                    </p>
                 </div>
-                <button className="bg-[#203267] text-white px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-black shadow-xl shadow-indigo-900/20 transition-all flex items-center gap-3 active:scale-95 relative z-10">
-                   <Zap size={16} fill="white" /> Gerar Briefing
+                <button className="bg-[#01223d] text-white px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-black shadow-xl shadow-slate-900/20 transition-all flex items-center justify-center gap-3 active:scale-95 relative z-10 group/btn">
+                   <Zap size={16} fill="#b4a183" className="text-[#b4a183] group-hover/btn:scale-125 transition-transform" /> Gerar Briefing
                 </button>
                 <div className="absolute -right-10 -bottom-10 opacity-[0.02] group-hover:scale-110 transition-transform">
                    <Target size={200} />

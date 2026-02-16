@@ -6,7 +6,7 @@ const CustomersTable: React.FC = () => {
   const headers = ['CLIENTE', 'FATURADO', 'RECEBIDO', 'EM ABERTO', 'STATUS'];
 
   return (
-    <div className="bg-white border border-slate-200 rounded-xl flex flex-col h-[500px] shadow-sm group hover:shadow-md transition-all overflow-hidden">
+    <div className="bg-white border border-slate-200 rounded-xl flex flex-col h-[500px] shadow-sm group transition-all overflow-hidden">
       <div className="p-8 pb-6">
         <h3 className="text-slate-900 font-bold text-base tracking-tight">Clientes</h3>
         <p className="text-[11px] text-slate-400 font-medium">Visão geral por cliente</p>
@@ -27,8 +27,8 @@ const CustomersTable: React.FC = () => {
       </div>
 
       <div className="p-6 border-t border-slate-50 bg-white">
-        <button className="flex items-center gap-2 text-blue-600 text-[11px] font-black uppercase tracking-widest hover:gap-3 transition-all">
-          Ver todos os clientes <ArrowRight size={14} />
+        <button className="flex items-center gap-2 text-[#01223d] text-[11px] font-black uppercase tracking-widest hover:gap-3 transition-all group">
+          Ver todos os clientes <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
         </button>
       </div>
     </div>
