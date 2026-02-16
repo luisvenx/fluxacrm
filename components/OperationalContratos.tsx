@@ -63,7 +63,7 @@ const OperationalContratos: React.FC<OperationalContratosProps> = ({ user }) => 
     const mrr = active.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
     
     return [
-      { label: 'MRR Contratual', value: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(mrr), trend: 'Consolidado SQL', icon: <CreditCard size={18}/>, color: 'blue' },
+      { label: 'MRR Contratual', value: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(mrr), trend: 'Consolidado', icon: <CreditCard size={18}/>, color: 'blue' },
       { label: 'Em Vigência', value: active.length.toString(), trend: 'Ativos agora', icon: <ShieldCheck size={18}/>, color: 'emerald' },
       { label: 'Sua Base', value: contracts.length.toString(), trend: 'Registros isolados', icon: <FileText size={18}/>, color: 'blue' },
     ];
@@ -84,10 +84,6 @@ const OperationalContratos: React.FC<OperationalContratosProps> = ({ user }) => 
             <FileText size={24} />
           </div>
           <div>
-            <div className="flex items-center gap-2 mb-0.5">
-               <Database size={14} className="text-blue-500" />
-               <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Dados da Sua Conta</span>
-            </div>
             <h2 className="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">Meus Contratos</h2>
           </div>
         </div>
@@ -113,7 +109,7 @@ const OperationalContratos: React.FC<OperationalContratosProps> = ({ user }) => 
         {isLoading ? (
           <div className="flex-1 flex flex-col items-center justify-center">
             <Loader2 className="animate-spin text-blue-600 mb-4" size={40} />
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Acessando Base SQL...</p>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Buscando contratos...</p>
           </div>
         ) : (
           <div className="overflow-x-auto no-scrollbar">

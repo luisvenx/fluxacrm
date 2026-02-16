@@ -91,14 +91,10 @@ const Transactions: React.FC<TransactionsProps> = ({ user }) => {
       {/* Header Corporativo */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-10">
         <div>
-          <div className="flex items-center gap-2 mb-2">
-             <Database size={14} className="text-blue-600" />
-             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Ledger Auditado v2.6</span>
-          </div>
           <h2 className="text-3xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">
             Extrato de <span className="text-blue-600 not-italic">Lançamentos</span>
           </h2>
-          <p className="text-slate-400 font-bold text-[11px] uppercase tracking-widest mt-2">Gestão consolidada de {filteredTransactions.length} registros</p>
+          <p className="text-slate-400 font-bold text-[11px] uppercase tracking-widest mt-3">Gestão consolidada de {filteredTransactions.length} registros</p>
         </div>
         
         <div className="flex items-center gap-3 w-full md:w-auto">
@@ -160,7 +156,7 @@ const Transactions: React.FC<TransactionsProps> = ({ user }) => {
                 <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Data de Competência</th>
                 <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Descrição & Classificação</th>
                 <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-right">Valor</th>
-                <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-center">Status Auditoria</th>
+                <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-center">Status</th>
                 <th className="px-8 py-5 w-10"></th>
               </tr>
             </thead>
@@ -169,7 +165,7 @@ const Transactions: React.FC<TransactionsProps> = ({ user }) => {
                 <tr>
                   <td colSpan={5} className="py-40 text-center">
                     <Loader2 className="animate-spin mx-auto text-blue-600 mb-4" size={32} />
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Consolidando Ledger Financeiro...</p>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Carregando registros...</p>
                   </td>
                 </tr>
               ) : filteredTransactions.length === 0 ? (

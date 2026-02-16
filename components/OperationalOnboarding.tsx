@@ -51,7 +51,7 @@ const OperationalOnboarding: React.FC<OperationalOnboardingProps> = ({ user }) =
             customers (name)
           )
         `)
-        .eq('user_id', user.id); // ISOLAÇÃO
+        .eq('user_id', user.id); 
       if (error) throw error;
       setOnboardings(data || []);
     } catch (err) {
@@ -72,7 +72,7 @@ const OperationalOnboarding: React.FC<OperationalOnboardingProps> = ({ user }) =
     const avgProgress = total > 0 ? Math.round(onboardings.reduce((acc, o) => acc + (o.progress || 0), 0) / total) : 0;
 
     return [
-      { label: 'Seus Onboardings', value: total.toString(), trend: 'Em fluxo', icon: <Rocket size={20} />, color: 'blue' },
+      { label: 'Onboardings', value: total.toString(), trend: 'Em fluxo', icon: <Rocket size={20} />, color: 'blue' },
       { label: 'No Prazo', value: inTime.toString(), trend: 'Performance OK', icon: <CheckCircle2 size={20} />, color: 'emerald' },
       { label: 'Em Atenção', value: atRisk.toString(), trend: 'Bloqueios', icon: <AlertTriangle size={20} />, color: 'amber' },
       { label: 'Avg. Progresso', value: `${avgProgress}%`, trend: 'Consolidado', icon: <Zap size={20} />, color: 'indigo' },
@@ -81,14 +81,14 @@ const OperationalOnboarding: React.FC<OperationalOnboardingProps> = ({ user }) =
 
   if (isLoading) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center bg-[#fcfcfd] min-h-[80vh]"><Loader2 className="animate-spin text-blue-600 mb-4" size={40} /><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-4 text-center">Filtrando Sua Entrega...</p></div>
+      <div className="flex-1 flex flex-col items-center justify-center bg-[#fcfcfd] min-h-[80vh]"><Loader2 className="animate-spin text-blue-600 mb-4" size={40} /><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-4 text-center">Buscando onboardings...</p></div>
     );
   }
 
   return (
     <div className="bg-[#fcfcfd] min-h-screen flex flex-col animate-in fade-in duration-700 overflow-hidden pb-24 md:pb-10">
       <div className="px-4 md:px-8 pt-6 md:pt-8 pb-4 md:pb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div><div className="flex items-center gap-2 mb-1"><Database size={14} className="text-blue-500 shrink-0" /><span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Seu Fluxo de Implementação</span></div><h2 className="text-2xl font-bold text-slate-900 tracking-tight">Onboarding Operacional</h2></div>
+        <div><h2 className="text-2xl font-bold text-slate-900 tracking-tight">Onboarding Operacional</h2></div>
         <div className="flex items-center gap-2 w-full md:w-auto">
           <button onClick={fetchOnboardings} className="flex-1 md:flex-none p-2.5 bg-white border border-slate-200 text-slate-400 hover:text-blue-600 rounded-xl transition-all shadow-sm"><RefreshCcw size={18} className={isLoading ? 'animate-spin' : ''} /></button>
           <button onClick={() => setIsModalOpen(true)} className="flex-[3] md:flex-none bg-blue-600 text-white px-6 py-2.5 rounded-xl md:rounded-full text-xs font-bold hover:bg-blue-700 transition-all flex items-center justify-center gap-2"><Plus size={20} /> Iniciar Fluxo</button>
@@ -100,7 +100,6 @@ const OperationalOnboarding: React.FC<OperationalOnboardingProps> = ({ user }) =
           {stats.map((stat, i) => (
             <div key={i} className="bg-white border border-slate-100 rounded-2xl p-4 flex items-center justify-between shadow-sm min-w-[200px] md:min-w-0 group hover:border-blue-100 transition-all">
               <div className="space-y-0.5"><p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</p><p className="text-lg font-black text-slate-900 tracking-tighter">{stat.value}</p><p className="text-[8px] font-bold text-blue-500 uppercase">{stat.trend}</p></div>
-              {/* Added React.ReactElement<any> cast to fix property access error */}
               <div className={`p-2 bg-slate-50 text-slate-400 rounded-xl group-hover:scale-110 transition-transform`}>{React.cloneElement(stat.icon as React.ReactElement<any>, { size: 18 })}</div>
             </div>
           ))}

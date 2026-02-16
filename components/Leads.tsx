@@ -2,20 +2,16 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Search, 
-  ChevronDown, 
   Plus, 
-  Upload, 
-  UserPlus, 
-  Filter,
   MoreVertical,
-  ArrowUpRight,
-  Mail,
-  Building2,
-  Calendar,
   Loader2,
   Database,
-  ExternalLink,
-  RefreshCcw
+  RefreshCcw,
+  UserPlus,
+  UserCheck,
+  Zap,
+  DollarSign,
+  Filter
 } from 'lucide-react';
 import NewLeadModal from './NewLeadModal';
 import ImportLeadsModal from './ImportLeadsModal';
@@ -27,7 +23,6 @@ interface LeadsProps {
 
 const Leads: React.FC<LeadsProps> = ({ user }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedStage, setSelectedStage] = useState('Todas as Fases');
   const [isNewLeadModalOpen, setIsNewLeadModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [leads, setLeads] = useState<any[]>([]);
@@ -40,7 +35,7 @@ const Leads: React.FC<LeadsProps> = ({ user }) => {
       const { data, error } = await supabase
         .from('leads')
         .select('*')
-        .eq('user_id', user.id) // GARANTIR ISOLAMENTO
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
       if (error) throw error;
       setLeads(data || []);
@@ -56,111 +51,159 @@ const Leads: React.FC<LeadsProps> = ({ user }) => {
   }, [user]);
 
   const filteredLeads = useMemo(() => {
-    return leads.filter(lead => {
-      const matchesSearch = lead.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                           lead.company?.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStage = selectedStage === 'Todas as Fases' || lead.stage?.toLowerCase() === selectedStage.toLowerCase();
-      return matchesSearch && matchesStage;
-    });
-  }, [leads, searchTerm, selectedStage]);
+    return leads.filter(lead => 
+      lead.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      lead.property_code?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [leads, searchTerm]);
+
+  const stats = useMemo(() => {
+    const totalValue = filteredLeads.reduce((acc, curr) => acc + (Number(curr.value) || 0), 0);
+    return {
+      count: filteredLeads.length,
+      value: totalValue
+    };
+  }, [filteredLeads]);
 
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
   };
 
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
-  };
-
   return (
-    <div className="bg-[#fcfcfd] min-h-screen space-y-6 md:space-y-8 animate-in fade-in duration-700 pb-24 md:pb-10 px-4 md:px-10 pt-6 md:pt-8">
-      
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+    <div className="bg-[#fcfcfd] min-h-screen animate-in fade-in duration-700 pb-24 md:pb-20 px-6 md:px-10 pt-8 relative overflow-hidden">
+      {/* Pattern Texture */}
+      <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.02]" 
+           style={{ backgroundImage: 'radial-gradient(#203267 1px, transparent 1px)', backgroundSize: '32px 32px' }}>
+      </div>
+
+      <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-10">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-             <Database size={16} className="text-blue-500 shrink-0" />
-             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Leads Intelligence</span>
-          </div>
-          <h2 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">Leads Central</h2>
-          <p className="text-slate-500 font-medium text-xs md:text-sm">Exibindo {filteredLeads.length} leads da sua conta.</p>
+          <h2 className="text-3xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">
+            Base de <span className="text-blue-600 not-italic">Oportunidades</span>
+          </h2>
+          <p className="text-slate-400 font-bold text-[11px] uppercase tracking-widest mt-4">Gestão centralizada de leads e contatos isolados</p>
         </div>
 
-        <div className="flex items-center gap-2 w-full md:w-auto">
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <button 
+            onClick={() => setIsImportModalOpen(true)}
+            className="flex-1 md:flex-none bg-white border border-slate-200 text-slate-600 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm"
+          >
+            Importar em Massa
+          </button>
           <button 
             onClick={() => setIsNewLeadModalOpen(true)}
-            className="flex-1 md:flex-none bg-blue-600 text-white px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all flex items-center justify-center gap-2"
+            className="flex-1 md:flex-none bg-blue-600 text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 shadow-lg transition-all flex items-center justify-center gap-2 active:scale-95"
           >
-            <Plus size={18} /> Novo
+            <Plus size={16} strokeWidth={3} /> Novo Cadastro
           </button>
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-4 items-center justify-between bg-white p-2 border border-slate-100 rounded-2xl md:rounded-3xl shadow-sm">
-        <div className="relative flex-1 w-full lg:max-w-md ml-0 lg:ml-2">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
+      {/* Leads Summary Row */}
+      <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+         <div className="bg-white border border-slate-100 p-6 rounded-[2rem] shadow-sm flex items-center gap-5 group hover:border-blue-100 transition-all">
+            <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+               <UserPlus size={20} />
+            </div>
+            <div>
+               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Contatos Totais</p>
+               <h3 className="text-2xl font-black text-slate-900 tracking-tighter">{stats.count}</h3>
+            </div>
+         </div>
+         <div className="bg-white border border-slate-100 p-6 rounded-[2rem] shadow-sm flex items-center gap-5 group hover:border-emerald-100 transition-all">
+            <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+               <DollarSign size={20} />
+            </div>
+            <div>
+               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Valor em Pipeline</p>
+               <h3 className="text-2xl font-black text-slate-900 tracking-tighter">{formatCurrency(stats.value)}</h3>
+            </div>
+         </div>
+         <div className="bg-white border border-slate-100 p-6 rounded-[2rem] shadow-sm flex items-center gap-5 group hover:border-indigo-100 transition-all">
+            <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+               <RefreshCcw size={20} />
+            </div>
+            <div>
+               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Status da Base</p>
+               <h3 className="text-xl font-black text-slate-900 tracking-tighter uppercase italic">Sincronizado</h3>
+            </div>
+         </div>
+      </div>
+
+      {/* Filters Toolbar */}
+      <div className="relative z-10 bg-white border border-slate-200 p-2 rounded-2xl shadow-sm mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="relative flex-1 group w-full ml-2">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-600 transition-colors" size={16} />
           <input 
             type="text" 
-            placeholder="Buscar nos seus leads..." 
+            placeholder="Pesquisar por nome, empresa ou imóvel..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-slate-50 border-none rounded-xl md:rounded-2xl py-2.5 pl-11 pr-4 text-sm font-medium focus:ring-2 focus:ring-blue-100 transition-all text-slate-600"
+            className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2.5 pl-11 pr-4 text-xs font-bold focus:ring-2 focus:ring-blue-100 transition-all outline-none text-slate-600"
           />
+        </div>
+        <div className="flex items-center gap-2 px-2">
+           <button className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-slate-900 transition-all shadow-sm">
+             <Filter size={16} />
+           </button>
+           <button onClick={fetchLeads} className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-blue-600 transition-all shadow-sm">
+             <RefreshCcw size={16} className={isLoading ? 'animate-spin' : ''} />
+           </button>
         </div>
       </div>
 
-      <div className="bg-white border border-slate-100 rounded-2xl md:rounded-[2.5rem] shadow-sm overflow-hidden flex flex-col min-h-[450px]">
-        <div className="overflow-x-auto no-scrollbar">
-          <table className="w-full text-left border-collapse min-w-[800px]">
+      {/* Leads Table Container */}
+      <div className="relative z-10 bg-white border border-slate-100 rounded-[2.5rem] shadow-xl overflow-hidden min-h-[500px] flex flex-col">
+        <div className="overflow-x-auto no-scrollbar flex-1">
+          <table className="w-full text-left border-collapse min-w-[950px]">
             <thead>
-              <tr className="bg-slate-50/30">
-                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Lead & Organização</th>
-                <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Fase</th>
-                <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Valor Est.</th>
-                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Data</th>
-                <th className="px-6 py-5 w-10"></th>
+              <tr className="bg-slate-50 border-b border-slate-100">
+                <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Identificação do Contato</th>
+                <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">Fase Pipeline</th>
+                <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Potencial Comercial</th>
+                <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">Origem / Canal</th>
+                <th className="px-10 py-6 w-10"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
               {isLoading ? (
-                <tr>
-                  <td colSpan={5} className="py-24 text-center">
-                    <Loader2 size={32} className="animate-spin mx-auto text-blue-500 mb-4" />
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Acessando seus registros...</p>
-                  </td>
-                </tr>
+                <tr><td colSpan={5} className="py-40 text-center"><Loader2 size={32} className="animate-spin mx-auto text-blue-500 mb-4" /><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Auditando Base...</p></td></tr>
               ) : filteredLeads.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="py-32 text-center">
-                     <p className="text-xs font-bold text-slate-300 uppercase tracking-[0.2em]">Sem leads cadastrados por você</p>
-                  </td>
-                </tr>
+                <tr><td colSpan={5} className="py-40 text-center opacity-30"><Database size={48} className="mx-auto mb-4" /><p className="text-xs font-black text-slate-300 uppercase tracking-widest">Nenhum registro localizado</p></td></tr>
               ) : (
                 filteredLeads.map((lead) => (
                   <tr key={lead.id} className="hover:bg-slate-50 transition-all group">
-                    <td className="px-8 py-6">
+                    <td className="px-10 py-6">
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-slate-900 text-white rounded-xl flex items-center justify-center font-black text-xs shadow-md italic">
+                        <div className="w-12 h-12 bg-slate-900 text-blue-400 border border-slate-700 rounded-2xl flex items-center justify-center font-black text-sm shadow-md italic group-hover:scale-110 transition-transform">
                           {lead.name.substring(0, 1)}
                         </div>
-                        <div className="min-w-0">
-                          <p className="text-sm font-bold text-slate-900 tracking-tight uppercase truncate max-w-[200px]">{lead.name}</p>
-                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest truncate">{lead.company || 'Pessoa Física'}</p>
+                        <div>
+                          <p className="text-sm font-bold text-slate-900 tracking-tight uppercase truncate max-w-[250px] italic">{lead.name}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                             <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{lead.phone || 'Sem Telefone'}</span>
+                             <span className="text-slate-200">•</span>
+                             <span className="text-[9px] text-blue-500 font-black uppercase">REF: {lead.property_code || 'N/A'}</span>
+                          </div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-6 text-center">
-                      <span className="text-[9px] font-black bg-blue-50 text-blue-600 px-3 py-1 rounded-full uppercase tracking-widest border border-blue-100/50">
+                    <td className="px-8 py-6 text-center">
+                      <span className="text-[9px] font-black bg-blue-50 text-blue-600 px-4 py-1.5 rounded-full uppercase tracking-widest border border-blue-100 shadow-sm">
                         {lead.stage || 'lead'}
                       </span>
                     </td>
-                    <td className="px-6 py-6 text-right">
-                      <p className="text-sm font-black text-slate-900 tracking-tighter">{formatCurrency(lead.value || 0)}</p>
-                    </td>
                     <td className="px-8 py-6 text-right">
-                      <span className="text-[10px] font-black text-slate-400 uppercase">{formatDate(lead.created_at)}</span>
+                      <p className="text-base font-black text-slate-900 tracking-tighter">{formatCurrency(lead.value || 0)}</p>
                     </td>
-                    <td className="px-6 py-6 text-right">
-                       <button className="p-2 text-slate-200 hover:text-slate-900"><MoreVertical size={16}/></button>
+                    <td className="px-8 py-6 text-center">
+                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest bg-slate-100 px-3 py-1 rounded-lg border border-slate-200">{lead.origin || 'Outbound'}</span>
+                    </td>
+                    <td className="px-10 py-6 text-right">
+                       <button className="p-2.5 text-slate-200 hover:text-slate-900 hover:bg-white rounded-xl transition-all shadow-sm">
+                         <MoreVertical size={18}/>
+                       </button>
                     </td>
                   </tr>
                 ))

@@ -17,7 +17,6 @@ import {
 import NewNPSModal from './NewNPSModal';
 import { supabase } from '../lib/supabase';
 
-// Added interface for props to fix App.tsx error
 interface OperationalNPSProps {
   user: any;
 }
@@ -79,10 +78,6 @@ const OperationalNPS: React.FC<OperationalNPSProps> = ({ user }) => {
             <Star size={24} />
           </div>
           <div>
-            <div className="flex items-center gap-2 mb-0.5">
-               <Database size={14} className="text-blue-500" />
-               <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Sentiment Realtime Sync</span>
-            </div>
             <h2 className="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">Voz do Cliente (NPS)</h2>
           </div>
         </div>
@@ -148,9 +143,6 @@ const OperationalNPS: React.FC<OperationalNPSProps> = ({ user }) => {
           <div className="relative z-10">
             <p className="text-[10px] md:text-[11px] font-bold text-white/50 uppercase tracking-widest mb-4">Amostragem Base</p>
             <h3 className="text-2xl md:text-3xl font-bold tracking-tight">{stats.rate} Respostas</h3>
-            <p className="text-[10px] text-blue-400 font-bold mt-1 uppercase tracking-widest flex items-center gap-1.5">
-               <Database size={12} /> SQL Realtime Audit
-            </p>
           </div>
           <BarChart className="absolute -right-4 -bottom-4 text-white/5 w-24 h-24 group-hover:scale-110 transition-transform" />
         </div>
@@ -171,12 +163,12 @@ const OperationalNPS: React.FC<OperationalNPSProps> = ({ user }) => {
         {isLoading ? (
           <div className="flex-1 flex flex-col items-center justify-center py-20">
              <Loader2 className="animate-spin text-blue-600 mb-4" size={32} />
-             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Processando Sentimentos...</p>
+             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Processando feedbacks...</p>
           </div>
         ) : responses.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center py-24 opacity-30 text-center space-y-4">
              <MessageSquare size={48} className="mx-auto" />
-             <p className="text-sm font-bold uppercase tracking-widest">Sem respostas registradas na base</p>
+             <p className="text-sm font-bold uppercase tracking-widest">Sem respostas registradas</p>
           </div>
         ) : (
           <div className="overflow-x-auto no-scrollbar">

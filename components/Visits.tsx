@@ -9,8 +9,8 @@ import {
   User, 
   CheckCircle2, 
   XCircle, 
-  MoreVertical,
-  Loader2,
+  MoreVertical, 
+  Loader2, 
   Database,
   RefreshCcw,
   MessageSquare,
@@ -82,12 +82,8 @@ const Visits: React.FC<VisitsProps> = ({ user }) => {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-             <Database size={16} className="text-blue-500" />
-             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Showings & Feedback Loop</span>
-          </div>
           <h2 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight uppercase">Controle de Visitas</h2>
-          <p className="text-slate-500 font-bold text-[10px] uppercase tracking-widest mt-1">Pipeline de demonstração e interessados</p>
+          <p className="text-slate-500 font-bold text-[10px] uppercase tracking-widest mt-2">Pipeline de demonstração e interessados</p>
         </div>
         
         <button 

@@ -77,12 +77,8 @@ const Properties: React.FC<PropertiesProps> = ({ user }) => {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-             <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></div>
-             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Inventory Cloud Sync</span>
-          </div>
           <h2 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight uppercase">Base de Imóveis</h2>
-          <p className="text-slate-500 font-bold text-[10px] uppercase tracking-widest mt-1">
+          <p className="text-slate-500 font-bold text-[10px] uppercase tracking-widest mt-2">
             Gestão analítica de {filteredProperties.length} unidades
           </p>
         </div>
@@ -131,12 +127,12 @@ const Properties: React.FC<PropertiesProps> = ({ user }) => {
       {isLoading ? (
         <div className="py-40 text-center">
           <Loader2 className="animate-spin mx-auto text-blue-500 mb-4" size={40} />
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Mapeando Ativos...</p>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Carregando ativos...</p>
         </div>
       ) : filteredProperties.length === 0 ? (
         <div className="py-40 text-center bg-white border-2 border-dashed border-slate-100 rounded-[3rem]">
           <Home size={48} className="mx-auto text-slate-100 mb-4" />
-          <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Nenhum imóvel encontrado nesta busca</p>
+          <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Nenhum imóvel encontrado</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">

@@ -52,7 +52,7 @@ const OperationalProdutos: React.FC<OperationalProdutosProps> = ({ user }) => {
   const stats = useMemo(() => {
     const active = products.filter(p => p.status === 'Ativo').length;
     return [
-      { label: 'Seus Itens', value: products.length.toString(), trend: 'Base Auditada', icon: <Package size={18}/> },
+      { label: 'Itens', value: products.length.toString(), trend: 'Cadastrados', icon: <Package size={18}/> },
       { label: 'Ativos', value: active.toString(), trend: 'Disponíveis', icon: <Zap size={18}/> },
     ];
   }, [products]);
@@ -72,10 +72,6 @@ const OperationalProdutos: React.FC<OperationalProdutosProps> = ({ user }) => {
             <Package size={24} />
           </div>
           <div>
-            <div className="flex items-center gap-2 mb-0.5">
-               <Database size={14} className="text-blue-500" />
-               <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Inventory Management</span>
-            </div>
             <h2 className="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">Meus Produtos</h2>
           </div>
         </div>
@@ -101,7 +97,7 @@ const OperationalProdutos: React.FC<OperationalProdutosProps> = ({ user }) => {
         {isLoading ? (
           <div className="flex-1 flex flex-col items-center justify-center py-20">
             <Loader2 className="animate-spin text-blue-600 mb-4" size={40} />
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sincronizando Catálogo...</p>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sincronizando catálogo...</p>
           </div>
         ) : (
           <div className="overflow-x-auto no-scrollbar">

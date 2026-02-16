@@ -103,12 +103,8 @@ const Disbursements: React.FC<DisbursementsProps> = ({ user }) => {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-             <ArrowRightLeft size={16} className="text-blue-500" />
-             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Administration & Rent Management</span>
-          </div>
           <h2 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight uppercase">Repasses Financeiros</h2>
-          <p className="text-slate-500 font-bold text-[10px] uppercase tracking-widest mt-1">Gestão de liquidação de aluguéis e comissões</p>
+          <p className="text-slate-500 font-bold text-[10px] uppercase tracking-widest mt-2">Gestão de liquidação de aluguéis e comissões</p>
         </div>
         <div className="flex items-center gap-3 w-full md:w-auto">
            <button onClick={fetchDisbursements} className="p-3 bg-white border-2 border-slate-100 rounded-xl text-slate-400 hover:text-blue-600 transition-all"><RefreshCcw size={18} className={isLoading ? 'animate-spin' : ''} /></button>
@@ -116,7 +112,7 @@ const Disbursements: React.FC<DisbursementsProps> = ({ user }) => {
         </div>
       </div>
 
-      {/* KPI Row Aprimorada */}
+      {/* KPI Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="bg-white border-2 border-blue-50 rounded-[2.5rem] p-8 shadow-sm flex items-center justify-between group hover:border-blue-500 transition-all">
           <div>
@@ -270,7 +266,7 @@ const Disbursements: React.FC<DisbursementsProps> = ({ user }) => {
               <div className="space-y-8">
                  <div>
                     <h3 className="text-2xl font-black text-slate-900 tracking-tight uppercase">Comprovante de Repasse</h3>
-                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1">Auditado via Fluxa Engine SQL</p>
+                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1">Auditado via Fluxa Engine</p>
                  </div>
 
                  <div className="space-y-4 border-y border-slate-50 py-8">
@@ -298,7 +294,7 @@ const Disbursements: React.FC<DisbursementsProps> = ({ user }) => {
                  </div>
 
                  <button className="w-full py-4 bg-slate-900 text-white rounded-full text-xs font-black uppercase tracking-widest hover:bg-slate-800 transition-all flex items-center justify-center gap-2">
-                    <Download size={16} /> Baixar PDF Auditoria
+                    <Download size={16} /> Baixar PDF
                  </button>
               </div>
            </div>

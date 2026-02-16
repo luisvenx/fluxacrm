@@ -76,14 +76,10 @@ const Taxes: React.FC<TaxesProps> = ({ user }) => {
       {/* Header Corporativo */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
         <div>
-          <div className="flex items-center gap-2 mb-2">
-             <Scale size={14} className="text-blue-600" />
-             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Fiscal Governance Hub</span>
-          </div>
           <h2 className="text-3xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">
             Compliance <span className="text-blue-600 not-italic">Tributário</span>
           </h2>
-          <p className="text-slate-400 font-bold text-[11px] uppercase tracking-widest mt-2">Monitoramento de obrigações e provisão fiscal auditada</p>
+          <p className="text-slate-400 font-bold text-[11px] uppercase tracking-widest mt-3">Monitoramento de obrigações e provisão fiscal auditada</p>
         </div>
         <button 
           onClick={() => setIsNewTaxModalOpen(true)} 
@@ -142,7 +138,7 @@ const Taxes: React.FC<TaxesProps> = ({ user }) => {
         {isLoading ? (
           <div className="flex-1 flex flex-col items-center justify-center py-20">
              <Loader2 className="animate-spin text-blue-600 mb-4" size={32} />
-             <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Compilando Matriz Fiscal...</p>
+             <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Carregando matriz fiscal...</p>
           </div>
         ) : (
           <div className="overflow-x-auto no-scrollbar">

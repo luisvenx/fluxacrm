@@ -81,14 +81,10 @@ const Cards: React.FC<CardsProps> = ({ user }) => {
       {/* Header Premium */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
         <div>
-          <div className="flex items-center gap-2 mb-2">
-             <ShieldCheck size={14} className="text-blue-600" />
-             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Asset Management Node</span>
-          </div>
           <h2 className="text-3xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">
             Minha <span className="text-blue-600 not-italic">Wallet</span>
           </h2>
-          <p className="text-slate-400 font-bold text-[11px] uppercase tracking-widest mt-2">Gestão centralizada de meios de pagamento corporativos</p>
+          <p className="text-slate-400 font-bold text-[11px] uppercase tracking-widest mt-3">Gestão centralizada de meios de pagamento corporativos</p>
         </div>
         <button 
           onClick={() => setIsNewCardModalOpen(true)} 

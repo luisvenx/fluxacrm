@@ -69,12 +69,8 @@ const Inspections: React.FC<InspectionsProps> = ({ user }) => {
       
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-             <Database size={16} className="text-blue-500" />
-             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Technical Inspection Engine</span>
-          </div>
           <h2 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight uppercase">Vistorias Técnicas</h2>
-          <p className="text-slate-500 font-bold text-[10px] uppercase tracking-widest mt-1">Controle de entrada, saída e rotina</p>
+          <p className="text-slate-500 font-bold text-[10px] uppercase tracking-widest mt-2">Controle de entrada, saída e rotina</p>
         </div>
         
         <button 
@@ -168,7 +164,7 @@ const Inspections: React.FC<InspectionsProps> = ({ user }) => {
                        <span className={`text-[9px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest border-2 ${
                          item.status === 'Realizada' ? 'bg-emerald-50 text-emerald-600 border-emerald-500' : 
                          item.status === 'Cancelada' ? 'bg-rose-50 text-rose-600 border-rose-500' :
-                         'bg-amber-50 text-amber-600 border-amber-500'
+                         'bg-amber-50 text-amber-600 border-amber-300'
                        }`}>
                          {item.status}
                        </span>

@@ -74,14 +74,10 @@ const CostCenters: React.FC<CostCentersProps> = ({ user }) => {
       {/* Header Premium */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
         <div>
-          <div className="flex items-center gap-2 mb-2">
-             <Activity size={14} className="text-blue-600" />
-             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Budget Allocation Hub</span>
-          </div>
           <h2 className="text-3xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">
             Centros de <span className="text-blue-600 not-italic">Custo</span>
           </h2>
-          <p className="text-slate-400 font-bold text-[11px] uppercase tracking-widest mt-2">Classificação analítica por unidade de negócio</p>
+          <p className="text-slate-400 font-bold text-[11px] uppercase tracking-widest mt-3">Classificação analítica por unidade de negócio</p>
         </div>
         <div className="flex items-center gap-3 w-full md:w-auto">
           <button onClick={() => setIsExportModalOpen(true)} className="flex-1 md:flex-none bg-white border border-slate-200 text-slate-600 px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm">
@@ -96,7 +92,7 @@ const CostCenters: React.FC<CostCentersProps> = ({ user }) => {
       {isLoading ? (
         <div className="py-40 text-center">
           <Loader2 className="animate-spin mx-auto text-blue-600 mb-4" size={32} />
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Auditando Alocação de Recursos...</p>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Carregando centros de custo...</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">

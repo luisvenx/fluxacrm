@@ -74,15 +74,11 @@ const MarketingKanbans: React.FC<MarketingKanbansProps> = ({ user }) => {
   };
 
   return (
-    <div className="min-h-full bg-[#fcfcfd] flex flex-col animate-in fade-in duration-700 overflow-hidden pb-24 md:pb-10">
+    <div className="min-h-full bg-[#fcfcfd] min-h-screen flex flex-col animate-in fade-in duration-700 overflow-hidden pb-24 md:pb-10">
       
       {/* Header Responsivo */}
       <div className="px-4 md:px-8 pt-6 md:pt-8 pb-4 md:pb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Database size={14} className="text-blue-500 shrink-0" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Task Manager Isolado</span>
-          </div>
           <h2 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight uppercase">Fluxos de Conteúdo</h2>
         </div>
 
@@ -118,7 +114,7 @@ const MarketingKanbans: React.FC<MarketingKanbansProps> = ({ user }) => {
       {isLoading ? (
         <div className="flex-1 flex flex-col items-center justify-center">
            <Loader2 className="animate-spin text-blue-600 mb-4" size={40} />
-           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Acessando Sua Base...</p>
+           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Carregando tarefas...</p>
         </div>
       ) : (
         <div className="flex-1 overflow-x-auto no-scrollbar px-4 md:px-8 pb-10">

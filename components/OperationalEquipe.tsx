@@ -55,7 +55,7 @@ const OperationalEquipe: React.FC<OperationalEquipeProps> = ({ user }) => {
     
     return [
       { label: 'Sua Equipe', value: `${total} Membros`, icon: <UserCheck size={20}/>, color: 'blue' },
-      { label: 'Burn Rate (Ref)', value: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(payroll), icon: <Wallet size={20}/>, color: 'slate' },
+      { label: 'Custo Ref.', value: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(payroll), icon: <Wallet size={20}/>, color: 'slate' },
     ];
   }, [members]);
 
@@ -74,10 +74,6 @@ const OperationalEquipe: React.FC<OperationalEquipeProps> = ({ user }) => {
             <Users size={24} />
           </div>
           <div>
-            <div className="flex items-center gap-2 mb-0.5">
-               <Database size={14} className="text-blue-500" />
-               <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Data Sync Isolado</span>
-            </div>
             <h2 className="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">Meus Colaboradores</h2>
           </div>
         </div>
@@ -103,7 +99,7 @@ const OperationalEquipe: React.FC<OperationalEquipeProps> = ({ user }) => {
         {isLoading ? (
           <div className="flex-1 flex flex-col items-center justify-center py-20">
              <Loader2 className="animate-spin text-blue-600 mb-4" size={32} />
-             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Acessando Dados...</p>
+             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Carregando equipe...</p>
           </div>
         ) : (
           <div className="overflow-x-auto no-scrollbar">

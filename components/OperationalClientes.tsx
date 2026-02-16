@@ -88,10 +88,6 @@ const OperationalClientes: React.FC<OperationalClientesProps> = ({ user }) => {
             <Users size={24} />
           </div>
           <div>
-            <div className="flex items-center gap-2 mb-0.5">
-               <Database size={14} className="text-blue-500" />
-               <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Sua Base SQL</span>
-            </div>
             <h2 className="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">Meus Clientes</h2>
           </div>
         </div>
@@ -145,7 +141,7 @@ const OperationalClientes: React.FC<OperationalClientesProps> = ({ user }) => {
         {isLoading ? (
           <div className="flex-1 flex flex-col items-center justify-center py-20">
             <Loader2 className="animate-spin text-blue-600 mb-4" size={40} />
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Acessando Dados...</p>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Acessando dados...</p>
           </div>
         ) : (
           <div className="overflow-x-auto no-scrollbar">
