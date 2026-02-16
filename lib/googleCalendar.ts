@@ -1,5 +1,5 @@
 
-const CLIENT_ID = '516469946544-ntquecdojdpbmdq853tt2pb1ngh0redt.apps.googleusercontent.com';
+const CLIENT_ID = '819652563805-c6s39aerm32jm9iblehbl8il7c46t12l.apps.googleusercontent.com';
 const SCOPES = 'https://www.googleapis.com/auth/calendar.events';
 
 interface GoogleCalendarEvent {
@@ -24,8 +24,11 @@ class GoogleCalendarService {
     this.accessToken = localStorage.getItem('google_access_token');
   }
 
-  initTokenClient(callback: (token: string) => void) {
-    if (typeof window === 'undefined' || !(window as any).google) return;
+  private initTokenClient(callback: (token: string) => void) {
+    if (typeof window === 'undefined' || !(window as any).google) {
+      console.error('Google SDK não carregado');
+      return;
+    }
 
     this.tokenClient = (window as any).google.accounts.oauth2.initTokenClient({
       client_id: CLIENT_ID,
@@ -36,6 +39,9 @@ class GoogleCalendarService {
           localStorage.setItem('google_access_token', response.access_token);
           callback(response.access_token);
         }
+        if (response.error) {
+          console.error('Erro OAuth Google:', response.error);
+        }
       },
     });
   }
@@ -43,7 +49,9 @@ class GoogleCalendarService {
   connect() {
     return new Promise((resolve) => {
       this.initTokenClient((token) => resolve(token));
-      this.tokenClient.requestAccessToken({ prompt: 'consent' });
+      if (this.tokenClient) {
+        this.tokenClient.requestAccessToken({ prompt: 'consent' });
+      }
     });
   }
 
@@ -57,7 +65,10 @@ class GoogleCalendarService {
   }
 
   async createEvent(event: GoogleCalendarEvent) {
-    if (!this.accessToken) return null;
+    if (!this.accessToken) {
+      console.warn('Google Calendar não conectado');
+      return null;
+    }
 
     try {
       const response = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
@@ -74,7 +85,13 @@ class GoogleCalendarService {
         return null;
       }
 
-      return await response.json();
+      const data = await response.json();
+      if (data.error) {
+        console.error('Erro API Google Calendar:', data.error);
+        return null;
+      }
+
+      return data;
     } catch (error) {
       console.error('Erro ao criar evento no Google Calendar:', error);
       return null;
