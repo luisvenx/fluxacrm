@@ -176,7 +176,8 @@ const OperationalContratos: React.FC<OperationalContratosProps> = ({ user }) => 
                        </button>
                     </td>
                   </tr>
-                ))}
+                ))
+              )}
             </tbody>
           </table>
         </div>
