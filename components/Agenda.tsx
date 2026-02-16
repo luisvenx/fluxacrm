@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Calendar as CalendarIcon, Clock, CheckCircle2, ChevronLeft, ChevronRight, Loader2, Database, Plus, AlertCircle, Share2, Unlink, CheckCircle } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, CheckCircle2, ChevronLeft, ChevronRight, Loader2, Database, Plus, AlertCircle, Share2, Unlink, CheckCircle, Globe } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import NewAppointmentModal from './NewAppointmentModal';
 import { googleCalendar } from '../lib/googleCalendar';
@@ -28,7 +28,8 @@ const Agenda: React.FC<AgendaProps> = ({ user }) => {
       const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).toISOString();
       const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0, 23, 59, 59).toISOString();
 
-      const { data, error } = await supabase
+      // 1. Busca eventos locais do Supabase
+      const { data: localData, error } = await supabase
         .from('appointments')
         .select('*')
         .eq('user_id', user.id)
@@ -37,7 +38,33 @@ const Agenda: React.FC<AgendaProps> = ({ user }) => {
         .order('start_time', { ascending: true });
 
       if (error) throw error;
-      setAppointments(data || []);
+
+      let mergedEvents = (localData || []).map(ev => ({ ...ev, source: 'local' }));
+
+      // 2. Se conectado ao Google, busca eventos da API
+      if (googleCalendar.isConnected()) {
+        const gData = await googleCalendar.listEvents(firstDay, lastDay);
+        if (gData && gData.items) {
+          const gEvents = gData.items.map((gEv: any) => ({
+            id: gEv.id,
+            title: gEv.summary,
+            start_time: gEv.start.dateTime || gEv.start.date,
+            end_time: gEv.end.dateTime || gEv.end.date,
+            category: 'Google',
+            is_completed: false,
+            source: 'google',
+            description: gEv.description
+          }));
+          
+          // Remove duplicatas (evita exibir o mesmo evento que já foi sincronizado localmente se houver match por título/data)
+          // Aqui fazemos um merge simples por ID ou título em datas iguais
+          mergedEvents = [...mergedEvents, ...gEvents.filter((ge: any) => 
+            !mergedEvents.some(le => le.title === ge.title && le.start_time === ge.start_time)
+          )];
+        }
+      }
+
+      setAppointments(mergedEvents.sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime()));
     } catch (err) {
       console.error('Erro ao carregar agenda:', err);
     } finally {
@@ -47,7 +74,7 @@ const Agenda: React.FC<AgendaProps> = ({ user }) => {
 
   useEffect(() => {
     fetchAppointments();
-  }, [currentDate, user]);
+  }, [currentDate, user, isGoogleConnected]);
 
   const changeMonth = (offset: number) => {
     const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + offset, 1);
@@ -55,7 +82,11 @@ const Agenda: React.FC<AgendaProps> = ({ user }) => {
     setSelectedDay(1);
   };
 
-  const toggleComplete = async (id: string, currentStatus: boolean) => {
+  const toggleComplete = async (id: string, currentStatus: boolean, source: string) => {
+    if (source === 'google') {
+      alert('Eventos do Google devem ser gerenciados no próprio Google Agenda.');
+      return;
+    }
     try {
       const { error } = await supabase
         .from('appointments')
@@ -71,13 +102,19 @@ const Agenda: React.FC<AgendaProps> = ({ user }) => {
   };
 
   const handleConnectGoogle = async () => {
-    await googleCalendar.connect();
-    setIsGoogleConnected(googleCalendar.isConnected());
+    try {
+      await googleCalendar.connect();
+      setIsGoogleConnected(googleCalendar.isConnected());
+      fetchAppointments();
+    } catch (err) {
+      console.error('Erro conexão Google:', err);
+    }
   };
 
   const handleDisconnectGoogle = () => {
     googleCalendar.disconnect();
     setIsGoogleConnected(false);
+    fetchAppointments();
   };
 
   const selectedFullDate = useMemo(() => {
@@ -102,6 +139,7 @@ const Agenda: React.FC<AgendaProps> = ({ user }) => {
       case 'comercial': return 'text-blue-600 bg-blue-50';
       case 'financeiro': return 'text-rose-600 bg-rose-50';
       case 'gestão': return 'text-emerald-600 bg-emerald-50';
+      case 'google': return 'text-indigo-600 bg-indigo-50';
       default: return 'text-slate-400 bg-slate-50';
     }
   };
@@ -192,7 +230,7 @@ const Agenda: React.FC<AgendaProps> = ({ user }) => {
           ) : (
             <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 border border-emerald-100 rounded-xl">
                <CheckCircle size={12} className="text-emerald-500" />
-               <span className="text-[9px] font-black text-emerald-600 uppercase tracking-tight">Eventos serão duplicados no Google</span>
+               <span className="text-[9px] font-black text-emerald-600 uppercase tracking-tight">Agenda integrada com sucesso</span>
             </div>
           )}
         </div>
@@ -232,13 +270,20 @@ const Agenda: React.FC<AgendaProps> = ({ user }) => {
                   <span className="text-[11px] font-black tracking-tighter">{new Date(item.start_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h4 className={`text-sm font-bold group-hover:text-slate-900 transition-colors truncate uppercase tracking-tight ${item.is_completed ? 'text-slate-400 line-through' : 'text-slate-800'}`}>{item.title}</h4>
-                  <div className="flex items-center gap-2 mt-1.5"><span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${getCategoryColor(item.category)}`}>{item.category || 'Geral'}</span></div>
+                  <div className="flex items-center gap-2">
+                    <h4 className={`text-sm font-bold group-hover:text-slate-900 transition-colors truncate uppercase tracking-tight ${item.is_completed ? 'text-slate-400 line-through' : 'text-slate-800'}`}>{item.title}</h4>
+                    {item.source === 'google' && <Globe size={10} className="text-indigo-400 shrink-0" />}
+                  </div>
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${getCategoryColor(item.category)}`}>
+                      {item.category || 'Geral'}
+                    </span>
+                  </div>
                 </div>
                 <CheckCircle2 
                   size={20} 
-                  onClick={() => toggleComplete(item.id, item.is_completed)}
-                  className={`transition-all cursor-pointer hover:scale-110 active:scale-90 ${item.is_completed ? 'text-emerald-500' : 'text-slate-100 group-hover:text-slate-200'}`} 
+                  onClick={() => toggleComplete(item.id, item.is_completed, item.source)}
+                  className={`transition-all cursor-pointer hover:scale-110 active:scale-90 ${item.is_completed ? 'text-emerald-500' : 'text-slate-100 group-hover:text-slate-200'} ${item.source === 'google' ? 'opacity-30 cursor-not-allowed' : ''}`} 
                 />
               </div>
             ))

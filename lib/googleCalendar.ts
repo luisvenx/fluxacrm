@@ -3,16 +3,19 @@ const CLIENT_ID = '819652563805-c6s39aerm32jm9iblehbl8il7c46t12l.apps.googleuser
 const SCOPES = 'https://www.googleapis.com/auth/calendar.events';
 
 interface GoogleCalendarEvent {
+  id?: string;
   summary: string;
   location?: string;
   description?: string;
   start: {
-    dateTime: string;
-    timeZone: string;
+    dateTime?: string;
+    date?: string;
+    timeZone?: string;
   };
   end: {
-    dateTime: string;
-    timeZone: string;
+    dateTime?: string;
+    date?: string;
+    timeZone?: string;
   };
 }
 
@@ -26,7 +29,6 @@ class GoogleCalendarService {
 
   private initTokenClient(callback: (token: string) => void, onError?: (err: any) => void) {
     if (typeof window === 'undefined' || !(window as any).google) {
-      console.error('Google SDK não carregado. Verifique se o script do Google está no index.html');
       if (onError) onError('SDK_NOT_LOADED');
       return;
     }
@@ -43,14 +45,11 @@ class GoogleCalendarService {
             callback(response.access_token);
           }
           if (response.error) {
-            console.error('Erro OAuth Google:', response.error, response.error_description);
-            // GIS Errors: redirect_uri_mismatch etc
             if (onError) onError(response);
           }
         },
       });
     } catch (err) {
-      console.error('Falha ao inicializar TokenClient:', err);
       if (onError) onError(err);
     }
   }
@@ -63,11 +62,7 @@ class GoogleCalendarService {
       );
       
       if (this.tokenClient) {
-        try {
-          this.tokenClient.requestAccessToken({ prompt: 'consent' });
-        } catch (err) {
-          reject(err);
-        }
+        this.tokenClient.requestAccessToken({ prompt: 'consent' });
       } else {
         reject('TOKEN_CLIENT_NOT_READY');
       }
@@ -86,11 +81,31 @@ class GoogleCalendarService {
     return !!this.accessToken;
   }
 
-  async createEvent(event: GoogleCalendarEvent) {
-    if (!this.accessToken) {
-      console.warn('Google Calendar não conectado.');
+  async listEvents(timeMin: string, timeMax: string) {
+    if (!this.accessToken) return null;
+
+    try {
+      const response = await fetch(
+        `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime`,
+        {
+          headers: { 'Authorization': `Bearer ${this.accessToken}` }
+        }
+      );
+
+      if (response.status === 401) {
+        this.disconnect();
+        return null;
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Erro ao listar eventos do Google:', error);
       return null;
     }
+  }
+
+  async createEvent(event: GoogleCalendarEvent) {
+    if (!this.accessToken) return null;
 
     try {
       const response = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
@@ -107,15 +122,9 @@ class GoogleCalendarService {
         return null;
       }
 
-      const data = await response.json();
-      if (data.error) {
-        console.error('Erro API Google Calendar:', data.error);
-        return null;
-      }
-
-      return data;
+      return await response.json();
     } catch (error) {
-      console.error('Erro ao criar evento no Google Calendar:', error);
+      console.error('Erro ao criar evento no Google:', error);
       return null;
     }
   }
