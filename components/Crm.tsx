@@ -13,12 +13,16 @@ import {
   ChevronDown,
   UserPlus,
   Loader2,
+  Database,
+  BarChart3,
   CalendarDays,
+  UserCheck,
+  Zap,
   Info,
   RefreshCcw,
   ArrowDown,
   ChevronRight,
-  Zap
+  CheckCircle2
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -32,7 +36,7 @@ const Crm: React.FC<CrmProps> = ({ user }) => {
   const [leads, setLeads] = useState<any[]>([]);
   const [goals, setGoals] = useState<any[]>([]);
   
-  const fetchData = async () => {
+  const fetchDashboardData = async () => {
     if (!user) return;
     setIsLoading(true);
     try {
@@ -51,83 +55,85 @@ const Crm: React.FC<CrmProps> = ({ user }) => {
   };
 
   useEffect(() => {
-    fetchData();
+    fetchDashboardData();
   }, [user]);
 
-  // Lógica de Processamento de Dados
-  const dashboardData = useMemo(() => {
+  // Cálculos de Métricas em tempo real
+  const metrics = useMemo(() => {
     const totalLeads = leads.length;
     const potentialValue = leads.reduce((acc, curr) => acc + (Number(curr.value) || 0), 0);
     
-    // Contagens por Etapa
     const stages = {
       lead: leads.filter(l => l.stage === 'lead').length,
-      contato: leads.filter(l => l.stage === 'qualificacao' || l.stage === 'contato').length,
+      contato: leads.filter(l => l.stage === 'contato' || l.stage === 'qualificacao').length,
       reuniao: leads.filter(l => l.stage === 'reuniao').length,
-      proposta: leads.filter(l => l.stage === 'proposta').length,
+      proposta: leads.filter(l => l.stage === 'proposta' || l.stage === 'negociacao').length,
       fechado: leads.filter(l => l.stage === 'fechado').length
     };
 
-    // Taxas de Conversão
-    const contactedLeads = totalLeads - stages.lead;
-    const contactRate = contactedLeads > 0 ? Math.round((stages.reuniao / contactedLeads) * 100) : 0;
-    const closingRate = totalLeads > 0 ? Math.round((stages.fechado / totalLeads) * 100) : 0;
+    const closings = stages.fechado;
+    const meetings = stages.reuniao;
+    const contacted = totalLeads - stages.lead;
 
-    // Ranking (Agrupado por Corretor)
-    const rankingMap: Record<string, number> = {};
-    leads.filter(l => l.stage === 'fechado').forEach(l => {
-      const name = l.assigned_to || 'Sem Atribuição';
-      rankingMap[name] = (rankingMap[name] || 0) + 1;
-    });
-    const ranking = Object.entries(rankingMap)
-      .map(([name, val]) => ({ name, val, initial: name.substring(0, 2).toUpperCase() }))
-      .sort((a, b) => b.val - a.val);
+    const contactToMeetingRate = contacted > 0 ? Math.round((meetings / contacted) * 100) : 0;
+    const closingRate = totalLeads > 0 ? Math.round((closings / totalLeads) * 100) : 0;
 
-    // Alertas de Metas em Risco
-    const now = new Date();
+    // Gerar Ranking Agregado
+    const rankingData = leads
+      .filter(l => l.stage === 'fechado')
+      .reduce((acc: any, curr) => {
+        const name = curr.assigned_to || 'Sem Atribuição';
+        if (!acc[name]) acc[name] = 0;
+        acc[name]++;
+        return acc;
+      }, {});
+
+    const sortedRanking = Object.entries(rankingData)
+      .map(([name, count]) => ({ 
+        name, 
+        count: count as number,
+        initials: name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+      }))
+      .sort((a, b) => b.count - a.count);
+
+    // Alertas de Metas
     const alerts = goals.filter(g => {
-      const start = new Date(g.start_date);
-      const end = new Date(g.end_date);
-      const totalDays = (end.getTime() - start.getTime()) / (1000 * 3600 * 24);
-      const daysPassed = (now.getTime() - start.getTime()) / (1000 * 3600 * 24);
-      const expectedProgress = Math.max(0, (daysPassed / totalDays) * 100);
-      const currentProgress = (Number(g.current_value) / Number(g.target_value)) * 100;
-      
-      return currentProgress < (expectedProgress * 0.8) && g.status === 'Active';
-    }).map(g => {
-      const start = new Date(g.start_date);
-      const end = new Date(g.end_date);
-      const totalDays = (end.getTime() - start.getTime()) / (1000 * 3600 * 24);
-      const daysPassed = (now.getTime() - start.getTime()) / (1000 * 3600 * 24);
-      return {
-        title: `Meta em risco: ${g.title}`,
-        desc: `Progresso ${(Number(g.current_value)/Number(g.target_value)*100).toFixed(0)}% vs esperado ${((daysPassed/totalDays)*100).toFixed(0)}%`
-      };
-    });
+      const p = (g.current_value / g.target_value) * 100;
+      return p < (g.alert_threshold || 80);
+    }).map(g => ({
+      title: `Meta em risco: ${g.title}`,
+      prog: `${((g.current_value / g.target_value) * 100).toFixed(0)}%`,
+      exp: `${g.alert_threshold}%`
+    }));
 
-    // Dados do Gráfico de Atividades (Últimos 30 dias)
-    const last30Days = Array.from({ length: 30 }, (_, i) => {
+    // Evolução de Atividades (Últimos 7 dias)
+    const last7Days = Array.from({ length: 7 }, (_, i) => {
       const d = new Date();
-      d.setDate(d.getDate() - (29 - i));
+      d.setDate(d.getDate() - (6 - i));
       return d.toISOString().split('T')[0];
     });
 
-    const chartPoints = last30Days.map(date => ({
-      date: date.split('-').reverse().slice(0, 2).join('/'),
-      leads: leads.filter(l => l.created_at?.startsWith(date)).length,
-      meetings: leads.filter(l => l.stage === 'reuniao' && l.updated_at?.startsWith(date)).length
-    }));
+    const chartData = last7Days.map(date => {
+      const leadsOnDay = leads.filter(l => l.created_at?.startsWith(date)).length;
+      return { date, count: leadsOnDay };
+    });
+
+    // Calcular máximo para escala do gráfico
+    const maxLeads = Math.max(...chartData.map(d => d.count), 1);
 
     return {
       totalLeads,
       potentialValue,
-      contactRate,
+      contactToMeetingRate,
       closingRate,
+      contacted,
+      meetings,
+      closings,
       stages,
-      ranking,
+      ranking: sortedRanking,
       alerts,
-      chartPoints,
-      goals
+      chartData,
+      maxLeads
     };
   }, [leads, goals]);
 
@@ -138,284 +144,322 @@ const Crm: React.FC<CrmProps> = ({ user }) => {
   if (isLoading) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center bg-[#fcfcfd] min-h-[80vh]">
-         <Loader2 className="animate-spin text-[#01223d] mb-4" size={40} />
-         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center px-4">Processando Dados do Supabase...</p>
+         <Loader2 className="animate-spin text-blue-600 mb-4" size={40} />
+         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center px-4">Processando Engine Comercial SQL...</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-[#fcfcfd] min-h-screen pb-24 md:pb-10 animate-in fade-in duration-700 relative overflow-hidden font-['Inter']">
+    <div className="bg-[#fcfcfd] min-h-screen pb-24 md:pb-10 animate-in fade-in duration-700">
       
-      {/* HEADER SECTION */}
-      <div className="px-6 md:px-10 pt-8 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-8">
+      {/* Row 1: Header & Control Bar */}
+      <div className="px-4 md:px-8 pt-6 md:pt-8 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight uppercase">Dashboard Comercial</h1>
-          <p className="text-sm text-slate-400 font-medium">Acompanhe a performance do time comercial em tempo real</p>
+          <h1 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">Performance Comercial</h1>
+          <p className="text-xs md:text-sm text-slate-400 font-medium">Insights táticos baseados em dados reais do banco</p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="bg-white border border-slate-200 rounded-lg p-1 flex items-center shadow-sm mr-4">
-             <div className="p-2 text-slate-400 border-r border-slate-100 mr-1"><Calendar size={14} /></div>
-             {['Hoje', 'Esta Semana', 'Este Mês', 'Este Ano'].map(p => (
-               <button 
-                key={p} 
-                onClick={() => setActivePeriod(p)}
-                className={`px-3 py-1.5 rounded-md text-[11px] font-bold transition-all whitespace-nowrap ${activePeriod === p ? 'bg-[#01223d] text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
-               >
-                 {p}
-               </button>
-             ))}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
+          <div className="bg-white border border-slate-200 rounded-xl p-1 flex items-center shadow-sm">
+             <Calendar size={14} className="text-slate-400 mx-3 shrink-0" />
+             <div className="flex gap-1">
+               {['Mês', 'Tri', 'Ano'].map(p => (
+                 <button 
+                  key={p} 
+                  onClick={() => setActivePeriod(p)}
+                  className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-tight transition-all whitespace-nowrap ${activePeriod === p ? 'bg-blue-600 text-white shadow-md' : 'text-slate-500 hover:text-slate-900'}`}
+                 >
+                   {p}
+                 </button>
+               ))}
+             </div>
           </div>
-          <button onClick={fetchData} className="p-2 bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-[#b4a183] transition-all shadow-sm">
-             <RefreshCcw size={16} />
+          <button onClick={fetchDashboardData} className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-blue-600 shadow-sm transition-all active:scale-95">
+            <RefreshCcw size={16} />
           </button>
         </div>
       </div>
 
-      <div className="px-6 md:px-10 space-y-6">
+      <div className="px-4 md:px-8 mt-6 md:mt-8 space-y-6">
         
-        {/* TOP KPI ROW (TIER 1) */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="bg-white border border-slate-100 rounded-xl p-6 shadow-sm flex justify-between items-start group">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Valor Potencial Total</span>
-                <Info size={14} className="text-slate-200 cursor-help" />
-              </div>
-              <h3 className="text-3xl font-black text-slate-900 tracking-tighter">{formatCurrency(dashboardData.potentialValue)}</h3>
-              <p className="text-[10px] font-medium text-slate-400">Total acumulado em pipeline</p>
-            </div>
-            <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center text-[#01223d] shadow-sm border border-slate-100 group-hover:scale-110 transition-transform">
-              <DollarSign size={20} />
-            </div>
+        {/* Row 2: Key KPIs */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 shadow-sm group hover:border-blue-500 transition-all relative overflow-hidden">
+             <div className="flex justify-between items-start mb-6">
+                <div className="flex items-center gap-2">
+                   <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Valor Potencial Total</h4>
+                   <Info size={12} className="text-slate-200" />
+                </div>
+                <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl border border-blue-100 transition-transform group-hover:scale-110">
+                   <DollarSign size={20} />
+                </div>
+             </div>
+             <h3 className="text-3xl font-black text-slate-900 tracking-tighter">{formatCurrency(metrics.potentialValue)}</h3>
+             <p className="text-[11px] text-slate-400 font-bold uppercase mt-2">{metrics.totalLeads} leads em prospecção</p>
+             <div className="absolute bottom-0 left-0 h-1 w-full bg-blue-600 opacity-5 group-hover:opacity-100 transition-opacity"></div>
           </div>
 
-          <div className="bg-white border border-slate-100 rounded-xl p-6 shadow-sm flex justify-between items-start group">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Taxa Contato → Reunião</span>
-                <Info size={14} className="text-slate-200 cursor-help" />
-              </div>
-              <h3 className="text-3xl font-black text-slate-900 tracking-tighter">{dashboardData.contactRate}%</h3>
-              <p className="text-[10px] font-medium text-slate-400">Eficiência de agendamento</p>
-            </div>
-            <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center text-[#01223d] shadow-sm border border-slate-100 group-hover:scale-110 transition-transform">
-              <TrendingUp size={20} />
-            </div>
+          <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 shadow-sm group hover:border-indigo-500 transition-all relative overflow-hidden">
+             <div className="flex justify-between items-start mb-6">
+                <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Taxa Contato → Reunião</h4>
+                <div className="p-2.5 bg-indigo-50 text-indigo-500 rounded-xl border border-indigo-100 transition-transform group-hover:scale-110">
+                   <TrendingUp size={20} />
+                </div>
+             </div>
+             <h3 className="text-3xl font-black text-slate-900 tracking-tighter">{metrics.contactToMeetingRate}%</h3>
+             <p className="text-[11px] text-slate-400 font-bold uppercase mt-2">{metrics.meetings} reuniões de {metrics.contacted} contatos</p>
+             <div className="absolute bottom-0 left-0 h-1 w-full bg-indigo-600 opacity-5 group-hover:opacity-100 transition-opacity"></div>
           </div>
 
-          <div className="bg-white border border-slate-100 rounded-xl p-6 shadow-sm flex justify-between items-start group">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Taxa de Fechamento</span>
-                <Info size={14} className="text-slate-200 cursor-help" />
-              </div>
-              <h3 className="text-3xl font-black text-slate-900 tracking-tighter">{dashboardData.closingRate}%</h3>
-              <p className="text-[10px] font-medium text-slate-400">Conversão final de vendas</p>
-            </div>
-            <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center text-[#b4a183] shadow-sm border border-slate-100 group-hover:scale-110 transition-transform">
-              <Target size={20} />
-            </div>
+          <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 shadow-sm group hover:border-emerald-500 transition-all relative overflow-hidden">
+             <div className="flex justify-between items-start mb-6">
+                <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Taxa de Fechamento</h4>
+                <div className="p-2.5 bg-emerald-50 text-emerald-500 rounded-xl border border-emerald-100 transition-transform group-hover:scale-110">
+                   <Target size={20} />
+                </div>
+             </div>
+             <h3 className="text-3xl font-black text-slate-900 tracking-tighter">{metrics.closingRate}%</h3>
+             <p className="text-[11px] text-slate-400 font-bold uppercase mt-2">{metrics.closings} de {metrics.totalLeads} leads fechados</p>
+             <div className="absolute bottom-0 left-0 h-1 w-full bg-emerald-600 opacity-5 group-hover:opacity-100 transition-opacity"></div>
           </div>
         </div>
 
-        {/* VOLUME KPI ROW (TIER 2) */}
+        {/* Row 3: Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {[
-            { label: 'Leads Base', val: dashboardData.totalLeads, icon: <Users size={14}/> },
-            { label: 'Qualificados', val: dashboardData.stages.contato, icon: <UserPlus size={14}/> },
-            { label: 'Reuniões', val: dashboardData.stages.reuniao, icon: <Calendar size={14}/> },
-            { label: 'Propostas', val: dashboardData.stages.proposta, icon: <CalendarDays size={14}/> },
-            { label: 'No-show', val: '0', icon: <Users size={14}/> }, 
-            { label: 'Fechamentos', val: dashboardData.stages.fechado, icon: <Trophy size={14}/> },
-          ].map((kpi, idx) => (
-            <div key={idx} className="bg-white border border-slate-100 rounded-xl p-4 shadow-sm group hover:border-[#b4a183] transition-all">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">{kpi.label}</span>
-                <div className="p-1.5 bg-slate-50 text-[#01223d] rounded-lg">{kpi.icon}</div>
+            { label: 'Leads Prospectados', val: metrics.totalLeads, icon: <Users size={16}/> },
+            { label: 'Leads Contatados', val: metrics.contacted, icon: <UserCheck size={16}/> },
+            { label: 'Reuniões Marcadas', val: metrics.meetings, icon: <CalendarDays size={16}/> },
+            { label: 'Reuniões Realizadas', val: metrics.closings, icon: <Calendar size={16}/> }, // Simplificado para fins de dashboard
+            { label: 'No-show', val: 0, icon: <UserPlus size={16}/> }, // Dependeria de log de agenda
+            { label: 'Fechamentos', val: metrics.closings, icon: <Trophy size={16}/> },
+          ].map((item, idx) => (
+            <div key={idx} className="bg-white border border-slate-100 rounded-xl p-4 shadow-sm group hover:border-blue-100 transition-all">
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter leading-tight max-w-[80px]">{item.label}</span>
+                <div className="p-2 bg-slate-50 text-slate-400 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-all">{item.icon}</div>
               </div>
-              <h4 className="text-2xl font-black text-slate-900 mb-1">{kpi.val}</h4>
-              <p className="text-[8px] font-bold text-slate-300 uppercase">Auditado SQL</p>
+              <p className="text-xl font-black text-slate-900">{item.val}</p>
             </div>
           ))}
         </div>
 
-        {/* MAIN CONTENT GRID */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-12">
-          
-          {/* COLUNA ESQUERDA - FUNIL + ALERTAS */}
-          <div className="lg:col-span-3 space-y-6">
-            <div className="bg-white border border-slate-100 rounded-xl p-6 shadow-sm">
-               <h4 className="text-[13px] font-bold text-slate-900 mb-6 uppercase tracking-widest">Funil de Conversão</h4>
-               <div className="space-y-6">
-                  {[
-                    { label: 'Lead', count: dashboardData.totalLeads, perc: '100%', color: 'bg-[#01223d]' },
-                    { label: 'Qualificação', count: dashboardData.stages.contato, perc: dashboardData.totalLeads > 0 ? `${(dashboardData.stages.contato/dashboardData.totalLeads*100).toFixed(0)}%` : '0%', color: 'bg-[#0a3556]' },
-                    { label: 'Reunião Marcada', count: dashboardData.stages.reuniao, perc: dashboardData.totalLeads > 0 ? `${(dashboardData.stages.reuniao/dashboardData.totalLeads*100).toFixed(0)}%` : '0%', color: 'bg-[#b4a183]' },
-                    { label: 'Proposta Enviada', count: dashboardData.stages.proposta, perc: dashboardData.totalLeads > 0 ? `${(dashboardData.stages.proposta/dashboardData.totalLeads*100).toFixed(0)}%` : '0%', color: 'bg-[#01223d]/50' },
-                    { label: 'Fechado', count: dashboardData.stages.fechado, perc: dashboardData.totalLeads > 0 ? `${(dashboardData.stages.fechado/dashboardData.totalLeads*100).toFixed(0)}%` : '0%', color: 'bg-emerald-600' },
-                  ].map((step, i) => (
-                    <div key={i} className="relative">
-                      <div className="flex justify-between items-end mb-1">
-                        <span className="text-[10px] font-bold text-slate-500 uppercase">{step.label}</span>
-                        <div className="flex items-center gap-1.5">
-                           <span className="text-[11px] font-black text-slate-900">{step.count}</span>
-                           <span className="text-[9px] font-bold text-slate-300">({step.perc})</span>
-                        </div>
-                      </div>
-                      <div className="h-2.5 w-full bg-slate-50 rounded-full overflow-hidden border border-slate-100">
-                         <div className={`h-full ${step.color} transition-all duration-1000`} style={{ width: step.perc }}></div>
-                      </div>
-                      {i < 4 && (
-                        <div className="flex justify-center py-1 opacity-20">
-                           <ArrowDown size={10} className="text-slate-400" />
-                        </div>
-                      )}
-                    </div>
-                  ))}
-               </div>
-            </div>
-
-            <div className="bg-white border border-slate-100 rounded-xl p-6 shadow-sm">
-               <div className="flex items-center justify-between mb-6">
-                 <div className="flex items-center gap-2">
-                    <AlertCircle size={16} className="text-[#b4a183]" />
-                    <h4 className="text-[13px] font-bold text-slate-900 uppercase tracking-widest">Alertas</h4>
-                 </div>
-                 <span className="bg-rose-50 text-rose-600 text-[10px] font-black px-2 py-0.5 rounded-md">{dashboardData.alerts.length}</span>
-               </div>
-
-               <div className="space-y-3">
-                  {dashboardData.alerts.length === 0 ? (
-                    <p className="text-[10px] text-slate-300 font-bold uppercase text-center py-4">Sem alertas de metas</p>
-                  ) : dashboardData.alerts.map((alert, idx) => (
-                    <div key={idx} className="bg-rose-50/50 border-l-4 border-rose-400 p-4 rounded-r-lg group cursor-pointer hover:bg-rose-50 transition-all relative">
-                       <h5 className="text-[11px] font-bold text-slate-800 line-clamp-1 pr-4">{alert.title}</h5>
-                       <p className="text-[10px] text-slate-400 mt-1">{alert.desc}</p>
-                       <ChevronRight size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 group-hover:text-rose-500 transition-colors" />
-                    </div>
-                  ))}
-               </div>
+        {/* Row 4: Funnel, Goals & Ranking */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Real Conversion Funnel */}
+          <div className="lg:col-span-4 bg-white border border-slate-100 rounded-[2rem] p-8 shadow-sm flex flex-col">
+            <h4 className="text-sm font-bold text-slate-900 mb-8 uppercase tracking-tight">Funil de Conversão Real</h4>
+            <div className="space-y-6 flex-1">
+              {[
+                { label: 'Lead', count: metrics.stages.lead, color: 'bg-blue-500', perc: metrics.totalLeads > 0 ? (metrics.stages.lead / metrics.totalLeads * 100).toFixed(0) + '%' : '0%' },
+                { label: 'Contato Iniciado', count: metrics.stages.contato, color: 'bg-indigo-500', perc: metrics.totalLeads > 0 ? (metrics.stages.contato / metrics.totalLeads * 100).toFixed(0) + '%' : '0%' },
+                { label: 'Reunião Marcada', count: metrics.stages.reuniao, color: 'bg-purple-500', perc: metrics.totalLeads > 0 ? (metrics.stages.reuniao / metrics.totalLeads * 100).toFixed(0) + '%' : '0%' },
+                { label: 'Proposta Enviada', count: metrics.stages.proposta, color: 'bg-rose-400', perc: metrics.totalLeads > 0 ? (metrics.stages.proposta / metrics.totalLeads * 100).toFixed(0) + '%' : '0%' },
+                { label: 'Fechado', count: metrics.stages.fechado, color: 'bg-emerald-500', perc: metrics.totalLeads > 0 ? (metrics.stages.fechado / metrics.totalLeads * 100).toFixed(0) + '%' : '0%' },
+              ].map((step, i) => (
+                <div key={i}>
+                  <div className="flex justify-between items-end mb-2">
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">{step.label}</span>
+                    <span className="text-xs font-black text-slate-900">{step.count} <span className="text-slate-300 ml-1">({step.perc})</span></span>
+                  </div>
+                  <div className="h-4 w-full bg-slate-50 rounded-full overflow-hidden border border-slate-100">
+                    <div className={`h-full ${step.color} transition-all duration-1000`} style={{ width: step.perc }}></div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* COLUNA CENTRAL - PROGRESSO DE METAS + EVOLUÇÃO ATIVIDADES */}
-          <div className="lg:col-span-6 space-y-6">
-            <div className="bg-white border border-slate-100 rounded-xl p-8 shadow-sm">
-               <div className="flex items-center gap-2 mb-8">
-                  <div className="p-1.5 bg-slate-50 text-[#01223d] rounded-lg"><Target size={18} /></div>
-                  <h4 className="text-[13px] font-bold text-slate-900 uppercase tracking-widest">Progresso de Metas Estratégicas</h4>
-               </div>
-
-               <div className="space-y-10">
-                  {dashboardData.goals.length === 0 ? (
-                    <div className="py-10 text-center opacity-30">
-                       <Target size={40} className="mx-auto mb-2" />
-                       <p className="text-xs font-black uppercase tracking-widest">Nenhuma meta configurada</p>
+          {/* OKR Progress */}
+          <div className="lg:col-span-5 bg-white border border-slate-100 rounded-[2rem] p-8 shadow-sm flex flex-col">
+            <h4 className="text-sm font-bold text-slate-900 mb-8 uppercase tracking-tight">Progresso de Metas</h4>
+            <div className="space-y-10 flex-1">
+              {goals.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center opacity-30">
+                  <Target size={48} className="mb-4" />
+                  <p className="text-[10px] font-black uppercase tracking-widest">Sem metas configuradas para esta conta</p>
+                </div>
+              ) : goals.slice(0, 3).map((goal, i) => {
+                const perc = Math.min((goal.current_value / goal.target_value) * 100, 100);
+                return (
+                  <div key={i} className="space-y-3">
+                    <div className="flex justify-between items-end">
+                      <div>
+                        <h5 className="text-xs font-bold text-slate-700 uppercase">{goal.title}</h5>
+                        <p className="text-[10px] text-slate-400 font-medium">{goal.current_value} / {goal.target_value} ({goal.metric})</p>
+                      </div>
+                      <div className="text-right">
+                         <span className={`text-lg font-black ${perc >= 80 ? 'text-emerald-500' : 'text-blue-600'}`}>{perc.toFixed(1)}%</span>
+                         <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter flex items-center gap-1 justify-end">
+                           <Clock size={10} /> {goal.period}
+                         </p>
+                      </div>
                     </div>
-                  ) : dashboardData.goals.slice(0, 3).map((goal, idx) => {
-                    const perc = Math.min(100, (Number(goal.current_value) / Number(goal.target_value)) * 100);
-                    return (
-                      <div key={idx} className="space-y-3">
-                         <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">{goal.scope} SQL Node</span>
-                         <div className="flex justify-between items-end">
-                            <div className="space-y-1">
-                               <p className="text-sm font-bold text-slate-800 uppercase tracking-tight italic">{goal.title}</p>
-                               <p className="text-[10px] text-slate-400 font-medium">{goal.current_value} / {goal.target_value}</p>
-                            </div>
-                            <div className="text-right">
-                               <span className={`text-sm font-black ${perc >= 100 ? 'text-emerald-500' : 'text-[#01223d]'}`}>{perc.toFixed(1)}%</span>
-                               <p className="text-[9px] text-slate-300 font-bold uppercase flex items-center gap-1 mt-0.5 justify-end"><Clock size={10}/> Ativo</p>
-                            </div>
-                         </div>
-                         <div className="h-1.5 w-full bg-slate-50 rounded-full overflow-hidden border border-slate-100">
-                            <div className={`h-full transition-all duration-[2000ms] ${perc >= 100 ? 'bg-emerald-500' : 'bg-[#01223d]'}`} style={{ width: `${perc}%` }}></div>
-                         </div>
-                      </div>
-                    );
-                  })}
-               </div>
-            </div>
-
-            <div className="bg-white border border-slate-100 rounded-xl p-8 shadow-sm">
-               <h4 className="text-[13px] font-bold text-slate-900 mb-8 uppercase tracking-widest">Evolução de Atividades (30d)</h4>
-               <div className="h-64 relative flex items-end justify-between px-2">
-                  {dashboardData.chartPoints.map((p, i) => {
-                    const max = Math.max(...dashboardData.chartPoints.map(p => p.leads), 1);
-                    const h = (p.leads / max) * 100;
-                    return (
-                      <div key={i} className="flex-1 flex flex-col items-center group relative h-full justify-end">
-                         <div className="absolute bottom-full mb-2 bg-[#01223d] text-white text-[8px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">{p.leads} leads</div>
-                         <div 
-                           className="w-1.5 bg-[#01223d] rounded-t-full transition-all duration-1000 group-hover:bg-[#b4a183] shadow-sm" 
-                           style={{ height: `${h}%` }}
-                         ></div>
-                      </div>
-                    );
-                  })}
-                  <div className="absolute bottom-0 left-0 right-0 h-px bg-slate-100"></div>
-               </div>
-               <div className="flex justify-between px-2 mt-4 text-[9px] font-bold text-slate-300 uppercase">
-                  <span>{dashboardData.chartPoints[0].date}</span>
-                  <span>{dashboardData.chartPoints[15].date}</span>
-                  <span>{dashboardData.chartPoints[29].date}</span>
-               </div>
+                    <div className="h-2 w-full bg-slate-50 rounded-full overflow-hidden border border-slate-100">
+                      <div className={`h-full transition-all duration-1000 ${perc >= 80 ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'bg-blue-600 shadow-[0_0_10px_rgba(37,99,235,0.3)]'}`} style={{ width: `${perc}%` }}></div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
-          {/* COLUNA DIREITA - RANKING + TAXAS + BRIEFING */}
-          <div className="lg:col-span-3 space-y-6">
-             <div className="bg-white border border-slate-100 rounded-xl p-6 shadow-sm">
-                <h4 className="text-[13px] font-bold text-slate-900 mb-6 uppercase tracking-widest">Top Performers</h4>
-                <div className="space-y-2">
-                   {dashboardData.ranking.length === 0 ? (
-                     <p className="text-[10px] text-slate-300 font-bold uppercase text-center py-6">Sem dados de vendas</p>
-                   ) : dashboardData.ranking.slice(0, 5).map((member, i) => (
-                     <div key={i} className="flex items-center justify-between p-3 hover:bg-slate-50 rounded-xl transition-all group">
-                        <div className="flex items-center gap-4">
-                           <span className="text-[11px] font-black text-slate-400 w-4">{i + 1}</span>
-                           <div className={`w-8 h-8 rounded-lg bg-[#01223d] flex items-center justify-center text-[10px] font-black text-[#b4a183] border border-slate-700 shadow-sm`}>
-                              {member.initial}
-                           </div>
-                           <div className="flex items-center gap-2">
-                              <span className="text-xs font-bold text-slate-700 uppercase tracking-tight truncate max-w-[100px]">{member.name}</span>
-                              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                           </div>
-                        </div>
-                        <span className="text-sm font-black text-slate-900">{member.val}</span>
-                     </div>
-                   ))}
-                </div>
+          {/* Ranking */}
+          <div className="lg:col-span-3 bg-white border border-slate-100 rounded-[2rem] p-8 shadow-sm flex flex-col">
+             <h4 className="text-sm font-bold text-slate-900 mb-8 uppercase tracking-tight">Ranking Performance</h4>
+             <div className="space-y-4 flex-1">
+                {metrics.ranking.length === 0 ? (
+                  <div className="h-full flex flex-col items-center justify-center opacity-20">
+                    <Trophy size={40} />
+                    <p className="text-[9px] font-black uppercase mt-4">Aguardando fechamentos</p>
+                  </div>
+                ) : metrics.ranking.map((item, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 transition-all group">
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <div className="w-9 h-9 rounded-lg bg-slate-900 text-white flex items-center justify-center text-[10px] font-black italic shadow-sm group-hover:scale-105 transition-transform">{item.initials}</div>
+                        <div className="absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white bg-emerald-500"></div>
+                      </div>
+                      <span className="text-xs font-bold text-slate-700 truncate max-w-[80px]">{item.name}</span>
+                    </div>
+                    <span className="text-sm font-black text-slate-900">{item.count}</span>
+                  </div>
+                ))}
              </div>
-
-             <div className="bg-white border border-slate-100 rounded-xl p-8 shadow-sm text-center flex flex-col items-center justify-center gap-6 min-h-[350px] relative overflow-hidden group">
-                <div className="w-full flex justify-between items-center mb-4 relative z-10">
-                   <div className="flex items-center gap-2">
-                      <Sparkles size={16} className="text-[#b4a183]" />
-                      <h4 className="text-[13px] font-bold text-slate-900 uppercase tracking-widest">Briefing AI</h4>
-                   </div>
-                </div>
-                
-                <div className="p-4 bg-slate-50 rounded-2xl text-[#b4a183] mb-2 relative z-10 group-hover:scale-110 transition-transform">
-                   <Sparkles size={32} />
-                </div>
-                <div className="relative z-10">
-                   <h5 className="text-sm font-bold text-slate-900 mb-2 uppercase tracking-tight">Relatório de Performance</h5>
-                   <p className="text-[11px] text-slate-400 leading-relaxed px-4 font-medium">
-                      O agente Gemini analisará seus {dashboardData.totalLeads} leads e {dashboardData.goals.length} metas para sugerir ações de fechamento.
-                   </p>
-                </div>
-                <button className="bg-[#01223d] text-white px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-black shadow-xl shadow-slate-900/20 transition-all flex items-center justify-center gap-3 active:scale-95 relative z-10 group/btn">
-                   <Zap size={16} fill="#b4a183" className="text-[#b4a183] group-hover/btn:scale-125 transition-transform" /> Gerar Briefing
-                </button>
-                <div className="absolute -right-10 -bottom-10 opacity-[0.02] group-hover:scale-110 transition-transform">
-                   <Target size={200} />
-                </div>
-             </div>
+             <button className="mt-8 w-full py-3 bg-slate-50 border border-slate-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:bg-slate-900 hover:text-white transition-all">Relatório Completo</button>
           </div>
         </div>
+
+        {/* Row 5: Alerts, Activity Chart & AI Briefing */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-12">
+          
+          {/* Critical Alerts */}
+          <div className="lg:col-span-4 bg-white border border-slate-100 rounded-[2rem] p-8 shadow-sm flex flex-col overflow-hidden">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-2">
+                <AlertCircle size={18} className="text-rose-500" />
+                <h4 className="text-sm font-bold text-slate-900 uppercase tracking-tight">Alertas Críticos</h4>
+              </div>
+              <span className="w-6 h-6 bg-rose-50 text-rose-600 rounded-lg flex items-center justify-center text-[10px] font-black border border-rose-100">{metrics.alerts.length}</span>
+            </div>
+
+            <div className="space-y-3 overflow-y-auto no-scrollbar max-h-[350px]">
+              {metrics.alerts.length === 0 ? (
+                <div className="py-20 text-center opacity-30">
+                  <CheckCircle2 size={32} className="mx-auto text-emerald-500 mb-4" />
+                  <p className="text-[10px] font-black uppercase tracking-widest">Tudo em conformidade</p>
+                </div>
+              ) : metrics.alerts.map((alert, i) => (
+                <div key={i} className="bg-rose-50/40 border border-rose-100 rounded-2xl p-5 hover:bg-rose-50 transition-all group cursor-pointer relative overflow-hidden">
+                  <div className="flex items-start justify-between gap-4">
+                     <div className="flex gap-3">
+                        <div className="mt-1 w-5 h-5 rounded-full bg-rose-100 flex items-center justify-center text-rose-500 shrink-0">
+                           <Target size={12} strokeWidth={3} />
+                        </div>
+                        <div>
+                           <p className="text-[11px] font-bold text-slate-800 leading-snug">{alert.title}</p>
+                           <p className="text-[10px] text-slate-400 font-medium mt-1">Progresso {alert.prog} vs esperado {alert.exp}</p>
+                           <span className="inline-block mt-2 text-[8px] font-black bg-rose-500 text-white px-2 py-0.5 rounded uppercase tracking-tighter shadow-sm shadow-rose-200">Meta em Risco</span>
+                        </div>
+                     </div>
+                     <ChevronRight size={16} className="text-rose-300 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Activity Evolution (Dynamic Chart from Database) */}
+          <div className="lg:col-span-5 bg-white border border-slate-100 rounded-[2rem] p-8 shadow-sm flex flex-col">
+            <h4 className="text-sm font-bold text-slate-900 mb-8 uppercase tracking-tight">Evolução de Atividades (Leads Criados)</h4>
+            
+            <div className="flex-1 relative flex flex-col">
+               <div className="absolute left-0 top-0 bottom-10 w-8 flex flex-col justify-between text-[9px] font-black text-slate-300">
+                  <span>{Math.ceil(metrics.maxLeads)}</span>
+                  <span>{Math.ceil(metrics.maxLeads * 0.75)}</span>
+                  <span>{Math.ceil(metrics.maxLeads * 0.5)}</span>
+                  <span>{Math.ceil(metrics.maxLeads * 0.25)}</span>
+                  <span>0</span>
+               </div>
+               
+               <div className="flex-1 ml-10 mb-10 relative border-l border-b border-slate-50">
+                  <div className="absolute inset-0 flex flex-col justify-between opacity-50">
+                     {[0, 1, 2, 3].map(i => <div key={i} className="w-full h-px border-t border-slate-100 border-dashed"></div>)}
+                  </div>
+                  
+                  <svg className="absolute inset-0 w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 100">
+                    <path 
+                      d={`M ${metrics.chartData.map((d, i) => `${(i / 6) * 100},${100 - (d.count / metrics.maxLeads * 100)}`).join(' L ')}`}
+                      fill="none" 
+                      stroke="#2563eb" 
+                      strokeWidth="2.5" 
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="drop-shadow-xl"
+                    />
+                    <path 
+                      d={`M 0,100 L ${metrics.chartData.map((d, i) => `${(i / 6) * 100},${100 - (d.count / metrics.maxLeads * 100)}`).join(' L ')} L 100,100 Z`}
+                      fill="url(#blueGradient)" 
+                      className="opacity-10"
+                    />
+                    <defs>
+                      <linearGradient id="blueGradient" x1="0" x2="0" y1="0" y2="1">
+                        <stop offset="0%" stopColor="#2563eb" />
+                        <stop offset="100%" stopColor="white" opacity="0" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+               </div>
+
+               <div className="absolute bottom-0 left-10 right-0 flex justify-between text-[8px] font-black text-slate-300 uppercase px-2">
+                  {metrics.chartData.map(d => <span key={d.date}>{d.date.split('-').reverse().slice(0, 2).join('/')}</span>)}
+               </div>
+            </div>
+
+            <div className="flex justify-center gap-6 mt-4">
+               <div className="flex items-center gap-2">
+                 <div className="w-2.5 h-2.5 rounded-full bg-blue-600 shadow-sm shadow-blue-200"></div>
+                 <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Leads Criados SQL</span>
+               </div>
+            </div>
+          </div>
+
+          {/* AI Briefing Card */}
+          <div className="lg:col-span-3 space-y-6 flex flex-col">
+            <div className="bg-[#002147] rounded-[2rem] p-8 shadow-xl relative group overflow-hidden flex flex-col items-center justify-center text-center flex-1">
+              <div className="absolute top-4 right-4">
+                 <div className="p-1.5 bg-white/10 rounded-lg text-white/30"><Database size={12} /></div>
+              </div>
+              
+              <div className="w-14 h-14 bg-blue-500/20 text-blue-400 rounded-2xl flex items-center justify-center mb-5 shadow-2xl border border-blue-500/30">
+                <Sparkles size={24} className="animate-pulse" />
+              </div>
+              
+              <h5 className="text-sm font-bold text-white mb-1 uppercase tracking-tight">Briefing do Time</h5>
+              <p className="text-[10px] text-slate-400 font-medium mb-6 uppercase tracking-widest opacity-80">Insights da sua base de dados</p>
+              
+              <button className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 shadow-xl shadow-blue-900/50 transition-all active:scale-95 group-hover:scale-105">
+                <Zap size={14} fill="currentColor" /> Gerar Briefing
+              </button>
+
+              <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-blue-500/5 rounded-full group-hover:scale-150 transition-transform duration-1000"></div>
+            </div>
+          </div>
+
+        </div>
       </div>
+
+      {/* Persistence Indicator */}
+      {!isLoading && (
+        <div className="fixed bottom-24 md:bottom-8 right-4 md:right-8 bg-slate-900/90 backdrop-blur-md text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 z-[100] border border-white/10 animate-in slide-in-from-right duration-500">
+          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+          <div className="flex flex-col">
+            <span className="text-[9px] font-black uppercase tracking-[0.2em] leading-none mb-1">SQL Live Feed</span>
+            <span className="text-[10px] font-bold text-slate-400 tracking-tight">Dashboard Comercial Sincronizado</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

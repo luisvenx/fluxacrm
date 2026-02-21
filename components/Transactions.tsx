@@ -3,15 +3,14 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Search, 
   Plus, 
+  Upload, 
   ArrowUpRight, 
   ArrowDownLeft, 
+  Filter, 
   MoreVertical,
   Loader2,
   Database,
-  RefreshCcw,
-  Calendar,
-  Filter,
-  ArrowRight
+  RefreshCcw
 } from 'lucide-react';
 import NewTransactionModal from './NewTransactionModal';
 import ImportModal from './ImportModal';
@@ -60,9 +59,11 @@ const Transactions: React.FC<TransactionsProps> = ({ user }) => {
 
   const filteredTransactions = useMemo(() => {
     let result = [...transactions];
-    if (selectedTab === 'Pagos') result = result.filter(t => t.status === 'PAID');
-    else if (selectedTab === 'Pendentes') result = result.filter(t => t.status === 'PENDING');
-    else if (selectedTab === 'Atrasados') {
+    if (selectedTab === 'Pagos') {
+      result = result.filter(t => t.status === 'PAID');
+    } else if (selectedTab === 'Pendentes') {
+      result = result.filter(t => t.status === 'PENDING');
+    } else if (selectedTab === 'Atrasados') {
       const today = new Date().toISOString().split('T')[0];
       result = result.filter(t => t.status === 'PENDING' && t.competence_date < today);
     }
@@ -80,125 +81,135 @@ const Transactions: React.FC<TransactionsProps> = ({ user }) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
   };
 
-  return (
-    <div className="bg-[#fcfcfd] min-h-screen animate-in fade-in duration-700 pb-24 md:pb-20 px-6 md:px-10 pt-8 relative overflow-hidden">
-      
-      {/* Pattern Texture */}
-      <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.02]" 
-           style={{ backgroundImage: 'radial-gradient(#01223d 1px, transparent 1px)', backgroundSize: '32px 32px' }}>
-      </div>
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: '2-digit' });
+  };
 
-      <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
+  return (
+    <div className="bg-[#fcfcfd] min-h-screen space-y-6 md:space-y-8 animate-in fade-in duration-700 pb-24 md:pb-20 px-4 md:px-10 pt-6 md:pt-8">
+      
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">
-            Journal de <span className="text-[#01223d] not-italic">Lançamentos</span>
-          </h2>
-          <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-4">Auditória de fluxo de caixa operacional SQL</p>
+          <div className="flex items-center gap-2 mb-1">
+             <Database size={16} className="text-blue-500" />
+             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Database Realtime</span>
+          </div>
+          <h2 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight uppercase">Ledger Financeiro</h2>
+          <p className="text-slate-500 font-bold text-[10px] uppercase tracking-widest mt-1">Exibindo {filteredTransactions.length} registros auditados</p>
         </div>
         
         <div className="flex items-center gap-3 w-full md:w-auto">
           <button 
             onClick={() => setIsImportModalOpen(true)}
-            className="flex-1 md:flex-none bg-white border border-slate-200 text-slate-600 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm"
+            className="flex-1 md:flex-none bg-white border-2 border-slate-200 text-slate-600 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-50 hover:border-slate-400 transition-all shadow-sm"
           >
-            Importação
+            Importar
           </button>
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="flex-1 md:flex-none bg-[#01223d] text-white px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-black shadow-xl transition-all flex items-center justify-center gap-2 active:scale-95 group"
+            className="flex-1 md:flex-none bg-blue-600 text-white px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 shadow-xl shadow-blue-600/20 transition-all flex items-center justify-center gap-2 active:scale-95"
           >
-            <Plus size={18} strokeWidth={3} className="text-[#b4a183] group-hover:rotate-90 transition-transform" /> Registrar
+            <Plus size={18} />
+            Novo Lançamento
           </button>
         </div>
       </div>
 
-      {/* Toolbar Executiva */}
-      <div className="relative z-10 bg-white border border-slate-200 p-2 rounded-xl shadow-sm mb-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div className="flex items-center gap-1 bg-slate-50 p-1 rounded-lg border border-slate-100 overflow-x-auto no-scrollbar">
+      {/* Toolbar */}
+      <div className="flex flex-col lg:flex-row gap-4 items-center justify-between bg-white p-3 border-2 border-slate-100 rounded-[2rem] shadow-md">
+        <div className="flex items-center gap-1 bg-slate-50 p-1 rounded-2xl w-full lg:w-auto overflow-x-auto no-scrollbar border border-slate-200/50">
           {tabs.map(tab => (
             <button
               key={tab}
               onClick={() => setSelectedTab(tab)}
-              className={`px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
-                selectedTab === tab ? 'bg-[#01223d] text-white shadow-md' : 'text-slate-400 hover:text-slate-700'
-              }`}
+              className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-tight transition-all whitespace-nowrap border-2 ${selectedTab === tab ? 'bg-white text-blue-600 border-blue-500 shadow-sm' : 'border-transparent text-slate-400 hover:text-slate-600'}`}
             >
               {tab}
             </button>
           ))}
         </div>
 
-        <div className="flex items-center gap-3 w-full lg:w-auto px-2">
-          <div className="relative flex-1 lg:w-96 group ml-2">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#01223d] transition-colors" size={16} />
+        <div className="flex items-center gap-2 w-full lg:w-auto md:pr-2">
+          <div className="relative flex-1 lg:w-96">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
             <input 
               type="text" 
-              placeholder="Pesquisar registros..." 
+              placeholder="Buscar por descrição ou banco..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-100 rounded-lg py-2.5 pl-11 pr-4 text-xs font-bold focus:ring-2 focus:ring-slate-100 outline-none text-slate-600 transition-all"
+              className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-2.5 pl-11 pr-4 text-xs font-bold focus:ring-2 focus:ring-blue-100 focus:border-blue-400 text-slate-600 transition-all"
             />
           </div>
-          <button onClick={fetchTransactions} className="p-2.5 bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-[#b4a183] transition-all shadow-sm">
+          <button onClick={fetchTransactions} className="p-2.5 bg-white border-2 border-slate-100 rounded-xl text-slate-400 hover:text-blue-600 hover:border-blue-400 transition-all">
             <RefreshCcw size={16} className={isLoading ? 'animate-spin' : ''} />
           </button>
         </div>
       </div>
 
-      {/* Tabela Master - Arredondamento Reduzido */}
-      <div className="relative z-10 bg-white border border-slate-100 rounded-xl shadow-xl overflow-hidden min-h-[500px] flex flex-col">
+      {/* Tabela com Bordas Dinâmicas */}
+      <div className="bg-white border-2 border-slate-100 rounded-[2.5rem] shadow-xl overflow-hidden min-h-[500px] flex flex-col transition-all hover:border-slate-200">
         <div className="overflow-x-auto no-scrollbar flex-1">
-          <table className="w-full text-left border-collapse min-w-[950px]">
+          <table className="w-full text-left border-collapse min-w-[900px]">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-100">
-                <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Data Competência</th>
-                <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Descrição & Conta</th>
-                <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Valor Auditado</th>
-                <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Status</th>
-                <th className="px-10 py-6 w-10"></th>
+              <tr className="bg-slate-50/50 border-b-2 border-slate-100">
+                <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Data</th>
+                <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Descrição & Centro</th>
+                <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Valor</th>
+                <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">Status</th>
+                <th className="px-8 py-6 w-10"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50">
+            <tbody className="divide-y-2 divide-slate-50">
               {isLoading ? (
-                <tr><td colSpan={5} className="py-40 text-center"><Loader2 size={32} className="animate-spin mx-auto text-[#01223d] mb-4" /><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Auditando Ledger...</p></td></tr>
+                <tr>
+                  <td colSpan={5} className="py-32 text-center">
+                    <Loader2 className="animate-spin mx-auto text-blue-500 mb-4" size={40} />
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Conciliando Base...</p>
+                  </td>
+                </tr>
               ) : filteredTransactions.length === 0 ? (
-                <tr><td colSpan={5} className="py-40 text-center opacity-30"><Database size={48} className="mx-auto mb-4" /><p className="text-xs font-black text-slate-300 uppercase tracking-widest">Nenhum registro localizado</p></td></tr>
+                <tr>
+                  <td colSpan={5} className="py-40 text-center opacity-30">
+                    <Database size={48} className="mx-auto text-slate-200 mb-4" />
+                    <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Sem registros vinculados à sua conta</p>
+                  </td>
+                </tr>
               ) : (
                 filteredTransactions.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-50 transition-all group">
-                    <td className="px-10 py-6">
+                  <tr key={item.id} className={`hover:bg-slate-50 transition-all group border-l-[6px] ${item.type === 'IN' ? 'border-emerald-500/80 hover:bg-emerald-50/20' : 'border-rose-500/80 hover:bg-rose-50/20'}`}>
+                    <td className="px-8 py-6">
                       <div className="flex flex-col">
-                        <span className="text-sm font-black text-slate-900 tracking-tight italic uppercase">{new Date(item.competence_date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}</span>
-                        <span className="text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Auditado</span>
+                        <span className="text-sm font-black text-slate-800 tracking-tight">{formatDate(item.competence_date)}</span>
+                        <span className="text-[9px] font-bold text-slate-300 uppercase">{item.bank_accounts?.name || 'Caixa'}</span>
                       </div>
                     </td>
                     <td className="px-8 py-6">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center border-2 shadow-sm transition-transform group-hover:scale-110 ${item.type === 'IN' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-500 border-rose-100'}`}>
+                      <div className="flex items-center gap-5">
+                        <div className={`p-2.5 rounded-2xl border-2 transition-transform group-hover:scale-110 shadow-sm ${item.type === 'IN' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-rose-50 text-rose-600 border-rose-200'}`}>
                           {item.type === 'IN' ? <ArrowDownLeft size={16} strokeWidth={3} /> : <ArrowUpRight size={16} strokeWidth={3} />}
                         </div>
                         <div className="min-w-0">
-                          <p className="text-sm font-bold text-slate-800 truncate max-w-[250px] uppercase italic tracking-tight">{item.description}</p>
-                          <p className="text-[9px] font-black text-[#01223d] uppercase tracking-widest mt-1 opacity-60">{item.bank_accounts?.name || 'Caixa Local'}</p>
+                          <p className="text-sm font-black text-slate-900 tracking-tight uppercase truncate max-w-[300px]">{item.description}</p>
+                          <p className="text-[9px] font-black text-blue-500 uppercase tracking-widest mt-0.5">{item.cost_centers?.name || 'Geral Operacional'}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-8 py-6 text-right">
-                       <p className={`text-base font-black ${item.type === 'IN' ? 'text-emerald-600' : 'text-slate-900'} tracking-tighter italic`}>
-                         {item.type === 'IN' ? '+' : '-'} {formatCurrency(item.amount)}
-                       </p>
+                    <td className={`px-8 py-6 text-base font-black text-right tracking-tighter ${item.type === 'IN' ? 'text-emerald-600' : 'text-slate-900'}`}>
+                      {item.type === 'IN' ? '+' : '-'} {formatCurrency(item.amount)}
                     </td>
                     <td className="px-8 py-6 text-center">
-                      <span className={`text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest border shadow-sm ${
-                        item.status === 'PAID' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-amber-50 text-amber-600 border-amber-200'
+                      <span className={`text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest border-2 shadow-sm ${
+                        item.status === 'PAID' ? 'bg-emerald-50 text-emerald-600 border-emerald-500' : 
+                        'bg-amber-50 text-amber-600 border-amber-500'
                       }`}>
-                        {item.status === 'PAID' ? 'Liquidez' : 'Pendente'}
+                        {item.status === 'PAID' ? 'Pago' : 'Pendente'}
                       </span>
                     </td>
-                    <td className="px-10 py-6 text-right">
-                       <button className="p-2.5 text-slate-200 hover:text-slate-900 hover:bg-white rounded-xl transition-all shadow-sm">
-                         <MoreVertical size={18}/>
-                       </button>
+                    <td className="px-8 py-6 text-right">
+                      <button className="p-2.5 text-slate-200 hover:text-slate-900 hover:bg-white hover:shadow-md rounded-xl transition-all">
+                        <MoreVertical size={18} />
+                      </button>
                     </td>
                   </tr>
                 ))

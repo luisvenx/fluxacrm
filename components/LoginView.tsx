@@ -6,11 +6,10 @@ import {
   Loader2, 
   AlertCircle, 
   CheckCircle2,
-  ArrowRight,
-  ShieldCheck,
+  ChevronRight,
   Zap,
-  Globe,
-  Lock
+  ShieldCheck,
+  Globe
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -44,14 +43,22 @@ const LoginView: React.FC<LoginViewProps> = () => {
           throw new Error('As senhas não coincidem.');
         }
         
+        // Cadastrar usuário no Supabase Auth. 
+        // O Trigger 'on_auth_user_created' no banco cuidará de inserir nas tabelas 'users' e 'profiles'
         const { error: signUpError } = await supabase.auth.signUp({
           email: formData.email,
           password: formData.password,
-          options: { data: { full_name: formData.name } }
+          options: { 
+            data: { 
+              full_name: formData.name 
+            } 
+          }
         });
 
         if (signUpError) throw signUpError;
-        setSuccess('Estrutura de acesso enviada para validação em seu e-mail.');
+
+        setSuccess('Conta criada! Enviamos um link de confirmação para o seu e-mail. Por favor, valide seu acesso para entrar na plataforma.');
+        setFormData(prev => ({ ...prev, password: '', confirmPassword: '' }));
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email: formData.email,
@@ -60,174 +67,176 @@ const LoginView: React.FC<LoginViewProps> = () => {
         if (error) throw error;
       }
     } catch (err: any) {
-      setError(err.message || 'Falha na autenticação.');
+      setError(err.message || 'Falha na operação.');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-white relative font-['Inter'] selection:bg-[#b4a183] selection:text-white">
+    <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden font-['Inter']">
       
-      {/* Blueprint Pattern Background */}
-      <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.03]" 
-           style={{ backgroundImage: 'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)', backgroundSize: '40px 40px' }}>
-      </div>
+      {/* Background Image with Overlay */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-[20000ms] scale-110 hover:scale-100"
+        style={{ backgroundImage: "url('https://lh3.googleusercontent.com/d/19U8wGmf5NP9ui8ZEnJ4k1MU0SVnmbuTG')" }}
+      ></div>
+      <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px]"></div>
 
-      <div className="relative z-10 w-full max-w-[480px] p-8 flex flex-col items-center">
+      <div className="w-full max-w-[1100px] grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-12 p-4 lg:p-8 z-10 animate-in fade-in slide-in-from-bottom-4 duration-1000">
         
-        {/* Logo Section - Pure & Animated */}
-        <div className="mb-10 flex flex-col items-center animate-in fade-in zoom-in-95 duration-1000">
-          <div className="relative">
-            <div className="absolute -inset-4 bg-[#b4a183]/5 blur-2xl rounded-full"></div>
-            <img 
-              src="https://lh3.googleusercontent.com/d/1etimAcTlGnq4yMgwIaChmuykWjsktTKO" 
-              alt="Fluxa Logo" 
-              className="h-14 w-auto object-contain relative animate-logo-float"
-            />
+        {/* Left Side: Brand Info */}
+        <div className="hidden lg:flex flex-col justify-center space-y-12">
+          <div className="space-y-6">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50/80 border border-blue-100 text-blue-600 text-[10px] font-medium uppercase tracking-[0.2em] backdrop-blur-sm">
+              <Zap size={12} fill="currentColor" /> Fluxa Imob v2.6
+            </div>
+            <h2 className="text-5xl font-medium text-slate-950 tracking-tighter leading-[1.1]">
+              Inteligência imobiliária <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">em tempo real.</span>
+            </h2>
+            <p className="text-slate-600 text-lg font-medium leading-relaxed max-w-md">
+              A stack definitiva para gestão de fluxos, OKRs e auditoria bancária automatizada para o mercado imobiliário.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-6">
+            <div className="p-5 rounded-3xl bg-white/70 border border-white/50 backdrop-blur-md space-y-2 shadow-sm">
+              <ShieldCheck className="text-emerald-500" size={20} />
+              <p className="text-slate-900 text-sm font-medium uppercase tracking-tight">SQL Encryption</p>
+              <p className="text-slate-500 text-xs font-medium">Dados protegidos por protocolos de nível bancário.</p>
+            </div>
+            <div className="p-5 rounded-3xl bg-white/70 border border-white/50 backdrop-blur-md space-y-2 shadow-sm">
+              <Globe className="text-blue-500" size={20} />
+              <p className="text-slate-900 text-sm font-medium uppercase tracking-tight">Cloud Sync</p>
+              <p className="text-slate-500 text-xs font-medium">Acesse sua operação de qualquer lugar do mundo.</p>
+            </div>
           </div>
         </div>
 
-        {/* Action Card */}
-        <div className="w-full bg-white rounded-[3rem] p-10 md:p-14 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.08)] border border-slate-100/50 transition-all duration-500">
-          
-          <div className="mb-10">
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight uppercase leading-none">
-              {isRegistering ? 'Provisionar' : 'Autenticar'}
-            </h1>
-            <div className="h-1 w-12 bg-[#b4a183] mt-4 rounded-full"></div>
-          </div>
-
-          {error && (
-            <div className="mb-8 p-4 bg-rose-50 border-l-4 border-rose-500 flex items-center gap-3 text-rose-600 text-[10px] font-black uppercase tracking-widest animate-in slide-in-from-left-2">
-              <AlertCircle size={14} />
-              <span>{error}</span>
+        {/* Right Side: Auth Card */}
+        <div className="flex flex-col justify-center items-center">
+          <div className="w-full max-w-[440px] bg-white border border-slate-200/60 rounded-[2.5rem] p-8 lg:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.1)] relative overflow-hidden group">
+            
+            {/* Header */}
+            <div className="mb-10">
+              <img 
+                src="https://lh3.googleusercontent.com/d/1iJOyi_ZfiSUGOMfDpAyXA2U_W6kcMxkF" 
+                alt="Fluxa Imob" 
+                className="h-8 mb-8"
+              />
+              <h1 className="text-2xl font-medium text-slate-950 tracking-tight">
+                {isRegistering ? 'Crie sua conta' : 'Bem-vindo de volta'}
+              </h1>
+              <p className="text-slate-400 text-sm mt-1 font-medium">
+                {isRegistering ? 'Junte-se à nova geração de gestores imobiliários.' : 'Acesse seu dashboard operacional.'}
+              </p>
             </div>
-          )}
 
-          {success && (
-            <div className="mb-8 p-4 bg-emerald-50 border-l-4 border-emerald-500 flex items-center gap-3 text-emerald-700 text-[10px] font-black uppercase tracking-widest animate-in zoom-in-95">
-              <CheckCircle2 size={14} />
-              <span>{success}</span>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {isRegistering && (
-              <div className="space-y-1 animate-in slide-in-from-top-2 duration-300">
-                <label className="text-[9px] font-black uppercase text-slate-400 tracking-[0.2em] ml-1">Nome Completo</label>
-                <input 
-                  type="text" 
-                  required
-                  className="w-full bg-slate-50/50 border-b-2 border-slate-100 px-0 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:border-[#b4a183] focus:bg-white transition-all placeholder:text-slate-300"
-                  value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                />
+            {error && (
+              <div className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-center gap-3 text-rose-600 text-xs font-medium animate-in zoom-in-95">
+                <AlertCircle size={16} className="shrink-0" />
+                <p>{error}</p>
               </div>
             )}
 
-            <div className="space-y-1">
-              <label className="text-[9px] font-black uppercase text-slate-400 tracking-[0.2em] ml-1">E-mail Profissional</label>
-              <input 
-                type="email" 
-                required
-                className="w-full bg-slate-50/50 border-b-2 border-slate-100 px-0 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:border-[#b4a183] focus:bg-white transition-all placeholder:text-slate-300"
-                value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
-              />
-            </div>
+            {success && (
+              <div className="mb-6 p-5 bg-emerald-50 border border-emerald-100 rounded-[2rem] flex items-start gap-4 text-emerald-700 text-xs font-medium animate-in zoom-in-95 leading-relaxed">
+                <CheckCircle2 size={20} className="shrink-0 text-emerald-500" />
+                <p>{success}</p>
+              </div>
+            )}
 
-            <div className="space-y-1 relative">
-              <label className="text-[9px] font-black uppercase text-slate-400 tracking-[0.2em] ml-1">Senha de Acesso</label>
-              <div className="relative">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {isRegistering && (
+                <div className="space-y-1">
+                  <input 
+                    type="text" 
+                    required
+                    placeholder="Nome Completo"
+                    className="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-3.5 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all placeholder:text-slate-400 font-medium"
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  />
+                </div>
+              )}
+
+              <div className="space-y-1">
+                <input 
+                  type="email" 
+                  required
+                  placeholder="seu@email.com"
+                  className="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-3.5 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all placeholder:text-slate-400 font-medium"
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                />
+              </div>
+
+              <div className="relative group">
                 <input 
                   type={showPassword ? "text" : "password"} 
                   required
-                  className="w-full bg-slate-50/50 border-b-2 border-slate-100 px-0 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:border-[#b4a183] focus:bg-white transition-all"
+                  placeholder="Senha"
+                  className="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-3.5 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all placeholder:text-slate-400 font-medium"
                   value={formData.password}
                   onChange={(e) => setFormData({...formData, password: e.target.value})}
                 />
                 <button 
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 text-slate-300 hover:text-[#b4a183] transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500 transition-colors"
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-            </div>
 
-            {isRegistering && (
-              <div className="space-y-1 animate-in slide-in-from-top-2 duration-300">
-                <label className="text-[9px] font-black uppercase text-slate-400 tracking-[0.2em] ml-1">Confirmar Senha</label>
-                <input 
-                  type={showPassword ? "text" : "password"} 
-                  required
-                  className="w-full bg-slate-50/50 border-b-2 border-slate-100 px-0 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:border-[#b4a183] focus:bg-white transition-all"
-                  value={formData.confirmPassword}
-                  onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
-                />
-              </div>
-            )}
+              {isRegistering && (
+                <div className="animate-in slide-in-from-top-2 duration-300">
+                  <input 
+                    type={showPassword ? "text" : "password"} 
+                    required
+                    placeholder="Confirmar Senha"
+                    className="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-3.5 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all placeholder:text-slate-400 font-medium"
+                    value={formData.confirmPassword}
+                    onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+                  />
+                </div>
+              )}
 
-            <div className="pt-8">
               <button 
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-slate-900 text-white py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] shadow-xl shadow-slate-200 transition-all active:scale-[0.98] hover:bg-black disabled:opacity-50 flex items-center justify-center gap-3 group"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-xl text-sm font-medium uppercase tracking-widest shadow-xl shadow-blue-500/20 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 group"
               >
                 {isLoading ? (
-                  <Loader2 size={18} className="animate-spin text-[#b4a183]" />
+                  <Loader2 size={18} className="animate-spin" />
                 ) : (
                   <>
-                    {isRegistering ? 'Iniciar Provisionamento' : 'Acessar Workspace'}
-                    <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform text-[#b4a183]" />
+                    {isRegistering ? 'Criar Conta' : 'Entrar na Plataforma'}
+                    <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
                   </>
                 )}
               </button>
-            </div>
-          </form>
+            </form>
 
-          <div className="mt-10 text-center">
             <button 
               onClick={() => {
                 setIsRegistering(!isRegistering);
                 setError(null);
                 setSuccess(null);
               }}
-              className="text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-[#b4a183] transition-all border-b border-transparent hover:border-[#b4a183] pb-1"
+              className="w-full mt-10 text-center text-xs font-medium text-slate-400 hover:text-blue-600 transition-colors"
             >
-              {isRegistering ? 'Já possuo uma estrutura? Entrar' : "Novo por aqui? Criar conta corporativa"}
+              {isRegistering ? 'Já possui uma conta? Login' : "Não tem conta? Cadastre-se"}
             </button>
           </div>
-        </div>
 
-        {/* Safety Badges */}
-        <div className="mt-12 flex justify-center items-center gap-8 opacity-20 group">
-           <div className="flex items-center gap-2">
-              <ShieldCheck size={12} className="text-slate-900" />
-              <span className="text-[8px] font-black uppercase tracking-widest">ISO 27001</span>
-           </div>
-           <div className="flex items-center gap-2">
-              <Zap size={12} className="text-slate-900" />
-              <span className="text-[8px] font-black uppercase tracking-widest">Realtime SQL</span>
-           </div>
-           <div className="flex items-center gap-2">
-              <Globe size={12} className="text-slate-900" />
-              <span className="text-[8px] font-black uppercase tracking-widest">Global Ops</span>
-           </div>
+          <div className="mt-8 flex gap-6 text-[10px] font-medium uppercase tracking-widest text-slate-400">
+            <a href="#" className="hover:text-slate-700 transition-colors">Privacidade</a>
+            <a href="#" className="hover:text-slate-700 transition-colors">Termos de Uso</a>
+          </div>
         </div>
       </div>
-
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes logo-float {
-          0%, 100% { transform: translateY(0) scale(1); }
-          50% { transform: translateY(-5px) scale(1.02); }
-        }
-        .animate-logo-float {
-          animation: logo-float 4s ease-in-out infinite;
-        }
-      `}} />
     </div>
   );
 };

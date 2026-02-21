@@ -4,16 +4,18 @@ import {
   Target, 
   CheckCircle2, 
   TrendingUp, 
+  AlertTriangle, 
+  Sparkles, 
   Plus, 
+  Users, 
   User, 
   Building2,
+  ChevronRight,
+  ArrowUpRight,
   Trophy,
   Loader2,
   Database,
-  Users,
-  Clock,
-  ArrowUpRight,
-  Sparkles
+  ArrowRight
 } from 'lucide-react';
 import NewGoalModal from './NewGoalModal';
 import { supabase } from '../lib/supabase';
@@ -46,138 +48,148 @@ const Metas: React.FC<MetasProps> = ({ user }) => {
     fetchGoals();
   }, [user]);
 
-  const avgAtingimento = useMemo(() => {
-    if (goals.length === 0) return 0;
-    const totalPerc = goals.reduce((acc, g) => {
-      const p = Math.min((Number(g.current_value) / Number(g.target_value)) * 100, 100);
-      return acc + p;
-    }, 0);
-    return Math.round(totalPerc / goals.length);
+  const stats = useMemo(() => {
+    const active = goals.length;
+    const avgProgress = goals.length > 0 
+      ? goals.reduce((acc, g) => acc + (Math.min(Number(g.current_value) / Number(g.target_value), 1) * 100), 0) / goals.length 
+      : 0;
+    
+    return [
+      { label: 'Metas Ativas', value: active.toString(), subtitle: 'Monitoramento', icon: <Target />, color: 'blue' },
+      { label: 'Atingimento Médio', value: `${avgProgress.toFixed(1)}%`, subtitle: 'Realtime SQL', icon: <TrendingUp />, color: 'emerald' },
+      { label: 'Individuais', value: goals.filter(g => g.scope === 'Individual').length.toString(), subtitle: 'Personal goals', icon: <User />, color: 'blue' },
+      { label: 'Squads', value: goals.filter(g => g.scope === 'Squad').length.toString(), subtitle: 'Team performance', icon: <Users />, color: 'purple' },
+    ];
   }, [goals]);
 
+  const tabs = [
+    { id: 'empresa', label: 'Empresa', icon: <Building2 size={16} /> },
+    { id: 'individuais', label: 'Individuais', icon: <User size={16} /> },
+    { id: 'squads', label: 'Squads', icon: <Users size={16} /> },
+  ];
+
   const filteredGoals = useMemo(() => {
-    return goals.filter(g => 
-      g.scope?.toLowerCase() === activeTab.substring(0, activeTab.length - (activeTab.endsWith('s') ? 1 : 0)).toLowerCase() || 
-      (activeTab === 'empresa' && g.scope === 'Empresa')
-    );
+    return goals.filter(g => g.scope?.toLowerCase() === activeTab.substring(0, activeTab.length - (activeTab.endsWith('s') ? 1 : 0)).toLowerCase() || 
+                       (activeTab === 'empresa' && g.scope === 'Empresa'));
   }, [goals, activeTab]);
 
   return (
-    <div className="bg-[#fcfcfd] min-h-screen animate-in fade-in duration-700 pb-24 md:pb-20 px-6 md:px-10 pt-8 relative overflow-hidden font-['Inter']">
-      <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.02]" 
-           style={{ backgroundImage: 'radial-gradient(#01223d 1px, transparent 1px)', backgroundSize: '32px 32px' }}>
-      </div>
-
-      <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
+    <div className="bg-[#fcfcfd] min-h-screen space-y-6 md:space-y-8 animate-in fade-in duration-700 pb-24 md:pb-20 px-4 md:px-10 pt-6 md:pt-8">
+      
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">
-            Objetivos <span className="text-[#01223d] not-italic">& Performance</span>
-          </h1>
-          <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-4">Auditoria tática de KPIs e OKRs corporativos SQL</p>
+          <div className="flex items-center gap-2 mb-1">
+             <Database size={16} className="text-blue-500 shrink-0" />
+             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">OKR Data Engine</span>
+          </div>
+          <h2 className="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">Metas & Performance</h2>
+          <p className="text-slate-500 text-xs md:text-sm font-medium mt-1">Gestão estratégica de OKRs para sua conta.</p>
         </div>
 
-        <button 
-          onClick={() => setIsNewGoalModalOpen(true)}
-          className="w-full md:w-auto bg-[#01223d] text-white px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-black shadow-xl transition-all flex items-center justify-center gap-3 active:scale-95 group"
-        >
-          <Plus size={18} strokeWidth={3} className="text-[#b4a183] group-hover:rotate-90 transition-transform" /> Definir OKR
-        </button>
+        <div className="flex items-center gap-2 md:gap-3 w-full md:w-auto">
+          <button className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl md:rounded-full text-xs md:text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
+            <Sparkles size={16} className="text-blue-500" /> <span className="hidden sm:inline">AI Gen</span> <span className="sm:hidden">AI</span>
+          </button>
+          <button 
+            onClick={() => setIsNewGoalModalOpen(true)}
+            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 md:px-6 py-2.5 bg-blue-600 text-white rounded-xl md:rounded-full text-xs md:text-sm font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20"
+          >
+            <Plus size={18} /> <span className="hidden sm:inline">Nova Meta</span> <span className="sm:hidden">Novo</span>
+          </button>
+        </div>
       </div>
 
-      <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-         <div className="bg-white border border-slate-200 p-8 rounded-xl shadow-sm flex flex-col justify-between h-40 group hover:border-[#b4a183] transition-all">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Atingimento Real</p>
-            <div className="flex items-end justify-between">
-               <h3 className="text-3xl font-black text-slate-900 tracking-tighter italic">{avgAtingimento}%</h3>
-               <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform border border-emerald-100 shadow-sm">
-                  <TrendingUp size={20} />
-               </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        {stats.map((stat, i) => (
+          <div key={i} className="bg-white border border-slate-100 rounded-[1.5rem] md:rounded-[1.75rem] p-5 md:p-6 shadow-sm hover:shadow-md transition-all group">
+            <div className="flex justify-between items-start mb-4">
+              <p className="text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest">{stat.label}</p>
+              <div className={`p-2 bg-slate-50 text-slate-400 rounded-xl group-hover:scale-110 transition-transform`}>
+                {stat.icon && React.cloneElement(stat.icon as React.ReactElement, { size: 18 })}
+              </div>
             </div>
-         </div>
-         <div className="bg-white border border-slate-200 p-8 rounded-xl shadow-sm flex flex-col justify-between h-40">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Metas em Ciclo</p>
-            <div className="flex items-end justify-between">
-               <h3 className="text-3xl font-black text-slate-900 tracking-tighter">{goals.length}</h3>
-               <div className="w-10 h-10 bg-slate-50 text-[#01223d] rounded-lg border border-slate-100 flex items-center justify-center shadow-sm">
-                  <Target size={20} />
-               </div>
-            </div>
-         </div>
-         <div className="bg-[#01223d] p-8 rounded-xl shadow-2xl flex flex-col justify-between h-40 relative overflow-hidden group">
-            <p className="text-[10px] font-black text-white/40 uppercase tracking-widest relative z-10">Meta Master</p>
-            <div className="flex items-end justify-between relative z-10">
-               <h3 className="text-2xl font-black text-white tracking-tighter italic uppercase">Sincronizado</h3>
-               <Sparkles size={20} className="text-[#b4a183] group-hover:rotate-12 transition-transform" />
-            </div>
-            <Target size={150} className="absolute -right-10 -bottom-10 opacity-5 group-hover:scale-110 transition-transform duration-700" />
-         </div>
+            <h3 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">{stat.value}</h3>
+            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1">{stat.subtitle}</p>
+          </div>
+        ))}
       </div>
 
-      <div className="relative z-10 bg-white border border-slate-200 p-1.5 rounded-xl shadow-sm mb-10 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-          {['Empresa', 'Individuais', 'Squads'].map((tab) => (
+      <div className="bg-white p-2 border border-slate-100 rounded-2xl md:rounded-3xl shadow-sm overflow-hidden">
+        <div className="flex items-center gap-1 bg-slate-50 p-1 rounded-xl md:rounded-2xl w-full overflow-x-auto no-scrollbar">
+          {tabs.map((tab) => (
             <button
-              key={tab}
-              onClick={() => setActiveTab(tab.toLowerCase() as any)}
-              className={`flex-1 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all min-w-[120px] ${
-                activeTab === tab.toLowerCase() ? 'bg-[#01223d] text-white shadow-md' : 'text-slate-400 hover:text-slate-900 hover:bg-slate-50'
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`flex-1 min-w-[100px] md:min-w-0 flex items-center justify-center gap-2 px-6 md:px-8 py-2.5 rounded-lg md:rounded-xl text-[10px] md:text-xs font-bold transition-all whitespace-nowrap ${
+                activeTab === tab.id 
+                  ? 'bg-white text-slate-900 shadow-sm border border-slate-100' 
+                  : 'text-slate-400 hover:text-slate-600'
               }`}
             >
-              {tab}
+              {tab.icon} {tab.label}
             </button>
           ))}
+        </div>
       </div>
 
       {isLoading ? (
-        <div className="py-20 text-center"><Loader2 className="animate-spin mx-auto text-[#01223d] mb-4" size={40} /><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Auditando Resultados...</p></div>
+        <div className="py-20 flex flex-col items-center justify-center">
+           <Loader2 className="animate-spin text-blue-600 mb-4" size={40} />
+           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sincronizando OKRs...</p>
+        </div>
       ) : filteredGoals.length === 0 ? (
-        <div className="bg-white border-2 border-dashed border-slate-100 rounded-xl p-24 text-center opacity-30">
-           <Database size={48} className="mx-auto mb-4" />
-           <p className="text-sm font-black uppercase tracking-widest italic">Nenhuma meta configurada</p>
+        <div className="bg-white border border-slate-100 rounded-[2rem] md:rounded-[2.5rem] shadow-sm min-h-[350px] md:min-h-[400px] flex flex-col items-center justify-center p-8 md:p-12 text-center group relative overflow-hidden transition-all hover:border-blue-100">
+          <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-110 transition-transform pointer-events-none">
+            <Trophy size={250} />
+          </div>
+          <div className="relative z-10 flex flex-col items-center space-y-6">
+            <div className="w-16 h-16 md:w-20 md:h-20 bg-slate-50 rounded-2xl md:rounded-[2.5rem] flex items-center justify-center text-slate-200 group-hover:bg-blue-50 group-hover:text-blue-500 transition-all duration-500 shadow-sm">
+              <Target size={32} />
+            </div>
+            <div className="max-w-md">
+              <h3 className="text-lg md:text-xl font-bold text-slate-900 tracking-tight mb-2 uppercase">Configure seus objetivos de {activeTab}</h3>
+              <p className="text-xs md:text-sm text-slate-400 font-medium leading-relaxed">Defina metas isoladas para sua operação e acompanhe os resultados em tempo real.</p>
+            </div>
+            <button onClick={() => setIsNewGoalModalOpen(true)} className="px-8 py-3 bg-slate-900 text-white rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl">Criar primeira meta</button>
+          </div>
         </div>
       ) : (
-        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
           {filteredGoals.map((goal) => {
             const perc = Math.min((Number(goal.current_value) / Number(goal.target_value)) * 100, 100);
             return (
-              <div key={goal.id} className="bg-white border border-slate-200 rounded-xl p-10 shadow-sm hover:shadow-2xl transition-all group flex flex-col justify-between min-h-[300px] relative overflow-hidden">
-                <div>
-                  <div className="flex justify-between items-start mb-6">
-                    <div className="space-y-1">
-                      <span className="text-[9px] font-black uppercase tracking-widest bg-slate-50 text-[#01223d] px-3 py-1 rounded-md border border-slate-100">{goal.metric} SQL</span>
-                      <h4 className="text-2xl font-black text-slate-900 tracking-tight uppercase italic mt-5 leading-none">{goal.title}</h4>
-                    </div>
-                    <div className={`p-4 rounded-xl border transition-all ${perc >= 100 ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-slate-50 text-slate-200 border-slate-100'}`}>
-                      <Trophy size={28} strokeWidth={2.5} />
-                    </div>
+              <div key={goal.id} className="bg-white border border-slate-100 rounded-[1.75rem] md:rounded-[2rem] p-6 md:p-8 shadow-sm hover:shadow-lg transition-all group">
+                <div className="flex justify-between items-start mb-6 md:mb-8">
+                  <div className="space-y-1 min-w-0 pr-4">
+                    <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest bg-blue-50 text-blue-600 px-2 py-0.5 rounded-md border border-blue-100">{goal.metric}</span>
+                    <h4 className="text-base md:text-lg font-bold text-slate-900 tracking-tight mt-2 uppercase truncate">{goal.title}</h4>
+                    <p className="text-[10px] md:text-xs text-slate-400 font-medium italic">{goal.period}</p>
+                  </div>
+                  <div className={`p-2 rounded-xl bg-slate-50 shrink-0 ${perc >= 100 ? 'text-emerald-500' : 'text-slate-300'}`}>
+                    <CheckCircle2 size={24} />
                   </div>
                 </div>
 
-                <div className="space-y-6 pt-10 border-t border-slate-50">
+                <div className="space-y-4">
                   <div className="flex justify-between items-end">
                     <div className="flex flex-col">
-                       <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-2">Execução Realizada</span>
-                       <span className="text-3xl font-black text-slate-900 tracking-tighter italic leading-none">
-                         {goal.current_value} <span className="text-slate-200 not-italic mx-2">/</span> <span className="text-slate-300">{goal.target_value}</span>
+                       <span className="text-[8px] md:text-[10px] font-black text-slate-300 uppercase tracking-widest">Progresso</span>
+                       <span className="text-xl md:text-2xl font-black text-slate-900 tracking-tighter">
+                         {goal.current_value} <span className="text-slate-200">/</span> <span className="text-slate-300">{goal.target_value}</span>
                        </span>
                     </div>
-                    <div className="text-right">
-                       <span className={`text-xl font-black ${perc >= 100 ? 'text-emerald-500' : 'text-[#01223d]'}`}>{perc.toFixed(1)}%</span>
-                       <p className="text-[9px] text-slate-300 font-bold uppercase flex items-center gap-1 mt-1 justify-end"><Clock size={10}/> Ciclo {goal.period}</p>
-                    </div>
+                    <span className="text-xs md:text-sm font-black text-blue-600">{perc.toFixed(1)}%</span>
                   </div>
-                  <div className="h-2 w-full bg-slate-50 rounded-full overflow-hidden border border-slate-100 p-0.5 shadow-inner">
-                    <div 
-                      className={`h-full transition-all duration-[2000ms] rounded-full ${perc >= 100 ? 'bg-emerald-500 shadow-[0_0_10px_#10b981]' : 'bg-[#01223d]'}`} 
-                      style={{ width: `${perc}%` }}
-                    ></div>
+                  <div className="h-2 w-full bg-slate-50 rounded-full overflow-hidden">
+                    <div className={`h-full transition-all duration-1000 shadow-sm ${perc >= 100 ? 'bg-emerald-500' : 'bg-blue-600'}`} style={{ width: `${perc}%` }}></div>
                   </div>
                 </div>
-                <div className="absolute bottom-0 left-0 h-1 w-0 group-hover:w-full transition-all duration-1000 bg-[#b4a183]"></div>
               </div>
             );
           })}
         </div>
       )}
+
       <NewGoalModal isOpen={isNewGoalModalOpen} onClose={() => { setIsNewGoalModalOpen(false); fetchGoals(); }} user={user} />
     </div>
   );

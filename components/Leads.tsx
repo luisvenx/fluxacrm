@@ -2,16 +2,20 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Search, 
+  ChevronDown, 
   Plus, 
+  Upload, 
+  UserPlus, 
+  Filter,
   MoreVertical,
+  ArrowUpRight,
+  Mail,
+  Building2,
+  Calendar,
   Loader2,
   Database,
-  RefreshCcw,
-  UserPlus,
-  UserCheck,
-  Zap,
-  DollarSign,
-  Filter
+  ExternalLink,
+  RefreshCcw
 } from 'lucide-react';
 import NewLeadModal from './NewLeadModal';
 import ImportLeadsModal from './ImportLeadsModal';
@@ -23,6 +27,7 @@ interface LeadsProps {
 
 const Leads: React.FC<LeadsProps> = ({ user }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedStage, setSelectedStage] = useState('Todas as Fases');
   const [isNewLeadModalOpen, setIsNewLeadModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [leads, setLeads] = useState<any[]>([]);
@@ -35,7 +40,7 @@ const Leads: React.FC<LeadsProps> = ({ user }) => {
       const { data, error } = await supabase
         .from('leads')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', user.id) // GARANTIR ISOLAMENTO
         .order('created_at', { ascending: false });
       if (error) throw error;
       setLeads(data || []);
@@ -51,157 +56,111 @@ const Leads: React.FC<LeadsProps> = ({ user }) => {
   }, [user]);
 
   const filteredLeads = useMemo(() => {
-    return leads.filter(lead => 
-      lead.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      lead.property_code?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [leads, searchTerm]);
-
-  const stats = useMemo(() => {
-    const totalValue = filteredLeads.reduce((acc, curr) => acc + (Number(curr.value) || 0), 0);
-    return {
-      count: filteredLeads.length,
-      value: totalValue
-    };
-  }, [filteredLeads]);
+    return leads.filter(lead => {
+      const matchesSearch = lead.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                           lead.company?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStage = selectedStage === 'Todas as Fases' || lead.stage?.toLowerCase() === selectedStage.toLowerCase();
+      return matchesSearch && matchesStage;
+    });
+  }, [leads, searchTerm, selectedStage]);
 
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
   };
 
-  return (
-    <div className="bg-[#fcfcfd] min-h-screen animate-in fade-in duration-700 pb-24 md:pb-20 px-6 md:px-10 pt-8 relative overflow-hidden font-['Inter']">
-      
-      <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.02]" 
-           style={{ backgroundImage: 'radial-gradient(#01223d 1px, transparent 1px)', backgroundSize: '32px 32px' }}>
-      </div>
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+  };
 
-      <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
+  return (
+    <div className="bg-[#fcfcfd] min-h-screen space-y-6 md:space-y-8 animate-in fade-in duration-700 pb-24 md:pb-10 px-4 md:px-10 pt-6 md:pt-8">
+      
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">
-            Base de <span className="text-[#01223d] not-italic">Oportunidades</span>
-          </h2>
-          <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-4">Gestão tática de leads e contatos isolados SQL</p>
+          <div className="flex items-center gap-2 mb-1">
+             <Database size={16} className="text-blue-500 shrink-0" />
+             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Leads Intelligence</span>
+          </div>
+          <h2 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">Leads Central</h2>
+          <p className="text-slate-500 font-medium text-xs md:text-sm">Exibindo {filteredLeads.length} leads da sua conta.</p>
         </div>
 
-        <div className="flex items-center gap-3 w-full md:w-auto">
-          <button 
-            onClick={() => setIsImportModalOpen(true)}
-            className="flex-1 md:flex-none bg-white border border-slate-200 text-slate-600 px-6 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm"
-          >
-            Importação
-          </button>
+        <div className="flex items-center gap-2 w-full md:w-auto">
           <button 
             onClick={() => setIsNewLeadModalOpen(true)}
-            className="flex-1 md:flex-none bg-[#01223d] text-white px-8 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-black shadow-xl transition-all flex items-center justify-center gap-2 active:scale-95 group"
+            className="flex-1 md:flex-none bg-blue-600 text-white px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all flex items-center justify-center gap-2"
           >
-            <Plus size={18} strokeWidth={3} className="text-[#b4a183] group-hover:rotate-90 transition-transform" /> Registrar
+            <Plus size={18} /> Novo
           </button>
         </div>
       </div>
 
-      <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-         <div className="bg-white border border-slate-200 p-8 rounded-xl shadow-sm flex items-center gap-6 group hover:border-[#b4a183] transition-all">
-            <div className="w-14 h-14 bg-slate-50 text-[#01223d] rounded-xl border border-slate-100 flex items-center justify-center group-hover:scale-110 transition-transform">
-               <UserPlus size={24} />
-            </div>
-            <div>
-               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Base de Contatos</p>
-               <h3 className="text-2xl font-black text-slate-900 tracking-tighter italic">{stats.count}</h3>
-            </div>
-         </div>
-         <div className="bg-white border border-slate-200 p-8 rounded-xl shadow-sm flex items-center gap-6 group hover:border-emerald-200 transition-all">
-            <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-xl border border-emerald-100 flex items-center justify-center group-hover:scale-110 transition-transform">
-               <DollarSign size={24} />
-            </div>
-            <div>
-               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Ticket Potencial</p>
-               <h3 className="text-2xl font-black text-slate-900 tracking-tighter italic">{formatCurrency(stats.value)}</h3>
-            </div>
-         </div>
-         <div className="bg-[#01223d] p-8 rounded-xl shadow-2xl flex items-center gap-6 relative overflow-hidden group">
-            <div className="w-14 h-14 bg-white/10 text-[#b4a183] rounded-xl flex items-center justify-center relative z-10 group-hover:scale-110 transition-transform shadow-inner border border-white/5">
-               <RefreshCcw size={24} />
-            </div>
-            <div className="relative z-10">
-               <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Sincronização</p>
-               <h3 className="text-xl font-black text-white tracking-tighter uppercase italic">Sincronizado</h3>
-            </div>
-            <Database size={80} className="absolute -right-4 -bottom-4 text-white/5 opacity-5" />
-         </div>
-      </div>
-
-      <div className="relative z-10 bg-white border border-slate-200 p-2 rounded-xl shadow-sm mb-10 flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="relative flex-1 group w-full ml-0 md:ml-2">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#01223d] transition-colors" size={16} />
+      <div className="flex flex-col lg:flex-row gap-4 items-center justify-between bg-white p-2 border border-slate-100 rounded-2xl md:rounded-3xl shadow-sm">
+        <div className="relative flex-1 w-full lg:max-w-md ml-0 lg:ml-2">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
           <input 
             type="text" 
-            placeholder="Pesquisar interessado ou referência..." 
+            placeholder="Buscar nos seus leads..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-slate-50 border border-slate-100 rounded-lg py-2.5 pl-11 pr-4 text-xs font-bold focus:ring-2 focus:ring-slate-100 transition-all outline-none text-slate-600 shadow-inner"
+            className="w-full bg-slate-50 border-none rounded-xl md:rounded-2xl py-2.5 pl-11 pr-4 text-sm font-medium focus:ring-2 focus:ring-blue-100 transition-all text-slate-600"
           />
-        </div>
-        <div className="flex items-center gap-2 px-2">
-           <button className="p-2.5 bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-slate-900 transition-all shadow-sm">
-             <Filter size={16} />
-           </button>
-           <button onClick={fetchLeads} className="p-2.5 bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-[#b4a183] transition-all shadow-sm">
-             <RefreshCcw size={16} className={isLoading ? 'animate-spin' : ''} />
-           </button>
         </div>
       </div>
 
-      <div className="relative z-10 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden min-h-[500px] flex flex-col">
-        <div className="overflow-x-auto no-scrollbar flex-1">
-          <table className="w-full text-left border-collapse min-w-[950px]">
+      <div className="bg-white border border-slate-100 rounded-2xl md:rounded-[2.5rem] shadow-sm overflow-hidden flex flex-col min-h-[450px]">
+        <div className="overflow-x-auto no-scrollbar">
+          <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-100">
-                <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Interessado & Identificação</th>
-                <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Fase Pipeline</th>
-                <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Potencial Comercial</th>
-                <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Origem</th>
-                <th className="px-10 py-6 w-10"></th>
+              <tr className="bg-slate-50/30">
+                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Lead & Organização</th>
+                <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Fase</th>
+                <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Valor Est.</th>
+                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Data</th>
+                <th className="px-6 py-5 w-10"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
               {isLoading ? (
-                <tr><td colSpan={5} className="py-40 text-center"><Loader2 size={32} className="animate-spin mx-auto text-[#01223d] mb-4" /><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Auditando CRM...</p></td></tr>
+                <tr>
+                  <td colSpan={5} className="py-24 text-center">
+                    <Loader2 size={32} className="animate-spin mx-auto text-blue-500 mb-4" />
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Acessando seus registros...</p>
+                  </td>
+                </tr>
               ) : filteredLeads.length === 0 ? (
-                <tr><td colSpan={5} className="py-40 text-center opacity-30"><Database size={48} className="mx-auto mb-4" /><p className="text-xs font-black text-slate-300 uppercase tracking-widest">Nenhum lead localizado</p></td></tr>
+                <tr>
+                  <td colSpan={5} className="py-32 text-center">
+                     <p className="text-xs font-bold text-slate-300 uppercase tracking-[0.2em]">Sem leads cadastrados por você</p>
+                  </td>
+                </tr>
               ) : (
                 filteredLeads.map((lead) => (
                   <tr key={lead.id} className="hover:bg-slate-50 transition-all group">
-                    <td className="px-10 py-6">
-                      <div className="flex items-center gap-5">
-                        <div className="w-12 h-12 bg-slate-900 text-[#b4a183] border border-slate-700 rounded-xl flex items-center justify-center font-black text-sm shadow-md italic group-hover:scale-110 transition-transform">
+                    <td className="px-8 py-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 bg-slate-900 text-white rounded-xl flex items-center justify-center font-black text-xs shadow-md italic">
                           {lead.name.substring(0, 1)}
                         </div>
-                        <div>
-                          <p className="text-sm font-bold text-slate-900 tracking-tight uppercase truncate max-w-[250px] italic">{lead.name}</p>
-                          <div className="flex items-center gap-2 mt-1">
-                             <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{lead.phone || 'S/ Telefone'}</span>
-                             <span className="text-slate-200">•</span>
-                             <span className="text-[9px] text-[#01223d] font-black uppercase">REF: {lead.property_code || 'N/A'}</span>
-                          </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-bold text-slate-900 tracking-tight uppercase truncate max-w-[200px]">{lead.name}</p>
+                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest truncate">{lead.company || 'Pessoa Física'}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-8 py-6 text-center">
-                      <span className="text-[9px] font-black bg-slate-50 text-[#01223d] px-4 py-1.5 rounded-full uppercase tracking-widest border border-slate-200 shadow-sm italic">
+                    <td className="px-6 py-6 text-center">
+                      <span className="text-[9px] font-black bg-blue-50 text-blue-600 px-3 py-1 rounded-full uppercase tracking-widest border border-blue-100/50">
                         {lead.stage || 'lead'}
                       </span>
                     </td>
+                    <td className="px-6 py-6 text-right">
+                      <p className="text-sm font-black text-slate-900 tracking-tighter">{formatCurrency(lead.value || 0)}</p>
+                    </td>
                     <td className="px-8 py-6 text-right">
-                      <p className="text-base font-black text-slate-900 tracking-tighter italic">{formatCurrency(lead.value || 0)}</p>
+                      <span className="text-[10px] font-black text-slate-400 uppercase">{formatDate(lead.created_at)}</span>
                     </td>
-                    <td className="px-8 py-6 text-center">
-                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-3 py-1 rounded-lg border border-slate-100">{lead.origin || 'Direto'}</span>
-                    </td>
-                    <td className="px-10 py-6 text-right">
-                       <button className="p-2.5 text-slate-200 hover:text-slate-900 hover:bg-white rounded-xl transition-all shadow-sm">
-                         <MoreVertical size={18}/>
-                       </button>
+                    <td className="px-6 py-6 text-right">
+                       <button className="p-2 text-slate-200 hover:text-slate-900"><MoreVertical size={16}/></button>
                     </td>
                   </tr>
                 ))

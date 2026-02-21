@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ArrowUpRight, 
   ArrowDownLeft, 
@@ -9,22 +9,20 @@ import {
   RefreshCcw, 
   Loader2, 
   Calendar, 
+  Filter, 
   ChevronDown, 
   Wallet,
   Receipt,
   CircleDashed,
-  Database,
-  Tv,
-  Info,
-  Zap,
-  Sparkles,
-  Clock,
+  Maximize2,
+  Edit2,
+  FileText,
   User,
-  LayoutGrid,
-  Filter,
-  Maximize2
+  Database
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import StatCard from './StatCard';
+import ChartCard from './ChartCard';
 import RecentEntries from './RecentEntries';
 import CustomersTable from './CustomersTable';
 
@@ -38,351 +36,295 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   
   const [metrics, setMetrics] = useState({
     entradas: 0,
+    countIn: 0,
     saidas: 0,
+    countOut: 0,
     lucro: 0,
     ticketMedio: 0,
     aReceber: 0,
-    aReceberRecebido: 0,
     contasPagar: 0,
+    countPagar: 0,
     mrr: 0,
     countContracts: 0,
     activeClients: 0
   });
 
-  const fetchData = async () => {
-    if (!user) return;
+  useEffect(() => {
+    if (user) fetchDashboardData();
+  }, [user]);
+
+  async function fetchDashboardData() {
     setIsLoading(true);
     try {
-      const [txsRes, contractsRes, customersRes] = await Promise.all([
-        supabase.from('transactions').select('*').eq('user_id', user.id),
-        supabase.from('contracts').select('amount').eq('status', 'ACTIVE').eq('user_id', user.id),
-        supabase.from('customers').select('*', { count: 'exact', head: true }).eq('user_id', user.id)
-      ]);
+      const { data: txs } = await supabase.from('transactions').select('*').eq('user_id', user.id);
+      const { data: contracts } = await supabase.from('contracts').select('amount').eq('status', 'ACTIVE').eq('user_id', user.id);
+      const { count: clientCount } = await supabase.from('customers').select('*', { count: 'exact', head: true }).eq('user_id', user.id);
 
-      if (txsRes.data) {
-        const stats = txsRes.data.reduce((acc, curr) => {
+      if (txs) {
+        const stats = txs.reduce((acc, curr) => {
           const val = Number(curr.amount);
           if (curr.type === 'IN') {
-            if (curr.status === 'PAID') acc.entradas += val;
-            else acc.aReceber += val;
+            if (curr.status === 'PAID') {
+              acc.entradas += val;
+              acc.countIn += 1;
+            } else {
+              acc.aReceber += val;
+            }
           } else {
-            if (curr.status === 'PAID') acc.saidas += val;
-            else acc.contasPagar += val;
+            if (curr.status === 'PAID') {
+              acc.saidas += val;
+              acc.countOut += 1;
+            } else {
+              acc.contasPagar += val;
+              acc.countPagar += 1;
+            }
           }
           return acc;
-        }, { entradas: 0, saidas: 0, aReceber: 0, aReceberRecebido: 0, contasPagar: 0 });
+        }, { entradas: 0, countIn: 0, saidas: 0, countOut: 0, aReceber: 0, contasPagar: 0, countPagar: 0 });
 
-        const totalMRR = contractsRes.data?.reduce((acc, c) => acc + Number(c.amount), 0) || 0;
+        const totalMRR = contracts?.reduce((acc, c) => acc + Number(c.amount), 0) || 0;
 
         setMetrics({
           ...stats,
           lucro: stats.entradas - stats.saidas,
-          ticketMedio: stats.entradas > 0 ? stats.entradas / (customersRes.count || 1) : 0,
+          ticketMedio: stats.countIn > 0 ? stats.entradas / stats.countIn : 0,
           mrr: totalMRR,
-          countContracts: contractsRes.data?.length || 0,
-          activeClients: customersRes.count || 0
+          countContracts: contracts?.length || 0,
+          activeClients: clientCount || 0
         });
       }
     } catch (err) {
-      console.error('Erro dashboard:', err);
+      console.error('Erro ao carregar dados:', err);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, [user]);
+  }
 
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex-1 flex flex-col items-center justify-center bg-[#fcfcfd] min-h-[80vh]">
-         <Loader2 className="animate-spin text-[#01223d] mb-4" size={40} />
-         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center px-4">Sincronizando Dashboards...</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="bg-[#fcfcfd] min-h-screen pb-24 md:pb-10 animate-in fade-in duration-700 font-['Inter']">
+    <div className="bg-[#fcfcfd] min-h-screen animate-in fade-in duration-700 pb-24 md:pb-10">
       
-      <div className="px-6 md:px-8 pt-8 flex flex-col gap-6">
-        <div className="flex justify-between items-start">
-           <div>
-              <h1 className="text-xl font-bold text-slate-900 tracking-tight uppercase italic">Monitoramento <span className="text-[#01223d] not-italic">Financeiro</span></h1>
-              <p className="text-xs text-slate-400 font-medium uppercase tracking-widest">Inteligência de Dados v2.9</p>
-           </div>
-           <button className="flex items-center gap-2 px-4 py-1.5 bg-white border border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
-             <Tv size={14} className="text-[#b4a183]" /> Modo TV
-           </button>
+      {/* Header Responsivo */}
+      <div className="px-4 md:px-8 pt-6 pb-2 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-xl md:text-[22px] font-bold text-[#111827] tracking-tight">Dashboard Financeiro</h1>
+          <p className="text-[12px] text-slate-400 font-medium">Visão geral das suas finanças</p>
         </div>
-
-        {/* Filter Bar Row */}
-        <div className="flex flex-col lg:flex-row justify-between items-center bg-white border border-slate-200 rounded-xl p-2 shadow-sm gap-4">
-           <div className="flex items-center gap-2 w-full lg:w-auto overflow-x-auto no-scrollbar">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 text-slate-400 border-r border-slate-100 mr-2">
-                 <Calendar size={14} />
-                 <span className="text-[10px] font-bold uppercase tracking-widest">Período:</span>
-              </div>
-              {['Hoje', 'Esta Semana', 'Este Mês', 'Este Ano'].map(p => (
-                <button 
-                  key={p} 
-                  onClick={() => setActivePeriod(p)}
-                  className={`px-4 py-1.5 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all ${activePeriod === p ? 'bg-[#01223d] text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
-                >
-                  {p}
-                </button>
-              ))}
-              <div className="relative ml-2">
-                 <select className="bg-slate-50 border border-slate-100 rounded-lg pl-3 pr-8 py-1.5 text-[11px] font-bold text-slate-600 appearance-none outline-none">
-                    <option>Realizado</option>
-                    <option>Previsto</option>
-                 </select>
-                 <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400" />
-              </div>
-              <button className="flex items-center gap-2 px-3 py-1.5 text-slate-500 text-[11px] font-bold hover:bg-slate-50 rounded-lg ml-2">
-                 <Filter size={14} /> Avançado <ChevronDown size={12} />
-              </button>
-           </div>
-
-           <div className="flex items-center gap-6 px-4">
-              <div className="flex flex-col items-end leading-tight">
-                 <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Visualizando:</span>
-                 <span className="text-[11px] font-bold text-slate-700">{activePeriod}</span>
-              </div>
-              <div className="flex flex-col items-end leading-tight">
-                 <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Modo:</span>
-                 <span className="text-[11px] font-bold text-slate-700">Realizado</span>
-              </div>
-              <div className="flex flex-col items-end leading-tight">
-                 <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Meta:</span>
-                 <span className="text-[11px] font-bold text-slate-700">Mensal</span>
-              </div>
-           </div>
-        </div>
-
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">Métricas de Performance</p>
-
-        {/* ROW 1: 4 Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-           <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col justify-between group hover:border-[#b4a183] transition-all">
-              <div className="flex justify-between items-start mb-4">
-                 <div>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Entradas</p>
-                    <h3 className="text-2xl font-black text-slate-900 tracking-tight mt-2">{formatCurrency(metrics.entradas)}</h3>
-                    <p className="text-[10px] text-slate-400 mt-1 uppercase font-bold">SQL Realtime</p>
-                 </div>
-                 <div className="p-2 bg-slate-50 text-[#01223d] rounded-lg border border-slate-100 shadow-sm">
-                    <TrendingUp size={16} />
-                 </div>
-              </div>
-           </div>
-
-           <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col justify-between group hover:border-rose-200 transition-all">
-              <div className="flex justify-between items-start mb-4">
-                 <div>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Saídas</p>
-                    <h3 className="text-2xl font-black text-slate-900 tracking-tight mt-2">{formatCurrency(metrics.saidas)}</h3>
-                    <p className="text-[10px] text-slate-400 mt-1 uppercase font-bold">Despesa Operacional</p>
-                 </div>
-                 <div className="p-2 bg-rose-50 text-rose-500 rounded-lg shadow-sm">
-                    <ArrowUpRight size={16} />
-                 </div>
-              </div>
-           </div>
-
-           <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col justify-between group">
-              <div className="flex justify-between items-start mb-4">
-                 <div>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lucro Líquido</p>
-                    <h3 className="text-2xl font-black text-slate-900 tracking-tight mt-2">{formatCurrency(metrics.lucro)}</h3>
-                    <div className="flex items-center gap-1 mt-1">
-                       <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">% LL —</span>
-                       <Info size={12} className="text-slate-300" />
-                    </div>
-                 </div>
-                 <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg opacity-50 shadow-sm">
-                    <TrendingUp size={16} />
-                 </div>
-              </div>
-           </div>
-
-           <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col justify-between group">
-              <div className="flex justify-between items-start mb-4">
-                 <div>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ticket Médio</p>
-                    <h3 className="text-2xl font-black text-slate-900 tracking-tight mt-2">{formatCurrency(metrics.ticketMedio)}</h3>
-                    <p className="text-[10px] text-slate-400 mt-1 uppercase font-bold">{metrics.activeClients} Clientes</p>
-                 </div>
-                 <div className="p-2 bg-slate-50 text-[#b4a183] rounded-lg border border-slate-100 shadow-sm">
-                    <Users size={16} />
-                 </div>
-              </div>
-           </div>
-        </div>
-
-        {/* ROW 2: Intermediate KPI Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-           <div className="lg:col-span-3 bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col items-center justify-center min-h-[280px] relative">
-              <div className="absolute top-4 left-4">
-                 <div className="relative group">
-                    <select className="bg-slate-50 border border-slate-100 rounded-lg pl-3 pr-6 py-1 text-[10px] font-bold text-slate-500 appearance-none outline-none">
-                       <option>Mensal</option>
-                    </select>
-                    <ChevronDown size={10} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                 </div>
-              </div>
-              <div className="absolute top-4 right-4 flex gap-2">
-                 <button className="text-slate-300 hover:text-[#01223d]"><Zap size={14}/></button>
-                 <button className="text-slate-300 hover:text-[#01223d]"><Maximize2 size={14}/></button>
-              </div>
-
-              <div className="relative flex flex-col items-center gap-6 mt-4">
-                 <div className="relative w-24 h-24">
-                    <CircleDashed size={96} strokeWidth={1.5} className="text-slate-100 animate-spin-slow" />
-                    <Target size={32} className="absolute inset-0 m-auto text-slate-300" />
-                 </div>
-                 <div className="text-center">
-                    <p className="text-xs text-slate-400 font-medium uppercase">Meta não definida</p>
-                    <button className="mt-4 px-6 py-2 border border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 flex items-center gap-2 hover:bg-[#01223d] hover:text-white transition-all shadow-sm">
-                       <Target size={14} className="text-[#b4a183]" /> Definir Meta
-                    </button>
-                 </div>
-              </div>
-           </div>
-
-           <div className="lg:col-span-3 bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col justify-between">
-              <div>
-                 <div className="flex items-center gap-2 mb-4">
-                    <Wallet size={16} className="text-[#b4a183]" />
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">A Receber</p>
-                 </div>
-                 <h3 className="text-2xl font-black text-slate-900 tracking-tight">{formatCurrency(metrics.aReceber)}</h3>
-                 <p className="text-[10px] text-slate-400 font-medium mt-1 uppercase tracking-tight">Vencimentos Futuros</p>
-                 
-                 <div className="mt-6 space-y-2">
-                    <div className="flex justify-between text-[10px] font-bold uppercase tracking-tight">
-                       <span className="text-slate-400">Recebido</span>
-                       <span className="text-slate-400">Pendente</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-slate-50 rounded-full overflow-hidden">
-                       <div className="h-full bg-[#b4a183]/40" style={{ width: '0%' }}></div>
-                    </div>
-                    <div className="flex justify-between text-[11px] font-black text-slate-800 italic">
-                       <span>{formatCurrency(0)}</span>
-                       <span>{formatCurrency(metrics.aReceber)}</span>
-                    </div>
-                 </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 pt-6 border-t border-slate-50 mt-auto">
-                 <div className="bg-slate-50/50 p-3 rounded-lg border border-slate-100">
-                    <div className="flex items-center gap-2 text-slate-400 mb-1">
-                       <Receipt size={12} />
-                       <span className="text-[9px] font-black uppercase">Faturas</span>
-                    </div>
-                    <p className="text-sm font-black text-[#01223d]">0</p>
-                 </div>
-                 <div className="bg-slate-50/50 p-3 rounded-lg border border-slate-100">
-                    <div className="flex items-center gap-2 text-slate-400 mb-1">
-                       <Users size={12} />
-                       <span className="text-[9px] font-black uppercase">Leads</span>
-                    </div>
-                    <p className="text-sm font-black text-[#01223d]">0</p>
-                 </div>
-              </div>
-           </div>
-
-           <div className="lg:col-span-3 bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col">
-              <div className="flex items-center gap-2 mb-4">
-                 <Receipt size={16} className="text-rose-500" />
-                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Contas a Pagar</p>
-              </div>
-              <h3 className="text-2xl font-black text-slate-900 tracking-tight">{formatCurrency(metrics.contasPagar)}</h3>
-              <p className="text-[10px] text-slate-400 font-medium mt-1 uppercase tracking-tight">Obrigações Exigíveis</p>
-              
-              <div className="mt-8 flex-1 border-t border-slate-50 pt-6">
-                 <div className="h-2 w-full bg-slate-50 rounded-full" />
-              </div>
-           </div>
-
-           <div className="lg:col-span-3 bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col">
-              <div className="flex justify-between items-start mb-4">
-                 <div className="flex items-center gap-2">
-                    <RefreshCcw size={16} className="text-[#01223d]" />
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">MRR</p>
-                 </div>
-                 <span className="bg-slate-900 text-[#b4a183] text-[9px] font-black px-2 py-0.5 rounded uppercase">{metrics.countContracts} Ativos</span>
-              </div>
-              <h3 className="text-2xl font-black text-slate-900 tracking-tight">{formatCurrency(metrics.mrr)}</h3>
-              <p className="text-[10px] text-slate-400 font-medium mt-1 uppercase tracking-tight">Recorrência Mensal</p>
-              
-              <div className="mt-auto py-8 text-center opacity-30">
-                 <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest italic">Nenhum contrato recorrente</p>
-              </div>
-           </div>
-        </div>
-
-        {/* ROW 3: Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-           <div className="bg-white border border-slate-200 rounded-xl p-8 shadow-sm">
-              <div className="flex justify-between items-center mb-10">
-                 <h3 className="text-slate-900 font-bold text-[14px] uppercase tracking-tight italic">Fluxo de <span className="text-[#01223d] not-italic">Caixa</span></h3>
-              </div>
-              <div className="h-[250px] w-full relative">
-                 <div className="absolute inset-0 flex flex-col justify-between">
-                   {[0,1,2,3,4].map(i => <div key={i} className="w-full border-t border-slate-50 border-dashed"></div>)}
-                 </div>
-                 <div className="absolute bottom-0 left-0 right-0 flex justify-between px-2 text-[9px] font-bold text-slate-300">
-                    <span>02/02</span><span>08/02</span><span>14/02</span><span>20/02</span><span>28/02</span>
-                 </div>
-                 <div className="absolute bottom-1/4 left-0 right-0 h-px bg-[#b4a183] opacity-30 shadow-[0_0_10px_#b4a183]"></div>
-              </div>
-              <div className="flex justify-center gap-4 mt-8">
-                 <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-tighter"><div className="w-2 h-2 rounded-full bg-emerald-400"></div> Entradas</div>
-                 <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-tighter"><div className="w-2 h-2 rounded-full bg-rose-400"></div> Saídas</div>
-              </div>
-           </div>
-
-           <div className="bg-white border border-slate-200 rounded-xl p-8 shadow-sm">
-              <div className="flex justify-between items-center mb-10">
-                 <h3 className="text-slate-900 font-bold text-[14px] uppercase tracking-tight italic">Evolução do <span className="text-[#01223d] not-italic">Patrimônio</span></h3>
-              </div>
-              <div className="h-[250px] w-full relative">
-                 <div className="absolute inset-0 flex flex-col justify-between">
-                   {[0,1,2,3,4].map(i => <div key={i} className="w-full border-t border-slate-50 border-dashed"></div>)}
-                 </div>
-                 <div className="absolute bottom-0 left-0 right-0 flex justify-between px-2 text-[9px] font-bold text-slate-300">
-                    <span>02/02</span><span>08/02</span><span>14/02</span><span>20/02</span><span>28/02</span>
-                 </div>
-              </div>
-           </div>
-        </div>
-
-        {/* ROW 4: Tables */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-20">
-           <div className="lg:col-span-7">
-              <RecentEntries />
-           </div>
-           <div className="lg:col-span-5">
-              <CustomersTable />
-           </div>
+        <div className="flex items-center gap-3">
+          <button onClick={fetchDashboardData} className="p-2 border-2 border-slate-200 rounded-lg text-slate-400 hover:text-blue-600 hover:border-blue-500 transition-all shadow-sm">
+            <RefreshCcw size={16} className={isLoading ? 'animate-spin' : ''} />
+          </button>
         </div>
       </div>
 
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes spin-slow {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        .animate-spin-slow {
-          animation: spin-slow 15s linear infinite;
-        }
-      `}} />
+      {/* Filter Bar */}
+      <div className="px-4 md:px-8 mb-6 mt-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-2 mr-2">
+              <Calendar size={14} className="text-slate-400" />
+              <span className="text-[11px] font-medium text-slate-400">Período:</span>
+            </div>
+            {['Hoje', 'Esta Semana', 'Este Mês', 'Este Ano'].map(p => (
+              <button 
+                key={p} 
+                onClick={() => setActivePeriod(p)}
+                className={`px-3.5 py-1.5 rounded-lg text-[11px] font-bold transition-all whitespace-nowrap border-2 ${activePeriod === p ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-white border-slate-100 text-slate-500 hover:bg-slate-50 hover:border-slate-200'}`}
+              >
+                {p}
+              </button>
+            ))}
+            
+            <div className="h-6 w-px bg-slate-200 mx-2"></div>
+
+            <button className="flex items-center gap-2 px-3 py-1.5 bg-white border-2 border-slate-100 rounded-lg text-[11px] font-bold text-slate-500 hover:bg-slate-50 hover:border-slate-200">
+               Realizado <ChevronDown size={12} />
+            </button>
+
+            <button className="flex items-center gap-2 px-3 py-1.5 bg-white border-2 border-slate-100 rounded-lg text-[11px] font-bold text-slate-500 hover:bg-slate-50 hover:border-slate-200">
+               <Filter size={12} /> Avançado <ChevronDown size={12} />
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2 text-[10px] text-slate-400 font-medium">
+             <span>Visualizando: <strong className="text-slate-600">{activePeriod}</strong></span>
+             <span className="mx-1">|</span>
+             <span>Modo: <strong className="text-slate-600">Realizado</strong></span>
+             <span className="mx-1">|</span>
+             <span>Meta: <strong className="text-slate-600">Mensal</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <div className="px-4 md:px-8">
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Indicadores Principais</p>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="px-4 md:px-8 space-y-6">
+        
+        {/* Row 1: Key Stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+          <StatCard 
+            title="Entradas" 
+            value={formatCurrency(metrics.entradas)} 
+            subtitle={`${metrics.countIn} transações`}
+            icon={<ArrowDownLeft />} 
+            color="emerald" 
+          />
+          <StatCard 
+            title="Saídas" 
+            value={formatCurrency(metrics.saidas)} 
+            subtitle={`${metrics.countOut} transações`}
+            icon={<ArrowUpRight />} 
+            color="red" 
+          />
+          <StatCard 
+            title="Lucro Líquido" 
+            value={formatCurrency(metrics.lucro)} 
+            subtitle="% do LL — "
+            icon={<TrendingUp />} 
+            color="blue" 
+            showInfo
+          />
+          <StatCard 
+            title="Ticket Médio" 
+            value={formatCurrency(metrics.ticketMedio)} 
+            subtitle={`${metrics.activeClients} clientes ativos`}
+            icon={<Users />} 
+            color="blue" 
+          />
+        </div>
+
+        {/* Row 2: Secondary Stats Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-5">
+          {/* Card Meta */}
+          <div className="bg-white border-2 border-blue-100 rounded-xl p-6 shadow-sm flex flex-col items-center justify-center text-center group hover:border-blue-500 transition-all relative overflow-hidden">
+            <div className="absolute top-4 left-4">
+              <button className="flex items-center gap-1.5 px-2 py-1 bg-slate-50 border border-slate-100 rounded-md text-[9px] font-bold text-slate-400">
+                Mensal <ChevronDown size={10} />
+              </button>
+            </div>
+            <div className="absolute top-4 right-4 flex gap-2">
+              <Edit2 size={12} className="text-slate-300 cursor-pointer hover:text-slate-600" />
+              <Maximize2 size={12} className="text-slate-300 cursor-pointer hover:text-slate-600" />
+            </div>
+
+            <div className="relative mb-4 mt-4">
+              <CircleDashed size={60} strokeWidth={1} className="text-blue-50 animate-[spin_20s_linear_infinite]" />
+              <Target size={24} className="absolute inset-0 m-auto text-blue-200 group-hover:text-blue-500 transition-colors" />
+            </div>
+            <h4 className="text-[12px] font-semibold text-slate-400 mb-4 uppercase tracking-widest">Meta de Fluxo</h4>
+            <button className="flex items-center gap-2 px-4 py-1.5 border border-blue-200 text-blue-600 rounded-lg text-[10px] font-bold hover:bg-blue-50 transition-all shadow-sm">
+              <Target size={12} /> Definir Meta
+            </button>
+          </div>
+
+          {/* Card A Receber */}
+          <div className="bg-white border-2 border-amber-100 rounded-xl p-6 shadow-sm group hover:border-amber-500 transition-all flex flex-col justify-between overflow-hidden">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="p-2 bg-amber-50 rounded-lg border border-amber-200"><Wallet size={16} className="text-amber-500" /></div>
+              <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Expectativa Receita</h4>
+            </div>
+            <div>
+              <h3 className="text-[22px] font-black text-slate-900 tracking-tight">{formatCurrency(metrics.aReceber)}</h3>
+              <p className="text-[10px] text-slate-400 font-medium mt-1">Total em aberto via Ledger</p>
+            </div>
+            <div className="mt-6 space-y-4">
+              <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden flex border border-slate-50">
+                 <div className="h-full bg-amber-500/20 w-[5%] shadow-sm" />
+              </div>
+              <div className="grid grid-cols-2 gap-2 pt-2">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-slate-50 rounded-lg text-slate-400"><FileText size={12} /></div>
+                  <div className="flex flex-col"><span className="text-[10px] text-slate-400">Tickets</span><span className="text-[12px] font-bold text-slate-800">0</span></div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-slate-50 rounded-lg text-slate-400"><User size={12} /></div>
+                  <div className="flex flex-col"><span className="text-[10px] text-slate-400">Clientes</span><span className="text-[12px] font-bold text-slate-800">0</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Card Contas a Pagar */}
+          <div className="bg-white border-2 border-rose-100 rounded-xl p-6 shadow-sm group hover:border-rose-500 transition-all flex flex-col justify-between overflow-hidden">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="p-2 bg-rose-50 rounded-lg border border-rose-200"><Receipt size={16} className="text-rose-500" /></div>
+              <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Contas a Pagar</h4>
+            </div>
+            <div>
+              <h3 className="text-[22px] font-black text-slate-900 tracking-tight">{formatCurrency(metrics.contasPagar)}</h3>
+              <p className="text-[10px] text-rose-400 font-bold uppercase tracking-widest mt-1">{metrics.countPagar} débitos pendentes</p>
+            </div>
+            <div className="mt-8 pt-8 border-t border-slate-50 flex items-center justify-center opacity-10 group-hover:opacity-30 transition-opacity">
+               <Receipt size={40} className="text-rose-600" />
+            </div>
+          </div>
+
+          {/* Card MRR */}
+          <div className="bg-white border-2 border-blue-100 rounded-xl p-6 shadow-sm group hover:border-blue-500 transition-all flex flex-col justify-between overflow-hidden">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-blue-50 rounded-lg border border-blue-200"><RefreshCcw size={16} className="text-blue-500" /></div>
+                <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">MRR Contratual</h4>
+              </div>
+              <span className="text-[9px] font-black bg-blue-600 text-white px-2 py-0.5 rounded-lg border border-blue-700 shadow-sm">{metrics.countContracts} Ativos</span>
+            </div>
+            <div>
+              <h3 className="text-[22px] font-black text-slate-900 tracking-tight">{formatCurrency(metrics.mrr)}</h3>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Recorrência Bruta</p>
+            </div>
+            <div className="flex-1 flex flex-col items-center justify-center py-6 opacity-30 group-hover:opacity-100 transition-all">
+               <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] group-hover:text-blue-400">Matriz de Dados SQL</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Row 3: Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-5">
+          <div className="border-2 border-slate-100 rounded-2xl overflow-hidden bg-white p-1">
+            <ChartCard 
+              title="Entradas x Saídas (Auditado)" 
+              xAxisLabels={['01/02', '02/02', '04/02', '06/02', '08/02', '10/02', '12/02', '14/02', '16/02', '18/02', '20/02', '22/02', '24/02', '26/02', '28/02']}
+              legend={[
+                { label: 'Entradas', color: '#2563eb' },
+                { label: 'Saídas', color: '#f43f5e' }
+              ]}
+            />
+          </div>
+          <div className="border-2 border-slate-100 rounded-2xl overflow-hidden bg-white p-1">
+            <ChartCard 
+              title="Variação Lucro Líquido" 
+              xAxisLabels={['01/02', '02/02', '04/02', '06/02', '08/02', '10/02', '12/02', '14/02', '16/02', '18/02', '20/02', '22/02', '24/02', '26/02', '28/02']}
+            />
+          </div>
+        </div>
+
+        {/* Row 4: Tables */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 pb-10">
+          <div className="lg:col-span-7 border-2 border-slate-100 rounded-2xl bg-white overflow-hidden p-1">
+            <RecentEntries />
+          </div>
+          <div className="lg:col-span-5 border-2 border-slate-100 rounded-2xl bg-white overflow-hidden p-1">
+            <CustomersTable />
+          </div>
+        </div>
+
+      </div>
+
+      {isLoading && (
+        <div className="fixed bottom-24 md:bottom-12 right-4 md:right-12 bg-slate-900 text-white px-10 py-5 rounded-[2.5rem] shadow-2xl flex items-center gap-5 z-50 border border-white/10 animate-bounce">
+          <Loader2 size={24} className="animate-spin text-blue-400" />
+          <div className="flex flex-col">
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] leading-none mb-1 text-white">Engine Sincronizada</span>
+            <span className="text-xs font-bold text-slate-400 tracking-tight">Conciliando matriz de dados...</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

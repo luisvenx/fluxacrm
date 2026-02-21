@@ -39,8 +39,7 @@ import {
   Home,
   MapPin,
   HandCoins,
-  Eye,
-  ClipboardCheck
+  Eye
 } from 'lucide-react';
 import { NavItem } from '../types';
 import { supabase } from '../lib/supabase';
@@ -95,7 +94,6 @@ const Sidebar: React.FC<SidebarProps> = ({
       subItems: [
         { id: 'Imóveis', label: 'Gestão de Imóveis', icon: <MapPin size={16} /> },
         { id: 'Visitas', label: 'Controle de Visitas', icon: <Eye size={16} /> },
-        { id: 'Vistorias', label: 'Vistorias Técnicas', icon: <ClipboardCheck size={16} /> },
         { id: 'Repasses', label: 'Gestão de Repasses', icon: <HandCoins size={16} /> },
       ]
     },
@@ -163,25 +161,26 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <aside 
-      className={`fixed top-0 left-0 bottom-0 z-[100] bg-white border-r border-slate-100 transition-all duration-500 ease-in-out transform flex flex-col ${
+      className={`fixed top-0 left-0 bottom-0 z-50 bg-white border-r border-slate-100 transition-all duration-500 ease-in-out transform flex flex-col ${
         isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       } ${isCollapsed ? 'w-[280px] lg:w-20' : 'w-[280px] lg:w-72'}`}
     >
+      {/* Header Fixo do Sidebar */}
       <div className={`p-6 flex items-center justify-between bg-white shrink-0 ${isCollapsed ? 'lg:flex-col lg:gap-6' : 'pb-8'}`}>
         <div 
           className="flex items-center group cursor-pointer overflow-hidden max-w-full"
           onClick={() => isCollapsed ? toggleCollapse() : onNavigate('Dashboard')}
         >
           <img 
-            src="https://lh3.googleusercontent.com/d/1etimAcTlGnq4yMgwIaChmuykWjsktTKO" 
+            src="https://lh3.googleusercontent.com/d/1Cga62qbLuN6sEj_qXQB-8IYIHHN0MVdD" 
             alt="Fluxa Logo" 
-            className={`transition-all duration-500 object-contain ${isCollapsed ? 'h-7 lg:h-7 lg:w-7' : 'h-9'}`}
+            className={`transition-all duration-500 object-contain ${isCollapsed ? 'h-7 lg:h-7 lg:w-7' : 'h-8'}`}
           />
         </div>
         
         <button 
           onClick={toggleCollapse} 
-          className="hidden lg:flex p-2 hover:bg-slate-50 rounded-xl transition-all text-slate-300 hover:text-[#01223d]"
+          className="hidden lg:flex p-2 hover:bg-slate-50 rounded-xl transition-all text-slate-300 hover:text-slate-900"
           title={isCollapsed ? "Expandir" : "Recolher"}
         >
           {isCollapsed ? <PanelLeft size={20} /> : <PanelLeftClose size={20} />}
@@ -189,21 +188,23 @@ const Sidebar: React.FC<SidebarProps> = ({
 
         <button 
           onClick={toggleSidebar} 
-          className="lg:hidden p-2 hover:bg-slate-50 rounded-xl transition-all text-slate-400 hover:text-[#01223d]"
+          className="lg:hidden p-2 hover:bg-slate-50 rounded-xl transition-all text-slate-300 hover:text-slate-900"
         >
           <X size={20} />
         </button>
       </div>
 
+      {/* Menu Rolável */}
       <div className={`flex-1 overflow-y-auto no-scrollbar pb-10 ${isCollapsed ? 'px-6 lg:px-2 space-y-8 lg:space-y-6' : 'px-6 space-y-8'}`}>
         {navItems.map((item) => (
           <div key={item.id} className="space-y-3">
+            {/* Categoria/Divisor */}
             <div className={`px-3 flex items-center justify-between ${isCollapsed ? 'lg:hidden' : ''}`}>
               <span className="text-[10px] font-medium text-slate-300 uppercase tracking-[0.25em]">{item.label}</span>
               {item.subItems && (
                 <button 
                   onClick={() => toggleMenu(item.id)}
-                  className="text-slate-300 hover:text-[#01223d] transition-colors"
+                  className="text-slate-300 hover:text-slate-900 transition-colors"
                 >
                   {expandedMenus.includes(item.id) ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
                 </button>
@@ -219,9 +220,9 @@ const Sidebar: React.FC<SidebarProps> = ({
                   title={item.label}
                   className={`w-full flex items-center rounded-2xl transition-all duration-300 group ${
                     isCollapsed ? 'justify-center lg:justify-center p-3.5' : 'gap-3.5 p-3.5'
-                  } ${activeView === item.id ? 'bg-[#01223d] text-white shadow-lg' : 'text-slate-500 hover:text-[#01223d] hover:bg-slate-50'}`}
+                  } ${activeView === item.id ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}
                 >
-                  <span className={`${activeView === item.id ? 'text-[#b4a183]' : 'text-slate-300 group-hover:text-[#01223d]'}`}>{item.icon}</span>
+                  <span className={`${activeView === item.id ? 'text-blue-400' : 'text-slate-300 group-hover:text-slate-900'}`}>{item.icon}</span>
                   <span className={`flex-1 text-left text-xs font-medium tracking-tight ${isCollapsed ? 'lg:hidden' : ''}`}>{item.label}</span>
                 </button>
               ) : (
@@ -231,9 +232,9 @@ const Sidebar: React.FC<SidebarProps> = ({
                     title={item.label}
                     className={`w-full flex items-center rounded-2xl transition-all group ${
                       isCollapsed ? 'justify-center lg:justify-center p-3.5' : 'gap-3.5 p-3.5'
-                    } ${expandedMenus.includes(item.id) ? 'bg-slate-50/50' : 'text-slate-500 hover:text-[#01223d] hover:bg-slate-50'}`}
+                    } ${expandedMenus.includes(item.id) ? 'bg-slate-50/50' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}
                   >
-                    <span className="text-slate-300 group-hover:text-[#01223d]">{item.icon}</span>
+                    <span className="text-slate-300 group-hover:text-slate-900">{item.icon}</span>
                     <span className={`flex-1 text-left text-xs font-medium tracking-tight ${isCollapsed ? 'lg:hidden' : ''}`}>{item.label}</span>
                     <ChevronDown size={12} className={`text-slate-300 transition-transform ${isCollapsed ? 'lg:hidden' : ''} ${expandedMenus.includes(item.id) ? '' : '-rotate-90'}`} />
                   </button>
@@ -245,12 +246,12 @@ const Sidebar: React.FC<SidebarProps> = ({
                           key={sub.id} 
                           onClick={() => onNavigate(sub.id)}
                           className={`w-full flex items-center gap-4 p-3 rounded-xl text-[12px] font-medium transition-all group ${
-                            activeView === sub.id ? 'bg-[#01223d] text-white shadow-md' : 'text-slate-400 hover:text-[#01223d] hover:bg-slate-50'
+                            activeView === sub.id ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-900 hover:bg-slate-50'
                           }`}
                         >
-                          <span className={`transition-colors ${activeView === sub.id ? 'text-[#b4a183]' : 'text-slate-300 group-hover:text-[#01223d]'}`}>{sub.icon}</span>
+                          <span className={`transition-colors ${activeView === sub.id ? 'text-white' : 'text-slate-300 group-hover:text-slate-900'}`}>{sub.icon}</span>
                           <span className="tracking-tight">{sub.label}</span>
-                          {activeView === sub.id && <div className="ml-auto w-1 h-1 bg-[#b4a183] rounded-full"></div>}
+                          {activeView === sub.id && <div className="ml-auto w-1 h-1 bg-white rounded-full"></div>}
                         </button>
                       ))}
                     </div>
@@ -262,11 +263,12 @@ const Sidebar: React.FC<SidebarProps> = ({
         ))}
       </div>
 
+      {/* Rodapé do Sidebar */}
       <div className={`p-6 border-t border-slate-50 bg-white shrink-0 ${isCollapsed ? 'lg:flex lg:flex-col lg:items-center lg:gap-6' : ''}`}>
         <div className={`bg-slate-50 p-4 rounded-2xl mb-6 flex items-center gap-4 border border-slate-100 group cursor-pointer hover:bg-white hover:shadow-md transition-all ${isCollapsed ? 'lg:hidden' : ''}`}>
-          <div className="w-10 h-10 rounded-xl bg-[#01223d] flex items-center justify-center text-white text-xs font-medium shadow-sm italic">{userInitial}</div>
+          <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white text-xs font-medium shadow-sm italic">{userInitial}</div>
           <div className="flex flex-col min-w-0">
-            <span className="text-[9px] text-[#b4a183] font-black uppercase tracking-widest leading-none mb-1">Conta Ativa</span>
+            <span className="text-[9px] text-blue-600 font-medium uppercase tracking-widest leading-none mb-1">Conta Ativa</span>
             <span className="text-xs text-slate-900 font-medium truncate">{userEmail || 'Usuário'}</span>
           </div>
         </div>
@@ -274,7 +276,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         <div className={`grid grid-cols-2 gap-2 ${isCollapsed ? 'lg:hidden' : ''}`}>
           <button 
             onClick={() => onNavigate('Configurações')} 
-            className={`flex flex-col items-center justify-center gap-2 p-3.5 rounded-2xl transition-all border ${activeView === 'Configurações' ? 'bg-slate-50 border-slate-200 text-[#01223d]' : 'bg-white border-slate-100 text-slate-400 hover:text-[#01223d] shadow-sm'}`}
+            className={`flex flex-col items-center justify-center gap-2 p-3.5 rounded-2xl transition-all border ${activeView === 'Configurações' ? 'bg-blue-50 border-blue-100 text-blue-600' : 'bg-white border-slate-100 text-slate-400 hover:text-slate-900 shadow-sm'}`}
           >
             <Settings size={18} />
             <span className="text-[10px] font-medium uppercase tracking-widest">Ajustes</span>
@@ -289,11 +291,12 @@ const Sidebar: React.FC<SidebarProps> = ({
           </button>
         </div>
 
+        {/* Mini rodapé visível apenas quando colapsado no desktop */}
         <div className={`hidden ${isCollapsed ? 'lg:flex lg:flex-col lg:items-center lg:gap-5' : ''}`}>
             <button 
               onClick={() => onNavigate('Configurações')}
               title="Configurações"
-              className={`p-3 rounded-2xl transition-all ${activeView === 'Configurações' ? 'bg-slate-50 text-[#01223d] shadow-sm' : 'text-slate-300 hover:text-[#01223d] hover:bg-slate-50'}`}
+              className={`p-3 rounded-2xl transition-all ${activeView === 'Configurações' ? 'bg-blue-50 text-blue-600 shadow-sm' : 'text-slate-300 hover:text-slate-900 hover:bg-slate-50'}`}
             >
               <Settings size={20} />
             </button>
@@ -304,7 +307,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             >
               <LogOut size={20} />
             </button>
-            <div className="w-9 h-9 rounded-xl bg-[#01223d] flex items-center justify-center text-white text-[10px] font-medium shadow-sm mt-2 italic">{userInitial}</div>
+            <div className="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white text-[10px] font-medium shadow-sm mt-2 italic">{userInitial}</div>
         </div>
       </div>
     </aside>

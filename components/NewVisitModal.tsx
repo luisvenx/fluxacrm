@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Eye, Calendar, Clock, User, Home, ChevronDown, Loader2, Save, Phone, UserCheck } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { googleCalendar } from '../lib/googleCalendar';
 
 interface NewVisitModalProps {
   isOpen: boolean;
@@ -13,7 +12,6 @@ interface NewVisitModalProps {
 const NewVisitModal: React.FC<NewVisitModalProps> = ({ isOpen, onClose, user }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [properties, setProperties] = useState<any[]>([]);
-  const [syncGoogle, setSyncGoogle] = useState(googleCalendar.isConnected());
   const [formData, setFormData] = useState({
     property_id: '',
     client_name: '',
@@ -26,11 +24,11 @@ const NewVisitModal: React.FC<NewVisitModalProps> = ({ isOpen, onClose, user }) 
 
   useEffect(() => {
     if (isOpen && user) {
-      supabase.from('properties').select('id, title, address').eq('user_id', user.id).then(({ data }) => {
+      supabase.from('properties').select('id, title').eq('user_id', user.id).then(({ data }) => {
         if (data) setProperties(data);
       });
+      // Pré-preenche o corretor com o nome do usuário se disponível
       setFormData(prev => ({ ...prev, visitor_name: user.user_metadata?.full_name || '' }));
-      setSyncGoogle(googleCalendar.isConnected());
     }
   }, [isOpen, user]);
 
@@ -41,11 +39,7 @@ const NewVisitModal: React.FC<NewVisitModalProps> = ({ isOpen, onClose, user }) 
 
     setIsSaving(true);
     try {
-      const selectedProperty = properties.find(p => p.id === formData.property_id);
-      const propTitle = selectedProperty ? selectedProperty.title : 'Imóvel';
-      const propAddress = selectedProperty ? selectedProperty.address : '';
-
-      const { error: visitError } = await supabase.from('visits').insert([{
+      const { error } = await supabase.from('visits').insert([{
         user_id: user.id,
         property_id: formData.property_id,
         client_name: formData.client_name,
@@ -56,33 +50,7 @@ const NewVisitModal: React.FC<NewVisitModalProps> = ({ isOpen, onClose, user }) 
         status: formData.status
       }]);
 
-      if (visitError) throw visitError;
-
-      const startDateTime = new Date(`${formData.date}T${formData.time}:00`).toISOString();
-      const endDateTime = new Date(new Date(startDateTime).getTime() + 60 * 60 * 1000).toISOString();
-      
-      const { error: apptError } = await supabase.from('appointments').insert([{
-        user_id: user.id,
-        title: `Visita: ${propTitle} (${formData.client_name})`,
-        category: 'Comercial',
-        start_time: startDateTime,
-        end_time: endDateTime,
-        description: `Visita agendada via Fluxa Imob.\nCorretor: ${formData.visitor_name}\nCliente: ${formData.client_name}\nTelefone: ${formData.client_phone}`,
-        is_completed: false,
-        notified: false
-      }]);
-
-      // Sincronização Google
-      if (syncGoogle && googleCalendar.isConnected()) {
-        await googleCalendar.createEvent({
-          summary: `Visita: ${propTitle} (${formData.client_name})`,
-          location: propAddress,
-          description: `Corretor: ${formData.visitor_name}\nCliente: ${formData.client_name}\nTelefone: ${formData.client_phone}`,
-          start: { dateTime: startDateTime, timeZone: 'America/Sao_Paulo' },
-          end: { dateTime: endDateTime, timeZone: 'America/Sao_Paulo' }
-        });
-      }
-
+      if (error) throw error;
       onClose();
     } catch (err) {
       console.error(err);
@@ -105,7 +73,7 @@ const NewVisitModal: React.FC<NewVisitModalProps> = ({ isOpen, onClose, user }) 
             </div>
             <div>
               <h2 className="text-2xl font-bold text-slate-900 tracking-tight uppercase">Agendar Demonstração</h2>
-              <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] mt-1">Sincronização Automática com Agenda</p>
+              <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] mt-1">Fluxa Real Estate Showings</p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-slate-50 rounded-full text-slate-300 hover:text-slate-900 transition-all"><X size={20} /></button>
@@ -115,7 +83,7 @@ const NewVisitModal: React.FC<NewVisitModalProps> = ({ isOpen, onClose, user }) 
           <div className="space-y-2">
             <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Imóvel Alvo *</label>
             <div className="relative group">
-              <Home className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-hover:text-blue-50 transition-colors" size={18} />
+              <Home className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-hover:text-blue-500 transition-colors" size={18} />
               <select 
                 value={formData.property_id}
                 onChange={e => setFormData({...formData, property_id: e.target.value})}
@@ -134,7 +102,7 @@ const NewVisitModal: React.FC<NewVisitModalProps> = ({ isOpen, onClose, user }) 
                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Interessado (Lead) *</label>
                    <div className="relative">
                      <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
-                     <input type="text" value={formData.client_name} onChange={e => setFormData({...formData, client_name: e.target.value})} placeholder="Nome completo" className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-3.5 px-5 pl-11 pr-5 text-sm font-bold shadow-inner" />
+                     <input type="text" value={formData.client_name} onChange={e => setFormData({...formData, client_name: e.target.value})} placeholder="Nome completo" className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-3.5 pl-11 pr-5 text-sm font-bold shadow-inner" />
                    </div>
                 </div>
                 <div className="space-y-2">
@@ -171,25 +139,6 @@ const NewVisitModal: React.FC<NewVisitModalProps> = ({ isOpen, onClose, user }) 
                 </div>
              </div>
           </div>
-
-          {googleCalendar.isConnected() && (
-            <div className="p-5 bg-blue-50/50 rounded-2xl border border-blue-100 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Google_Calendar_icon_%282020%29.svg" className="w-6 h-6" alt="GCal" />
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Sincronização Google</span>
-                  <span className="text-[8px] font-bold text-slate-400 uppercase">Visita aparecerá no seu celular</span>
-                </div>
-              </div>
-              <button 
-                type="button"
-                onClick={() => setSyncGoogle(!syncGoogle)}
-                className={`w-10 h-5 rounded-full relative transition-all ${syncGoogle ? 'bg-blue-600' : 'bg-slate-200'}`}
-              >
-                <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${syncGoogle ? 'left-6' : 'left-1'}`} />
-              </button>
-            </div>
-          )}
 
           <div className="flex items-center gap-3 pt-8 pb-4">
             <button type="button" onClick={onClose} className="flex-1 py-5 bg-white border-2 border-slate-200 rounded-full text-[10px] font-black uppercase text-slate-400 tracking-widest hover:bg-slate-50 transition-all">Cancelar</button>

@@ -25,7 +25,7 @@ const NewUserModal: React.FC<NewUserModalProps> = ({ isOpen, onClose, user }) =>
     setIsSaving(true);
     try {
       const { error } = await supabase.from('profiles').insert([{
-        user_id: user.id,
+        user_id: user.id, // VÍNCULO AO DONO DA CONTA
         full_name: formData.full_name,
         email: formData.email,
         role: formData.role
@@ -45,70 +45,41 @@ const NewUserModal: React.FC<NewUserModalProps> = ({ isOpen, onClose, user }) =>
 
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md transition-opacity" onClick={onClose} />
+      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" onClick={onClose} />
       
-      <div className="relative bg-white w-full max-w-[480px] rounded-xl shadow-2xl animate-in zoom-in-95 duration-200 border border-slate-100 overflow-hidden flex flex-col">
-        <div className="p-8 pb-4 flex items-center justify-between sticky top-0 bg-white z-10 shrink-0 border-b border-slate-50">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-slate-50 text-[#01223d] rounded-xl flex items-center justify-center border border-slate-200 shadow-sm">
-              <UserPlus size={24} />
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-slate-900 tracking-tight uppercase italic leading-none">Convidar Operador</h2>
-              <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] mt-1">Habilitação de Node SQL</p>
-            </div>
+      <div className="relative bg-white w-full max-w-[480px] rounded-[2.5rem] shadow-2xl animate-in zoom-in-95 duration-200 p-10 border border-slate-100">
+        <div className="flex items-center justify-between mb-10">
+          <div className="flex items-center gap-3">
+             <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shadow-sm">
+                <UserPlus size={24} />
+             </div>
+             <div>
+                <h2 className="text-xl font-bold text-slate-900 tracking-tight">Convidar Membro</h2>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Base de Acessos Isolada</p>
+             </div>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-slate-50 rounded-full text-slate-300 hover:text-slate-900 transition-all"><X size={20} /></button>
+          <button onClick={onClose} className="p-2 text-slate-300 hover:text-slate-900 transition-colors"><X size={20} /></button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-8 pt-6 space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nome Completo do Operador *</label>
-            <input 
-              type="text" 
-              value={formData.full_name} 
-              onChange={e => setFormData({...formData, full_name: e.target.value})} 
-              placeholder="Ex: Ana Silva" 
-              className="w-full bg-slate-50 border border-slate-200 rounded-lg py-3.5 px-5 text-sm font-bold text-slate-900 focus:border-[#01223d] outline-none transition-all italic shadow-inner" 
-            />
+            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Nome Completo *</label>
+            <input type="text" value={formData.full_name} onChange={e => setFormData({...formData, full_name: e.target.value})} placeholder="Ex: Ana Silva" className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-3.5 px-5 text-sm font-semibold outline-none" />
           </div>
-          
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">E-mail Profissional *</label>
-            <input 
-              type="email" 
-              value={formData.email} 
-              onChange={e => setFormData({...formData, email: e.target.value})} 
-              placeholder="ana@empresa.com" 
-              className="w-full bg-slate-50 border border-slate-200 rounded-lg py-3.5 px-5 text-sm font-bold text-slate-900 focus:border-[#01223d] outline-none transition-all shadow-inner" 
-            />
+            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">E-mail Profissional *</label>
+            <input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="ana@empresa.com" className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-3.5 px-5 text-sm font-semibold outline-none" />
           </div>
-
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nível de Privilégio SQL</label>
-            <div className="relative group">
-              <select 
-                value={formData.role} 
-                onChange={e => setFormData({...formData, role: e.target.value})} 
-                className="w-full bg-slate-50 border border-slate-200 rounded-lg py-3.5 px-5 text-sm font-bold appearance-none outline-none focus:border-[#01223d] shadow-inner transition-all"
-              >
-                <option>Visualizador</option>
-                <option>Financeiro</option>
-                <option>Comercial</option>
-                <option>Administrador</option>
-              </select>
-              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none group-hover:text-[#01223d]" size={18} />
-            </div>
+            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Nível de Acesso</label>
+            <select value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-3.5 px-5 text-sm font-semibold">
+              <option>Visualizador</option><option>Financeiro</option><option>Comercial</option><option>Administrador</option>
+            </select>
           </div>
-
-          <div className="flex items-center gap-3 pt-4 pb-4">
-            <button type="button" onClick={onClose} className="flex-1 py-4 bg-white border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:bg-slate-50 transition-all">Cancelar</button>
-            <button 
-              type="submit" 
-              disabled={isSaving} 
-              className="flex-1 py-4 bg-[#01223d] text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-slate-900/10 hover:bg-black transition-all active:scale-95 flex items-center justify-center gap-3"
-            >
-              {isSaving ? <Loader2 size={18} className="animate-spin" /> : <><Save size={18} className="text-[#b4a183]" /> Salvar Acesso</>}
+          <div className="flex items-center gap-3 pt-6">
+            <button type="button" onClick={onClose} className="flex-1 py-4 bg-white border border-slate-100 rounded-full text-xs font-black uppercase tracking-widest text-slate-400">Cancelar</button>
+            <button type="submit" disabled={isSaving} className="flex-1 py-4 bg-blue-600 text-white rounded-full text-xs font-black uppercase tracking-widest shadow-lg flex items-center justify-center gap-2">
+              {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />} Salvar Acesso
             </button>
           </div>
         </form>
