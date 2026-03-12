@@ -99,5 +99,5 @@ O Fluxa Imob está pronto para o uso mobile:
 Este software é de uso restrito e privado para gestão imobiliária. 
 
 ---
-**Desenvolvido com foco em precisão e escala.**  
+**Desenvolvido por Luís Venx com foco em precisão e escala.**  
 *Fluxa Imob Engine - Transformando dados em decisões.*
